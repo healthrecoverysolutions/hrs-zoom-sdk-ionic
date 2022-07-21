@@ -44,8 +44,7 @@
             </feature>
         </config-file>
         <resource-file src="libs/ios/MobileRTCResources.bundle" />
-        <source-file src="libs/ios/MobileRTC.framework" target-dir="lib" framework="true" />
-        <framework custom="true" embed="true" src="libs/ios/MobileRTC.framework" />
+        <framework src="libs/ios/MobileRTC.xcframework" custom="true" embed="true" />
         <header-file src="src/ios/Zoom.h" />
         <source-file src="src/ios/Zoom.m" />
     </platform>
