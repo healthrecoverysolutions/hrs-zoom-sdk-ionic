@@ -68,8 +68,10 @@
     // Run login method on main thread.
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         if (username != nil && [username isKindOfClass:[NSString class]] && [username length] > 0 && password != nil && [password isKindOfClass:[NSString class]]  && [password length]) {
+            
+            // loginWithEmail has been deprecated in the lastest SDK 5.11 and not being used anywhere in the code so commented it for now.
             // Try to log user in
-            [[[MobileRTC sharedRTC] getAuthService] loginWithEmail:username password:password rememberMe:YES];
+//            [[[MobileRTC sharedRTC] getAuthService] loginWithEmail:username password:password rememberMe:YES];
         } else {
             NSMutableDictionary *res = [[NSMutableDictionary alloc] init];
             res[@"result"] = @NO;
@@ -256,6 +258,8 @@
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings].meetingLeaveHidden = NO;
             }
+            // To disable video preview before meeting in zoom SDK 5.11.
+            [[[MobileRTC sharedRTC] getMeetingSettings] disableShowVideoPreviewWhenJoinMeeting:TRUE];
             NSString* participantID = @"";
             // participant_id
             if ([options objectForKey:@"participant_id"] != [NSNull null]) {
@@ -265,18 +269,15 @@
             // Automatically enable audio instead of requiring the user to enable it manually.
             [[[MobileRTC sharedRTC] getMeetingSettings] setAutoConnectInternetAudio:YES];
 
-            // Prepare meeting parameters.
-            NSDictionary *paramDict = @{
-                                        kMeetingParam_Username:displayName,
-                                        kMeetingParam_MeetingNumber:meetingNo,
-                                        kMeetingParam_MeetingPassword:meetingPassword,
-                                        kMeetingParam_ParticipantID: participantID
-                                        };
-            // Join meeting.
-            MobileRTCMeetError response = [ms joinMeetingWithDictionary:paramDict];
-            if (DEBUG) {
-                NSLog(@"Join a Meeting res:%d", response);
-            }
+            // As per latest SDK 5.11 joinMeetingWithDictionary has been deprecated so changed with joinMeetingWithJoinParam which is the latest.
+            MobileRTCMeetingJoinParam *params = [[MobileRTCMeetingJoinParam alloc] init];
+            params.password = meetingPassword;
+            params.meetingNumber = meetingNo;
+            params.userName = displayName;
+            params.customerKey = participantID;
+            [ms joinMeetingWithJoinParam:params];
+            
+
         }
     });
 }
@@ -457,7 +458,8 @@
                 user.userType = MobileRTCUserType_APIUser;
                 user.meetingNumber = meetingNo;
                 user.userName = displayName;
-                user.userToken = zoomToken;
+                // userToken field is not available in latest SDK 5.11
+//                user.userToken = zoomToken;
                 user.userID = userId;
                 user.isAppShare = NO;
                 user.zak = zoomAccessToken;
@@ -465,7 +467,8 @@
             }
             // participant_id
             if ([options objectForKey:@"participant_id"] != [NSNull null]) {
-                param.participantID = options[@"participant_id"];
+                // participant_id has been replaced with customerKey in the lastest SDK 5.11.
+                param.customerKey =  options[@"participant_id"];
             }
             // Start meeting.
             MobileRTCMeetError response = [ms startMeetingWithStartParam:param];
@@ -611,11 +614,12 @@
             // Prepare start meeting parameters.
             NSDictionary* paramDict = nil;
             paramDict = @{};
+            // startMeetingWithDictionary has been deprecated in the lastest SDK 5.11 and not being used anywhere in the code so commented it for now.
             // Start instant meeting.
-            MobileRTCMeetError response = [ms startMeetingWithDictionary:paramDict];
-            if (DEBUG) {
-                NSLog(@"start an instant meeting res:%d", response);
-            }
+//            MobileRTCMeetError response = [ms startMeetingWithDictionary:paramDict];
+//            if (DEBUG) {
+//                NSLog(@"start an instant meeting res:%d", response);
+//            }
         }
     });
 }

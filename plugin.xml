@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="cordova.plugin.zoom-auto-audio-and-video" version="4.6.21666.0515" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="cordova.plugin.zoom-auto-audio-and-video" version="4.6.21666.0516" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>Zoom</name>
     <js-module name="Zoom" src="www/Zoom.js">
         <clobbers target="cordova.plugins.Zoom" />
@@ -44,8 +44,7 @@
             </feature>
         </config-file>
         <resource-file src="libs/ios/MobileRTCResources.bundle" />
-        <source-file src="libs/ios/MobileRTC.framework" target-dir="lib" framework="true" />
-        <framework custom="true" embed="true" src="libs/ios/MobileRTC.framework" />
+        <framework src="libs/ios/MobileRTC.xcframework" custom="true" embed="true" />
         <header-file src="src/ios/Zoom.h" />
         <source-file src="src/ios/Zoom.m" />
     </platform>
