@@ -166,4 +166,23 @@
 */
 - (NSInteger)getInterpreterActiveLan;
 
+/*!
+ @brief Get the list of available languages that interpreters can hear.
+ @return If the function succeeds, the return value is a pointer to the NSArray NSArray <MobileRTCInterpretationLanguage *>, Otherwise failed, the return value is nil.
+*/
+- (NSArray <MobileRTCInterpretationLanguage *> * _Nullable)getInterpreterAvailableLanguages;
+
+/*!
+ @brief Set a language that I can hear as an interpreter.
+ @param lanID Specify the selected language that I can hear as an interpreter.
+ @return The result of the function.
+*/
+- (BOOL)setInterpreterListenLan:(NSInteger)lanID;
+
+/*!
+ @brief Get a language that I can hear as an interpreter.
+ @return Specify the selected language that I can hear as an interpreter.Otherwise failed, the return value is -1.
+*/
+- (NSInteger)getInterpreterListenLan;
+
 @end

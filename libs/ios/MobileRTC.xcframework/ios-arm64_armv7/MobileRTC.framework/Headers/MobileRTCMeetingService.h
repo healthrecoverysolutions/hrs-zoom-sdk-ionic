@@ -113,6 +113,11 @@
  @brief User ZAK.
  */
 @property (nullable, nonatomic, retain, readwrite) NSString * zak;
+
+/*!
+ @brief Using jmak.
+ */
+@property (nullable, nonatomic, retain, readwrite) NSString * jmak;
 @end
 
 /*!
