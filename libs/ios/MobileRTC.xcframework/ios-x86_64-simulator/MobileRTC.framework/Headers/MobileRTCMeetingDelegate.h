@@ -13,6 +13,7 @@
 #import "MobileRTCReturnToMainSessionHandler.h"
 #import "MobileRTCPreProcessRawData.h"
 #import "MobileRTCVideoSender.h"
+#import "MobileRTCShareSender.h"
 #import "MobileRTCVideoCapabilityItem.h"
 #import "MobileRTCLiveTranscriptionLanguage.h"
 
@@ -515,12 +516,6 @@
 
 /*!
  @brief Callback event that co-host changes.
- @param cohostId The user ID of co-host.
- */
-- (void)onMeetingCoHostChange:(NSUInteger)cohostId DEPRECATED_ATTRIBUTE;
-
-/*!
- @brief Callback event that co-host changes.
  @param userID The user ID of co-host.
  @param isCoHost indicate the user(userID) be assigned to cohost or be remove cohost.
  */
@@ -631,6 +626,12 @@
  @param availableLanguageList Specify the available languages list.
 */
 - (void)onAvailableLanguageListUpdated:(NSArray <MobileRTCInterpretationLanguage *> *_Nullable)availableLanguageList;
+
+/*!
+ @brief Callback to indicate that the list of available languages that interpreters can hear has changed.When the list of available languages that interpreters can hear in a meeting is changed, all interpreters in the meeting can get this event.
+ @param interpreterAvailableListenLanList The list of available languages that interpreters can hear.
+*/
+- (void)onInterpreterLanguagesUpdated:(NSArray <MobileRTCInterpretationLanguage *> *_Nullable)availableLanguages;
 
 @end
 
@@ -991,6 +992,27 @@
 @brief This callback is used to uninitialize send data.
 */
 - (void)onUninitialized;
+
+@end
+
+#pragma mark - MobileRTCVideoSourceDelegate
+/*!
+@protocol MobileRTCVideoSourceDelegate
+@brief This class is used to send your own share rawdata.
+*/
+@protocol MobileRTCShareSourceDelegate <NSObject>
+
+@optional
+/**
+ * @brief Notify to start send share source.
+ * @param sender The object of MobileRTCShareSender to send share source.
+ */
+- (void)onStartSend:(MobileRTCShareSender *_Nonnull)sender;
+
+/**
+ * @brief Notify to stop send share source.
+ */
+- (void)onStopSend;
 
 @end
 

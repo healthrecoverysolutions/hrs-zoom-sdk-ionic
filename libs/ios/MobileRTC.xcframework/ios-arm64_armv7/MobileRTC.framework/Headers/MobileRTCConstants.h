@@ -70,6 +70,14 @@ typedef NS_ENUM(NSUInteger, MobileRTCLoginFailReason) {
     MobileRTCLoginFailReason_NeedBirthdayAsk,
     ///Login fail other reason.
     MobileRTCLoginFailReason_OtherIssue = 100,
+    // invalid arguements error.
+    MobileRTCLoginFailReason_InvalidArguments,
+    // SDK not authorized error.
+    MobileRTCLoginFailReason_SDKNotAuthorized,
+    // login failed for now is in auto login process.
+    MobileRTCLoginFailReason_InAutoLoginProcess,
+    // login failed for now is already logged in.
+    MobileRTCLoginFailReason_AlreayLoggedin,
 };
 
 /*!
