@@ -110,6 +110,12 @@
  */
 - (BOOL)isMultiLanguageTranscriptionEnabled;
 
+/**
+ @brief Determine whether the translated captions feature is enabled.
+ @return YES means enabled, otherwise not.
+ */
+- (BOOL)isTextLiveTranslationEnabled;
+
 /*!
  @brief Get the list of all available spoken languages in meeting.
  @return If the function succeeds, the return value is the list of the available spoken languages in meeting. Otherwise failed, the return value is NULL.
