@@ -37,6 +37,7 @@
 #import <MobileRTC/MobileRTCRenderer.h>
 #import <MobileRTC/MobileRTCAudioRawDataHelper.h>
 #import <MobileRTC/MobileRTCVideoSourceHelper.h>
+#import <MobileRTC/MobileRTCShareSourceHelper.h>
 #import <MobileRTC/MobileRTCSMSService.h>
 #import <MobileRTC/MobileRTCDirectShareService.h>
 
@@ -220,6 +221,12 @@
 @return The object of MobileRTCVideoSourceHelper.
 */
 - (MobileRTCVideoSourceHelper * _Nullable)getVideoSourceHelper;
+
+/*!
+@brief Get the video source helper.@see MobileRTCShareSourceHelper
+@return The object of MobileRTCShareSourceHelper.
+*/
+- (MobileRTCShareSourceHelper * _Nullable)getShareSourceHelper;
 
 /*!
  @brief Get the languages supported by MobileRTC.   
