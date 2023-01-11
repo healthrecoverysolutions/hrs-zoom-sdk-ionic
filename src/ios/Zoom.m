@@ -898,7 +898,7 @@
     }
 }
 
-// Delegate methods of MobileRTCUserServiceDelegate to observe when new user joins the meeting
+// Delegate method of MobileRTCUserServiceDelegate to observe when new user joins the meeting
 - (void)onSinkMeetingUserJoin:(NSUInteger)userID{
     if ([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 2){
         // Added one second delay in view switching to get the UI opearations done when new user joins the call
@@ -913,7 +913,7 @@
     }
 }
 
-// Delegate methods of MobileRTCUserServiceDelegate to observe whe user leaves the meeting
+// Delegate method of MobileRTCUserServiceDelegate to observe whe user leaves the meeting
 - (void)onSinkMeetingUserLeft:(NSUInteger)userID{
     if ([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 2){
         // Added one second delay in view switching to get the UI opearations done when user leaves the call
