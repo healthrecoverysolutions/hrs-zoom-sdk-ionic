@@ -20,6 +20,7 @@ import android.content.DialogInterface;
 import us.zoom.sdk.ChatMessageDeleteType;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
 import us.zoom.sdk.InMeetingChatController;
+import us.zoom.sdk.InMeetingUserList;
 import us.zoom.sdk.MeetingParameter;
 import us.zoom.sdk.VideoQuality;
 import us.zoom.sdk.ZoomSDK;
@@ -49,6 +50,8 @@ import us.zoom.sdk.JoinMeetingParams;
 import us.zoom.sdk.JoinMeetingOptions;
 
 import cordova.plugin.zoom.AuthThread;
+import us.zoom.sdk.ZoomUIService;
+
 /**
  * Zoom
  *
@@ -409,6 +412,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         msHelper.setAutoConnectVoIPWhenJoinMeeting(true);
         msHelper.enableForceAutoStartMyVideoWhenJoinMeeting(true);
         msHelper.disableShowVideoPreviewWhenJoinMeeting(true);
+        // to switch to gallery view automatically when user count threshold reaches
+        msHelper.setSwitchVideoLayoutUserCountThreshold(2);
+        msHelper.setSwitchVideoLayoutAccordingToUserCountEnabled(true);
 
         JoinMeetingParams params = new JoinMeetingParams();
 
@@ -1218,10 +1224,26 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     public void onMeetingFail(int i, int i1) {}
 
     @Override
-    public void onMeetingUserJoin(List<Long> list) {}
+    public void onMeetingUserJoin(List<Long> list) {
+        InMeetingService userList = ZoomSDK.getInstance().getInMeetingService();
+        ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
+        if(userList.getInMeetingUserList()!=null && userList.getInMeetingUserList().size()>=3) { 
+            zoomUIService.switchToVideoWall(); // gallery view
+        } else {
+            zoomUIService.switchToActiveSpeaker(); // switch to speaker view
+        }
+    }
 
     @Override
-    public void onMeetingUserLeave(List<Long> list) {}
+    public void onMeetingUserLeave(List<Long> list) {
+        InMeetingService userList = ZoomSDK.getInstance().getInMeetingService();
+        ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
+        if(userList.getInMeetingUserList()!=null && userList.getInMeetingUserList().size() < 3) {
+            zoomUIService.switchToActiveSpeaker();
+        } else {
+            zoomUIService.switchToVideoWall();
+        }
+    }
 
     @Override
     public void onMeetingUserUpdated(long l) {}
