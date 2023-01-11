@@ -12,7 +12,7 @@
  *
  *  A Cordova Plugin to use Zoom Video Conferencing services on Cordova applications.
  */
-@interface Zoom :  CDVPlugin<MobileRTCAuthDelegate, MobileRTCMeetingServiceDelegate> {
+@interface Zoom :  CDVPlugin<MobileRTCAuthDelegate, MobileRTCMeetingServiceDelegate, MobileRTCUserServiceDelegate> {
     NSString *callbackId;
     CDVPluginResult* pluginResult;
 }
