@@ -898,4 +898,34 @@
     }
 }
 
+// Delegate method of MobileRTCUserServiceDelegate to observe when new user joins the meeting
+- (void)onSinkMeetingUserJoin:(NSUInteger)userID{
+    if ([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 2){
+        // Added one second delay in view switching to get the UI opearations done when new user joins the call
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        [[[MobileRTC sharedRTC] getMeetingService] switchToVideoWall];
+        });
+    }else{
+        // Added one second delay in view switching to get the UI opearations done when new user joins the call
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            [[[MobileRTC sharedRTC] getMeetingService] switchToActiveSpeaker];
+        });
+    }
+}
+
+// Delegate method of MobileRTCUserServiceDelegate to observe whe user leaves the meeting
+- (void)onSinkMeetingUserLeft:(NSUInteger)userID{
+    if ([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 2){
+        // Added one second delay in view switching to get the UI opearations done when user leaves the call
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        [[[MobileRTC sharedRTC] getMeetingService] switchToVideoWall];
+        });
+    }else{
+        // Added one second delay in view switching to get the UI opearations done when user leaves the call
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            [[[MobileRTC sharedRTC] getMeetingService] switchToActiveSpeaker];
+        });
+    }
+}
+
 @end
