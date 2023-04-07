@@ -156,6 +156,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         return true;
     }
 
+    @Override
+    public void onShareMeetingChatStatusChanged(boolean start) {};
+
     /**
      * initialize
      *
