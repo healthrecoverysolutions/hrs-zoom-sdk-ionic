@@ -19,6 +19,7 @@ import android.content.DialogInterface;
 
 import us.zoom.sdk.ChatMessageDeleteType;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
+import us.zoom.sdk.IRequestLocalRecordingPrivilegeHandler;
 import us.zoom.sdk.InMeetingChatController;
 import us.zoom.sdk.InMeetingUserList;
 import us.zoom.sdk.MeetingParameter;
@@ -155,6 +156,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
         return true;
     }
+    
+    @Override
+    public void onNotificationServiceStatus(SDKNotificationServiceStatus status) {};
 
     @Override
     public void onShareMeetingChatStatusChanged(boolean start) {};
@@ -725,7 +729,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             }
             if (zoomToken.length() != 0 && zoomAccessToken.length() != 0 && userId.length() != 0) {
                 StartMeetingParamsWithoutLogin params = new StartMeetingParamsWithoutLogin();
-                params.userId = userId;
+                // instance variable 'userId' in StartMeetingParamsWithoutLogin is deleted from SDK 5.13
+                // https://devsupport.zoom.us/hc/en-us/articles/12330750576269-Zoom-Meeting-SDK-Android-5-13-0
+                // params.userId = userId;
+
                 // SDK 5.11 does not support this field, only zoomAccessToken is to be set now
                 // params.zoomToken = zoomToken;
                 params.userType = MeetingService.USER_TYPE_API_USER;
@@ -1421,6 +1428,41 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     @Override
     public void onLocalVideoOrderUpdated(List<Long> list) {
+
+    }
+
+    @Override
+    public void onLocalRecordingPrivilegeRequested(IRequestLocalRecordingPrivilegeHandler iRequestLocalRecordingPrivilegeHandler) {
+
+    }
+
+    @Override
+    public void onSuspendParticipantsActivities() {
+
+    }
+
+    @Override
+    public void onAllowParticipantsStartVideoNotification(boolean b) {
+
+    }
+
+    @Override
+    public void onAllowParticipantsRenameNotification(boolean b) {
+
+    }
+
+    @Override
+    public void onAllowParticipantsUnmuteSelfNotification(boolean b) {
+
+    }
+
+    @Override
+    public void onAllowParticipantsShareWhiteBoardNotification(boolean b) {
+
+    }
+
+    @Override
+    public void onMeetingLockStatus(boolean b) {
 
     }
 }
