@@ -4,7 +4,6 @@
  *  @author Zoom Video Communications, Inc.
  *  @version v4.6.21666.0512
  */
-
 #import "Zoom.h"
 
 #define kSDKDomain  @"https://zoom.us"
@@ -288,7 +287,8 @@
     MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
     if (ms != nil)
     {
-        MobileRTCVideoError unmuteResult = [ms muteMyVideo:NO];
+        //Return type of muteMyVideo has been replaced with MobileRTCSDKError from MobileRTCVideoError in latest SDK 5.14
+        MobileRTCSDKError unmuteResult = [ms muteMyVideo:NO];
         NSLog(@"onMeetingReady unmuteResult: %d", unmuteResult);
     }
 }
@@ -460,7 +460,8 @@
                 user.userName = displayName;
                 // userToken field is not available in latest SDK 5.11
 //                user.userToken = zoomToken;
-                user.userID = userId;
+                //Property userID has been removed from MobileRTCMeetingStartParam4WithoutLoginUser in latest SDK 5.14
+//                user.userID = userId;
                 user.isAppShare = NO;
                 user.zak = zoomAccessToken;
                 param = user;
