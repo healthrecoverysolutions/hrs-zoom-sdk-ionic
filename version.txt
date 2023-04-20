@@ -2,4 +2,4 @@ v4.6.21666.0518
 
 Base SDKs:
 Android: v5.12.8
-iOS: v5.14
+iOS: v5.14.0.7320
