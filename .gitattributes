@@ -2,3 +2,7 @@
 mobilertc.aar filter=lfs diff=lfs merge=lfs -text
 libs/android/mobilertc.aar filter=lfs diff=lfs merge=lfs -text
 libs/android/commonlib.aar filter=lfs diff=lfs merge=lfs -text
+*.exe filter=lfs diff=lfs merge=lfs -text
+libs/ios/MobileRTC.xcframework/ios-arm64_x86_64-simulator/MobileRTC.framework/MobileRTC.exec filter=lfs diff=lfs merge=lfs -text
+libs/ios/MobileRTC.xcframework/ios-arm64/MobileRTC.framework/MobileRTC filter=lfs diff=lfs merge=lfs -text
+libs/ios/MobileRTC.xcframework/ios-arm64_x86_64-simulator/MobileRTC.framework/MobileRTC filter=lfs diff=lfs merge=lfs -text
