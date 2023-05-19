@@ -20,8 +20,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 repositories {
@@ -29,9 +29,6 @@ repositories {
     maven {
                 url 'https://maven.google.com/'
                 name 'Google'
-    }
-    flatDir {
-        dirs 'libs/android'
     }
 }
 dependencies { 
@@ -57,8 +54,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0"
     implementation "androidx.fragment:fragment-ktx:1.4.1"
-    implementation(name:'commonlib', ext:'aar')
-    implementation(name:'mobilertc', ext:'aar')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs/android', include: ['*.aar'])
 }
 
