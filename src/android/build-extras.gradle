@@ -10,6 +10,9 @@ android {
     }
 
     packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/LICENSE'
     }
