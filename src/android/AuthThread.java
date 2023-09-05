@@ -107,8 +107,8 @@ public class AuthThread implements Callable<Boolean>, ZoomSDKInitializeListener 
      */
     public void setInitParameters(String appKey, String appSecret, String webDomain) {
         if (DEBUG) { Log.v(TAG, "Init parameter set"); }
-        this.initParams.appKey = appKey;
-        this.initParams.appSecret = appSecret;
+//        this.initParams.appKey = appKey;
+//        this.initParams.appSecret = appSecret;
         this.initParams.domain = webDomain;
         this.initParams.enableLog = true;
     }
@@ -196,7 +196,7 @@ public class AuthThread implements Callable<Boolean>, ZoomSDKInitializeListener 
 
     /**
      * onZoomAuthIdentityExpired
-     * 
+     *
      * A listener to get notified when the authentication identity has expired.
      */
     @Override
