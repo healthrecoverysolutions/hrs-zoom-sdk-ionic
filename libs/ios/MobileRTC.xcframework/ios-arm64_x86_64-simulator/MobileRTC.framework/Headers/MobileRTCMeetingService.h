@@ -46,6 +46,16 @@
  */
 @property (nullable, nonatomic, retain, readwrite) NSString * meetingNumber;
 
+/**
+ * @brief <Optional> Is my voice in the mixed audio raw data?
+ */
+@property (nonatomic, assign, readwrite) BOOL isMyVoiceInMix;
+
+/**
+ * @brief <Optional>Set the invitation ID for automatic meeting invitation.
+ */
+@property(nullable, nonatomic, copy) NSString *inviteContactID;
+
 @end
 
 /**
@@ -135,6 +145,11 @@
  */
 @property (nullable, nonatomic, retain, readwrite) NSString * join_token;
 
+/**
+ * @brief <Optional> Is my voice in the mixed audio raw data?
+ */
+@property (nonatomic, assign, readwrite) BOOL isMyVoiceInMix;
+
 @end
 
 /**
@@ -218,12 +233,12 @@
 /**
  * @brief Callback to receive meeting events.
  */
-@property (nullable, assign, nonatomic) id<MobileRTCMeetingServiceDelegate> delegate;
+@property (weak, nonatomic) id<MobileRTCMeetingServiceDelegate> _Nullable delegate;
 
 /**
  * @brief Callback for custom UI meeting events. Custom UI features enable you to customize the user interface instead of using the default client view.
  */
-@property (nullable, assign, nonatomic) id<MobileRTCCustomizedUIMeetingDelegate> customizedUImeetingDelegate;
+@property (weak, nonatomic) id<MobileRTCCustomizedUIMeetingDelegate> _Nullable customizedUImeetingDelegate;
 
 /**
  * @brief Start a meeting with MobileRTCMeetingStartParam parameter.
@@ -275,17 +290,5 @@
  * @warning This method can only be called after auth ready and before join or start meeting.
  */
 - (BOOL)setCustomizedInvitationDomain:(NSString *_Nonnull)invitationDomain;
-
-/**
- * @brief Get annotation over share legal notices prompt.
- * @return annotation over share legal notices prompt.
- */
-- (NSString *_Nullable)getWebinarRegistrationLegalNoticesPrompt;
-
-/**
- * @brief Get annotation over share legal notices explained.
- * @return annotation over share legal notices explained.
- */
-- (MobileRTCWebinarRegistLegalNoticeContent *_Nullable)getWebinarRegistrationLegalNoticesExplained;
 
 @end

@@ -196,6 +196,11 @@
 @property (assign, nonatomic) BOOL hideShareButtonOnCloudWhiteboard;
 
 /*!
+ @brief About button’s visibility on the cloud whiteboard. Default is displaying.
+ */
+@property (assign, nonatomic) BOOL hideAboutButtonOnCloudWhiteboard;
+
+/*!
  @brief Query if the user joins meeting with audio device. 
  @return YES means the audio device is automatically connected, otherwise not. 
  */
@@ -432,6 +437,18 @@
 - (void)prePopulateWebinarRegistrationInfo:(nonnull NSString *)email username:(nonnull NSString *)username;
 
 /*!
+@brief Set the webinar register information dialog to hide or display.
+@param hide Yes means hide the dialog. Otherwise, do not hide the dialog.
+*/
+- (void)setHideRegisterWebinarInfoWindow:(BOOL)hide;
+
+/*!
+@brief Get the webinar register information dialog to hide or display.
+@return boolean value of the setting value.
+*/
+- (BOOL)hideRegisterWebinarInfoWindow;
+
+/*!
 @brief Set to disable confidential watermark.
 @param disabled The option value.
 @return YES means confidential watermark is disable, otherwise not.
@@ -506,4 +523,16 @@
  @param bHide YES indicates to display the tab. No not.
 */
 - (void)hideRequestRecordPrivilegeDialog:(BOOL)bHide;
+
+/*!
+ @brief Get the flag of auto enter Picture-in-Picture Mode for video calls.
+ */
+- (BOOL)videoCallPictureInPictureEnabled;
+
+/*!
+ @brief Set the flag of auto enter Picture-in-Picture Mode for video calls.
+ @param enable YES to follow Zoom VoIP Meeting Picture-in-Picture logic.
+ @warning only works in ZoomUI.
+ */
+- (void)enableVideoCallPictureInPicture:(BOOL)enable;
 @end

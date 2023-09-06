@@ -16,13 +16,11 @@
     pluginResult = nil;
     callbackId = command.callbackId;
     // Get variables.
-    NSString* appKey = [command.arguments objectAtIndex:0];
-    NSString* appSecret = [command.arguments objectAtIndex:1];
-
+    NSString* jwtToken = [command.arguments objectAtIndex:0];
     // Run authentication and initialize SDK on main thread.
     dispatch_async(dispatch_get_main_queue(), ^(void){
         // if input parameters are not valid.
-        if (appKey == nil || ![appKey isKindOfClass:[NSString class]] || [appKey length] == 0 || appSecret == nil || ![appSecret isKindOfClass:[NSString class]]|| [appSecret length] == 0) {
+        if (jwtToken == nil || ![jwtToken isKindOfClass:[NSString class]] || [jwtToken length] == 0) {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Please pass valid SDK key and secret."];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
             return;
@@ -49,13 +47,57 @@
             // Assign delegate.
             authService.delegate = self;
             // Assign key and secret.
-            authService.clientKey = appKey;
-            authService.clientSecret = appSecret;
+            authService.jwtToken = jwtToken;
             // Perform SDK auth.
             [authService sdkAuth];
         }
     });
 }
+
+- (void)initializeWithJWTToken:(CDVInvokedUrlCommand*)command{
+    pluginResult = nil;
+    callbackId = command.callbackId;
+    // Get variables.
+    NSString* jwtToken = [command.arguments objectAtIndex:0];
+    // Run authentication and initialize SDK on main thread.
+    dispatch_async(dispatch_get_main_queue(), ^(void){
+        // if input parameters are not valid.
+        if (jwtToken == nil || ![jwtToken isKindOfClass:[NSString class]] || [jwtToken length] == 0) {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Please pass valid SDK key and secret."];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+            return;
+        }
+
+        // Initialize SDK.
+        MobileRTCSDKInitContext *context = [[MobileRTCSDKInitContext alloc] init];
+        context.domain = kSDKDomain;
+        context.enableLog = YES;
+        context.locale = MobileRTC_ZoomLocale_Default;
+
+        BOOL initRet = [[MobileRTC sharedRTC] initialize:context];
+
+        // If the SDK has successfully authorized, avoid re-authorization.
+        if ([[MobileRTC sharedRTC] isRTCAuthorized])
+        {
+            return;
+        }
+
+        // Get auth service.
+        MobileRTCAuthService *authService = [[MobileRTC sharedRTC] getAuthService];
+        if (authService)
+        {
+            // Assign delegate.
+            authService.delegate = self;
+            // Assign key and secret.
+            authService.jwtToken = jwtToken;
+            // Perform SDK auth.
+            [authService sdkAuth];
+        }
+    });
+}
+
+
+
 
 - (void)login:(CDVInvokedUrlCommand*)command
 {
