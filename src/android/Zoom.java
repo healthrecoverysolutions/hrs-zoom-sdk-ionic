@@ -189,15 +189,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         ZoomSDK mZoomSDK = ZoomSDK.getInstance();
-//        // If the SDK has been successfully initialized, simply return.
-//        if (mZoomSDK.isInitialized()) {
-//            callbackContext.success("Initialize successfully!");
-//            return;
-//        }
 
         // Note: When "null" is pass from JS to Android, it is transferred as a word "null".
-        if (jwtToken == null || jwtToken.trim().isEmpty() || jwtToken.equals("null")
-            /*|| appSecret == null || appSecret.trim().isEmpty() || appSecret.equals("null")*/) {
+        if (jwtToken == null || jwtToken.trim().isEmpty() || jwtToken.equals("null")) {
             callbackContext.error("Both SDK key and secret cannot be empty");
             return;
         }
@@ -232,7 +226,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     /**
      * initialize
      *
-     * Initialize Zoom SDK.
+     * Initialize Zoom SDK. <Dev Note : this method should not be used now and is deprecated. Use initializeWithJWT instead for initialization
      *
      * @param appKey        Zoom SDK app key.
      * @param appSecret     Zoom SDK app secret.
@@ -245,23 +239,22 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
         ZoomSDK mZoomSDK = ZoomSDK.getInstance();
 //        // If the SDK has been successfully initialized, simply return.
-//        if (mZoomSDK.isInitialized()) {
-//            callbackContext.success("Initialize successfully!");
-//            return;
-//        }
+        if (mZoomSDK.isInitialized()) {
+            callbackContext.success("Initialize successfully!");
+            return;
+        }
 
         // Note: When "null" is pass from JS to Android, it is transferred as a word "null".
         if (appKey == null || appKey.trim().isEmpty() || appKey.equals("null")
-                /*|| appSecret == null || appSecret.trim().isEmpty() || appSecret.equals("null")*/) {
+                || appSecret == null || appSecret.trim().isEmpty() || appSecret.equals("null")) {
             callbackContext.error("Both SDK key and secret cannot be empty");
             return;
         }
 
         ZoomSDKInitParams params = new ZoomSDKInitParams();
+        // These are not present any more in the new SDK. use initializeWithJWT instead.
 //        params.appKey = appKey;
 //        params.appSecret = appSecret;
-        params.jwtToken = appKey; // change the param in plugin later
-        Log.d("AB", "params JWT token -- > " + params.jwtToken);
         params.domain = this.WEB_DOMAIN;
         params.enableLog = true;
 
