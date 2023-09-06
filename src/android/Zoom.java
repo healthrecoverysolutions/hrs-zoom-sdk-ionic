@@ -225,7 +225,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     /**
      * initialize
-     *
+     * @deprecated 
      * Initialize Zoom SDK. <Dev Note : this method should not be used now and is deprecated. Use initializeWithJWT instead for initialization
      *
      * @param appKey        Zoom SDK app key.
