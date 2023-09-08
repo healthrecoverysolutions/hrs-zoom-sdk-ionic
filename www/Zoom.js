@@ -24,11 +24,6 @@ var zoom = {
         callNativeFunction('initialize', [appKey, appSecret], success, error);
     },
     
-    initializeWithJWTToken: function(jwtToken, success, error) {
-        console.log('initializeWithJWTToken method called' + jwtToken);
-        callNativeFunction('initializeWithJWTToken', [jwtToken], success, error);
-    },
-
     initializeWithJWT: function(jwtToken) {
         return execAsPromise('initializeWithJWT', [jwtToken]);
     },
