@@ -198,7 +198,6 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
         ZoomSDKInitParams params = new ZoomSDKInitParams();
         params.jwtToken = jwtToken;
-        Log.d("AB", "params JWT token -- > " + params.jwtToken);
         params.domain = this.WEB_DOMAIN;
         params.enableLog = true;
 

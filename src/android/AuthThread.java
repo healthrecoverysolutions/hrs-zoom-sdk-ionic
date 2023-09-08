@@ -100,14 +100,14 @@ public class AuthThread implements Callable<Boolean>, ZoomSDKInitializeListener 
      * setInitParameters
      *
      * Pass and set parameters needed to initialize Zoom SDK.
-     *
+     * // Dev note ->  App key and secret are no longer used in SDK init params with meeting SDK 5.15.7
      * @param appKey    Zoom SDK App Key.
      * @param appSecret Zoom SDK App Secret.
      * @param webDomain Zoom SDK Web Domain. Default is "zoom.us".
      */
     public void setInitParameters(String appKey, String appSecret, String webDomain) {
         if (DEBUG) { Log.v(TAG, "Init parameter set"); }
-//        this.initParams.appKey = appKey;
+//        this.initParams.appKey = appKey; // With SDK 5.15.7, these params are no longer valid. We are not using this method anywhere in the code.
 //        this.initParams.appSecret = appSecret;
         this.initParams.domain = webDomain;
         this.initParams.enableLog = true;
