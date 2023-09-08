@@ -2,7 +2,7 @@
  *  Zoom.m
  *
  *  @author Zoom Video Communications, Inc.
- *  @version v4.6.21666.0521
+ *  @version v5.15.7
  */
 #import "Zoom.h"
 
@@ -50,9 +50,9 @@
         {
             // Assign delegate.
             authService.delegate = self;
-            // Assign key and secret.
-            authService.clientKey = appKey;
-            authService.clientSecret = appSecret;
+            // appKey and appSecret is no longer assignable to MobileRTCAuthService
+//            authService.clientKey = appKey;
+//            authService.clientSecret = appSecret;
             // Perform SDK auth.
             [authService sdkAuth];
         }
