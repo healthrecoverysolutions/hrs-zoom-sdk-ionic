@@ -23,7 +23,7 @@ var zoom = {
     initialize: function(appKey, appSecret, success, error) {
         callNativeFunction('initialize', [appKey, appSecret], success, error);
     },
-
+    
     initializeWithJWT: function(jwtToken) {
         return execAsPromise('initializeWithJWT', [jwtToken]);
     },

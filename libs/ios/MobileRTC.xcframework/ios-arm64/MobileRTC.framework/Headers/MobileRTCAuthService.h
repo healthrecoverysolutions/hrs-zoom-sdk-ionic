@@ -23,19 +23,7 @@
 /*!
  @brief The property to receive authentication/login events. 
  */
-@property (nullable, assign, nonatomic) id<MobileRTCAuthDelegate> delegate;
-
-/*!
- @brief APP Key got from zoom.us.
- @warning Keep the value as a secret. DO NOT publish it.
- */
-@property (nullable, retain, nonatomic) NSString *clientKey;
-
-/*!
- @brief APP secret got from zoom.us.
- @warning Keep the value as a secret. DO NOT publish it.
- */
-@property (nullable, retain, nonatomic) NSString *clientSecret;
+@property (weak, nonatomic) id<MobileRTCAuthDelegate> _Nullable delegate;
 
 /*!
  @brief jwt auth token.
