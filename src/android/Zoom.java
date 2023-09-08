@@ -60,7 +60,7 @@ import us.zoom.sdk.ZoomUIService;
  * A Cordova Plugin to use Zoom Video Conferencing services on Cordova applications.
  *
  * @author  Zoom Video Communications, Inc.
- * @version v4.6.21666.0512
+ * @version v5.15.7
  */
 public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener, MeetingServiceListener, InMeetingServiceListener {
     /* Debug variables */
