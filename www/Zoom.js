@@ -9,12 +9,23 @@ function callNativeFunction(name, args, success, error) {
 
 }
 
+var execAsPromise = function (command, args) {
+    if (args === void 0) { args = []; }
+    return new Promise(function (resolve, reject) {
+        window.cordova.exec(resolve, reject, PLUGIN_NAME , command, args);
+    });
+};
+
 var zoom = {
 
     _meetingLeftlistener: [],
 
     initialize: function(appKey, appSecret, success, error) {
         callNativeFunction('initialize', [appKey, appSecret], success, error);
+    },
+    
+    initializeWithJWT: function(jwtToken) {
+        return execAsPromise('initializeWithJWT', [jwtToken]);
     },
 
     login: function(username, password, success, error) {

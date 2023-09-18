@@ -2,7 +2,7 @@
  *  Zoom.m
  *
  *  @author Zoom Video Communications, Inc.
- *  @version v4.6.21666.0512
+ *  @version v5.15.7
  */
 #import "Zoom.h"
 
@@ -11,6 +11,8 @@
 
 @implementation Zoom
 
+
+// This method has been deprecated. Now the authservice takes jwtToken at the place of appKey and appSecret.
 - (void)initialize:(CDVInvokedUrlCommand*)command
 {
     pluginResult = nil;
@@ -48,9 +50,46 @@
         {
             // Assign delegate.
             authService.delegate = self;
-            // Assign key and secret.
-            authService.clientKey = appKey;
-            authService.clientSecret = appSecret;
+            // appKey and appSecret is no longer assignable to MobileRTCAuthService
+//            authService.clientKey = appKey;
+//            authService.clientSecret = appSecret;
+            // Perform SDK auth.
+            [authService sdkAuth];
+        }
+    });
+}
+
+//Added new method to set jwtToken in MobileRTCAuthService
+- (void)initializeWithJWT:(CDVInvokedUrlCommand*)command{
+    pluginResult = nil;
+    callbackId = command.callbackId;
+    // Get variables.
+    NSString* jwtToken = [command.arguments objectAtIndex:0];
+    // Run authentication and initialize SDK on main thread.
+    dispatch_async(dispatch_get_main_queue(), ^(void){
+        // if input parameters are not valid.
+        if (jwtToken == nil || ![jwtToken isKindOfClass:[NSString class]] || [jwtToken length] == 0) {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Please pass valid jwtToken."];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+            return;
+        }
+
+        // Initialize SDK.
+        MobileRTCSDKInitContext *context = [[MobileRTCSDKInitContext alloc] init];
+        context.domain = kSDKDomain;
+        context.enableLog = YES;
+        context.locale = MobileRTC_ZoomLocale_Default;
+
+        BOOL initRet = [[MobileRTC sharedRTC] initialize:context];
+
+        // Get auth service.
+        MobileRTCAuthService *authService = [[MobileRTC sharedRTC] getAuthService];
+        if (authService)
+        {
+            // Assign delegate.
+            authService.delegate = self;
+            // Assign jwtTken
+            authService.jwtToken = jwtToken;
             // Perform SDK auth.
             [authService sdkAuth];
         }

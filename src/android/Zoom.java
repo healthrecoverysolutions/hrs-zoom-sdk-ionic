@@ -22,6 +22,7 @@ import us.zoom.sdk.FreeMeetingNeedUpgradeType;
 import us.zoom.sdk.IRequestLocalRecordingPrivilegeHandler;
 import us.zoom.sdk.InMeetingChatController;
 import us.zoom.sdk.InMeetingUserList;
+import us.zoom.sdk.LocalRecordingRequestPrivilegeStatus;
 import us.zoom.sdk.MeetingParameter;
 import us.zoom.sdk.VideoQuality;
 import us.zoom.sdk.ZoomSDK;
@@ -59,7 +60,7 @@ import us.zoom.sdk.ZoomUIService;
  * A Cordova Plugin to use Zoom Video Conferencing services on Cordova applications.
  *
  * @author  Zoom Video Communications, Inc.
- * @version v4.6.21666.0512
+ * @version v5.15.7
  */
 public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener, MeetingServiceListener, InMeetingServiceListener {
     /* Debug variables */
@@ -102,6 +103,17 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     new Runnable() {
                         public void run() {
                             initialize(appKey, appSecret, callbackContext);
+                        }
+                    });
+
+                break;
+
+            case "initializeWithJWT":
+                String jwtToken = args.getString(0);
+                cordova.getActivity().runOnUiThread(
+                    new Runnable() {
+                        public void run() {
+                            initializeWithJWT(jwtToken, callbackContext);
                         }
                     });
 
@@ -156,7 +168,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
         return true;
     }
-    
+
     @Override
     public void onNotificationServiceStatus(SDKNotificationServiceStatus status) {};
 
@@ -166,7 +178,54 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     /**
      * initialize
      *
-     * Initialize Zoom SDK.
+     * Initialize Zoom SDK using JWT token
+     *
+     * @param jwtToken        Zoom SDK meeting JWT token
+     * @param callbackContext Cordova callback context.
+     */
+    private void initializeWithJWT(String jwtToken, CallbackContext callbackContext) {
+        if (DEBUG) {
+            Log.v(TAG, "********** Zoom's initialize called **********");
+        }
+
+        ZoomSDK mZoomSDK = ZoomSDK.getInstance();
+
+        // Note: When "null" is pass from JS to Android, it is transferred as a word "null".
+        if (jwtToken == null || jwtToken.trim().isEmpty() || jwtToken.equals("null")) {
+            callbackContext.error("Both SDK key and secret cannot be empty");
+            return;
+        }
+
+        ZoomSDKInitParams params = new ZoomSDKInitParams();
+        params.jwtToken = jwtToken;
+        params.domain = this.WEB_DOMAIN;
+        params.enableLog = true;
+
+        ZoomSDKInitializeListener listener = new ZoomSDKInitializeListener() {
+            /**
+             * @param errorCode {@link us.zoom.sdk.ZoomError#ZOOM_ERROR_SUCCESS} if the SDK has been initialized successfully.
+             */
+            @Override
+            public void onZoomSDKInitializeResult(int errorCode, int internalErrorCode) {
+                if(errorCode == ZoomError.ZOOM_ERROR_SUCCESS) {
+                    Log.d(TAG, "Initialized the Zoom SDK");
+                    callbackContext.success("Initialize successfully!");
+                } else {
+                    Log.d(TAG, "Error initializing zoom sdk " + errorCode);
+                    callbackContext.error(errorCode);
+                }
+            }
+            @Override
+            public void onZoomAuthIdentityExpired() {
+            }
+        };
+        mZoomSDK.initialize(cordova.getActivity(), listener, params);
+    }
+
+    /**
+     * initialize
+     * @deprecated 
+     * Initialize Zoom SDK. <Dev Note : this method should not be used now and is deprecated. Use initializeWithJWT instead for initialization
      *
      * @param appKey        Zoom SDK app key.
      * @param appSecret     Zoom SDK app secret.
@@ -178,7 +237,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         ZoomSDK mZoomSDK = ZoomSDK.getInstance();
-        // If the SDK has been successfully initialized, simply return.
+//        // If the SDK has been successfully initialized, simply return.
         if (mZoomSDK.isInitialized()) {
             callbackContext.success("Initialize successfully!");
             return;
@@ -192,8 +251,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         ZoomSDKInitParams params = new ZoomSDKInitParams();
-        params.appKey = appKey;
-        params.appSecret = appSecret;
+        // These are not present any more in the new SDK. use initializeWithJWT instead.
+//        params.appKey = appKey;
+//        params.appSecret = appSecret;
         params.domain = this.WEB_DOMAIN;
         params.enableLog = true;
 
@@ -1237,7 +1297,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     public void onMeetingUserJoin(List<Long> list) {
         InMeetingService userList = ZoomSDK.getInstance().getInMeetingService();
         ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
-        if(userList.getInMeetingUserList()!=null && userList.getInMeetingUserList().size()>=3) { 
+        if(userList.getInMeetingUserList()!=null && userList.getInMeetingUserList().size()>=3) {
             zoomUIService.switchToVideoWall(); // gallery view
         } else {
             zoomUIService.switchToActiveSpeaker(); // switch to speaker view
@@ -1257,6 +1317,11 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     @Override
     public void onMeetingUserUpdated(long l) {}
+
+    @Override
+    public void onInMeetingUserAvatarPathUpdated(long l) {
+
+    }
 
     @Override
     public void onMeetingHostChanged(long l) {}
@@ -1463,6 +1528,11 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     @Override
     public void onMeetingLockStatus(boolean b) {
+
+    }
+
+    @Override
+    public void onRequestLocalRecordingPrivilegeChanged(LocalRecordingRequestPrivilegeStatus localRecordingRequestPrivilegeStatus) {
 
     }
 }
