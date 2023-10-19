@@ -1,4 +1,6 @@
-package cordova.plugin.zoom;
+package cordova.plugin.zoom.Zoom;
+
+import static cordova.plugin.zoom.Zoom.sdksample.inmeetingfunction.customizedmeetingui.MyMeetingActivity.JOIN_FROM_UNLOGIN;
 
 import java.util.Locale;
 import java.util.Locale.Builder;
@@ -13,17 +15,32 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.view.View;
 
+import com.hrs.clinician.MainActivity;
+
+import cordova.plugin.zoom.Zoom.sdksample.inmeetingfunction.customizedmeetingui.MyMeetingActivity;
+import cordova.plugin.zoom.Zoom.sdksample.inmeetingfunction.customizedmeetingui.RawDataMeetingActivity;
+import cordova.plugin.zoom.Zoom.sdksample.inmeetingfunction.customizedmeetingui.view.MeetingWindowHelper;
+import cordova.plugin.zoom.Zoom.sdksample.inmeetingfunction.zoommeetingui.CustomNewZoomUIActivity;
+import cordova.plugin.zoom.Zoom.sdksample.inmeetingfunction.zoommeetingui.ZoomMeetingUISettingHelper;
+import cordova.plugin.zoom.Zoom.sdksample.ui.APIUserStartJoinMeetingActivity;
+import cordova.plugin.zoom.Zoom.sdksample.ui.InitAuthSDKActivity;
 import us.zoom.sdk.ChatMessageDeleteType;
+import us.zoom.sdk.CustomizedMiniMeetingViewSize;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
 import us.zoom.sdk.IRequestLocalRecordingPrivilegeHandler;
 import us.zoom.sdk.InMeetingChatController;
-import us.zoom.sdk.InMeetingUserList;
 import us.zoom.sdk.LocalRecordingRequestPrivilegeStatus;
 import us.zoom.sdk.MeetingParameter;
+import us.zoom.sdk.SimpleZoomUIDelegate;
 import us.zoom.sdk.VideoQuality;
 import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomSDKAuthenticationListener;
@@ -51,8 +68,8 @@ import us.zoom.sdk.StartMeetingParamsWithoutLogin;
 import us.zoom.sdk.JoinMeetingParams;
 import us.zoom.sdk.JoinMeetingOptions;
 
-import cordova.plugin.zoom.AuthThread;
 import us.zoom.sdk.ZoomUIService;
+
 
 /**
  * Zoom
@@ -71,6 +88,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private String WEB_DOMAIN = "https://zoom.us";
 
     private CallbackContext callbackContext;
+
+    private boolean isResumed = false;
 
     /**
      * execute
@@ -137,6 +156,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 String meetingPassword = args.getString(1);
                 String displayNameJ = args.getString(2);
                 JSONObject optionsJ = args.getJSONObject(3);
+                this.showMeetingUi();
                 cordova.getActivity().runOnUiThread( // running on a different thread
                     new Runnable() {
                         public void run() {
@@ -200,6 +220,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         params.jwtToken = jwtToken;
         params.domain = this.WEB_DOMAIN;
         params.enableLog = true;
+//        ZoomSDK.getInstance().getMeetingService().addListener(this);
 
         ZoomSDKInitializeListener listener = new ZoomSDKInitializeListener() {
             /**
@@ -209,6 +230,11 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             public void onZoomSDKInitializeResult(int errorCode, int internalErrorCode) {
                 if(errorCode == ZoomError.ZOOM_ERROR_SUCCESS) {
                     Log.d(TAG, "Initialized the Zoom SDK");
+                    ZoomSDK.getInstance().getZoomUIService().setNewMeetingUI(CustomNewZoomUIActivity.class);
+                    ZoomSDK.getInstance().getZoomUIService().disablePIPMode(false);
+                    ZoomSDK.getInstance().getMeetingSettingsHelper().enable720p(false);
+                    ZoomSDK.getInstance().getMeetingSettingsHelper().enableShowMyMeetingElapseTime(true);
+//                    ZoomSDK.getInstance().getMeetingSettingsHelper().setCustomizedNotificationData(null, handle);
                     callbackContext.success("Initialize successfully!");
                 } else {
                     Log.d(TAG, "Error initializing zoom sdk " + errorCode);
@@ -224,7 +250,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     /**
      * initialize
-     * @deprecated 
+     * @deprecated
      * Initialize Zoom SDK. <Dev Note : this method should not be used now and is deprecated. Use initializeWithJWT instead for initialization
      *
      * @param appKey        Zoom SDK app key.
@@ -417,6 +443,17 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
     }
 
+    private void showAPIUserActivity() {
+        Intent intent = new Intent(cordova.getActivity(), MyMeetingActivity.class);
+        intent.putExtra("from", MyMeetingActivity.JOIN_FROM_APIUSER);
+        intent.putExtra("rootActivity", "com.hrs.clinician.MainActivity");
+        Log.d("AB", "rootActivity while sending" + cordova.getActivity().getClass());
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        cordova.getActivity().startActivity(intent);
+//        Intent intent = new Intent(cordova.getActivity(), APIUserStartJoinMeetingActivity.class);
+//        cordova.getActivity().startActivity(intent);
+    }
+
     /**
      * joinMeeting
      *
@@ -523,6 +560,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 opts.no_meeting_error_message = option.isNull("no_meeting_error_message")? false : option.getBoolean("no_meeting_error_message");
                 opts.meeting_views_options = 0;
 
+
                 if (!option.isNull("no_button_video") && option.getBoolean("no_button_video")) {
                     opts.meeting_views_options += MeetingViewsOptions.NO_BUTTON_VIDEO;
                 }
@@ -569,8 +607,12 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
-
+                    ZoomSDK.getInstance().getMeetingSettingsHelper().setCustomizedMeetingUIEnabled(true);
+                    ZoomSDK.getInstance().getZoomUIService().setNewMeetingUI(CustomNewZoomUIActivity.class);
+                    ZoomSDK.getInstance().getZoomUIService().disablePIPMode(false);
+                    ZoomSDK.getInstance().getMeetingSettingsHelper().enable720p(false);
+                    ZoomSDK.getInstance().getMeetingSettingsHelper().enableShowMyMeetingElapseTime(true);
+                    ZoomSDK.getInstance().getMeetingService().addListener(Zoom.this);
                     int response = meetingService.joinMeetingWithParams(
                             cordova.getActivity().getApplicationContext(),params, opts);
                     if (DEBUG) { Log.i(TAG, "In JoinMeeting, response=" + getMeetingErrorMessage(response)); }
@@ -580,6 +622,30 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                         pluginResult.setKeepCallback(true);
                         callbackContext.sendPluginResult(pluginResult);
                     } else {
+
+                        Log.d(TAG, "Initialized the Zoom SDK");
+
+                        ZoomSDK.getInstance().getZoomUIService().setZoomUIDelegate(new SimpleZoomUIDelegate() {
+                            @Override
+                            public void afterMeetingMinimized(Activity activity) {
+                                Intent intent = new Intent(activity, MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                activity.startActivity(intent);
+                            }
+                        });
+                          MeetingWindowHelper.getInstance().setMainActivity(cordova.getActivity());
+                          showAPIUserActivity();
+                        ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(0, 0, 360, 540));
+//                        ZoomSDK.getInstance().getZoomUIService().setZoomUIDelegate(new SimpleZoomUIDelegate() {
+//                            @Override
+//                            public void afterMeetingMinimized(Activity activity) {
+//                                Intent intent = new Intent(activity, InitAuthSDKActivity.class);
+//                                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+//                                activity.startActivity(intent);
+//                            }
+//                        });
+//                          MeetingWindowHelper.getInstance().showMeetingWindow(cordova.getActivity());
+//                        MeetingWindowHelper.getInstance().showMeetingWindow(cordova.getActivity());
                         pluginResult =  new PluginResult(PluginResult.Status.OK, getMeetingErrorMessage(response));
                         pluginResult.setKeepCallback(true);
                         callbackContext.sendPluginResult(pluginResult);
@@ -1149,9 +1215,28 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     android.widget.Toast.LENGTH_LONG
             );
             toast.show();
+        }else if (meetingStatus == MeetingStatus.MEETING_STATUS_INMEETING){
+//            MeetingWindowHelper.getInstance().showMeetingWindow(cordova.getActivity());
         }
     }
 
+//    private void refreshUI() {
+//        MeetingStatus meetingStatus = ZoomSDK.getInstance().getMeetingService().getMeetingStatus();
+//        ZoomSDK.getInstance().getMeetingSettingsHelper().setCustomizedMeetingUIEnabled(true);
+//        if (ZoomSDK.getInstance().getMeetingSettingsHelper().isCustomizedMeetingUIEnabled()) {
+//            if (meetingStatus == MeetingStatus.MEETING_STATUS_INMEETING && isResumed) {
+//                MeetingWindowHelper.getInstance().showMeetingWindow(cordova.getActivity());
+//            } else {
+//                MeetingWindowHelper.getInstance().hiddenMeetingWindow(true);
+//            }
+//        }
+//    }
+    private void showMeetingUi() {
+//            Intent intent = null;
+//            intent = new Intent(cordova.getActivity().getApplicationContext(), MyMeetingActivity.class);
+//            intent.putExtra("from", JOIN_FROM_UNLOGIN);
+//            cordova.getActivity().startActivity(intent);
+    }
     @Override
     public void onMeetingParameterNotification(MeetingParameter meetingParameter) {
 
