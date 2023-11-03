@@ -1,0 +1,35 @@
+# Deleted files 
+Font and icon files deleted as part of the migration from Ionic 4 to Ionic 5 (JIR-2249).
+The following files were no longer being used in any of the apps, and the desire moving forward was to not use these fonts or icons. 
+Thus the following files were deleted:
+
+// Ionicons 
+ionicons.scss
+ionicons.eot
+ionicons.ttf
+ionicons.svg
+ionicons.woff
+ionicons.woff2
+
+// Roboto Font
+roboto.scss
+roboto-light.ttf
+roboto-light.woff
+roboto-light.woff2
+roboto-regular.ttf
+roboto-regular.woff
+roboto-regular.woff2
+roboto-medium.ttf
+roboto-medium.woff
+roboto-medium.woff2
+roboto-bold.ttf
+roboto-bold.woff
+roboto-bold.woff2
+
+
+// Noto Sans Font
+noto-sans.scss
+noto-sans-regular.ttf
+noto-sans-regular.woff
+noto-sans-bold.ttf
+noto-sans-bold.woff

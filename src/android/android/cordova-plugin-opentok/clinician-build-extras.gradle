@@ -1,0 +1,27 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.0.0'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        maven {
+            url  "http://tokbox.bintray.com/maven"
+            content
+            {
+                includeGroupByRegex("com\\.opentok.*")
+            }
+            allowInsecureProtocol = true
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.opentok.android:opentok-android-sdk:2.26.0'
+}

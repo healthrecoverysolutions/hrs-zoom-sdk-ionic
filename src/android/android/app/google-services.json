@@ -1,0 +1,268 @@
+{
+  "project_info": {
+    "project_number": "848348592935",
+    "firebase_url": "https://hrsmessaging.firebaseio.com",
+    "project_id": "hrsmessaging",
+    "storage_bucket": "hrsmessaging.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848348592935:android:09ed35be91858d73",
+        "android_client_info": {
+          "package_name": "com.hrs.clinician"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "848348592935-6c4nepokq9t6bk9rnk5j74ocahus44r5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtcchlcA_QQPfWhR7bd7Zx5v7RsgzWmQk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848348592935:android:1dd553def43ec13a",
+        "android_client_info": {
+          "package_name": "com.hrspatientconnect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "848348592935-t7r4q95qhmloh8aql9tu6rfnr4trl6sk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hrspatientconnect",
+            "certificate_hash": "c53f72001b7cc8a06786568422620a9c02190289"
+          }
+        },
+        {
+          "client_id": "848348592935-6c4nepokq9t6bk9rnk5j74ocahus44r5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtcchlcA_QQPfWhR7bd7Zx5v7RsgzWmQk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "848348592935-6c4nepokq9t6bk9rnk5j74ocahus44r5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "848348592935-vds57r7lkeobknfdl0ct9psojabf7ogl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.hrs.clinician"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848348592935:android:469211de8d557e32",
+        "android_client_info": {
+          "package_name": "com.hrspatientconnectservice"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "848348592935-md5dolib129bb2m7r1kkcgqts9pvpp72.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hrspatientconnectservice",
+            "certificate_hash": "9c394bbd98ce933f50982e08485c19cd2cf7657c"
+          }
+        },
+        {
+          "client_id": "848348592935-6c4nepokq9t6bk9rnk5j74ocahus44r5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtcchlcA_QQPfWhR7bd7Zx5v7RsgzWmQk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "848348592935-6c4nepokq9t6bk9rnk5j74ocahus44r5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "848348592935-vds57r7lkeobknfdl0ct9psojabf7ogl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.hrs.clinician"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848348592935:android:6f5d66a54d21b5a2",
+        "android_client_info": {
+          "package_name": "ionic.hrsmobile.byod.clinician"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "848348592935-6c4nepokq9t6bk9rnk5j74ocahus44r5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtcchlcA_QQPfWhR7bd7Zx5v7RsgzWmQk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848348592935:android:daca292f15e232f2",
+        "android_client_info": {
+          "package_name": "ionic.hrsmobile.byod.clinician.QA"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "848348592935-6c4nepokq9t6bk9rnk5j74ocahus44r5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtcchlcA_QQPfWhR7bd7Zx5v7RsgzWmQk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848348592935:android:10425b85b2b83dc9",
+        "android_client_info": {
+          "package_name": "ionic.hrsmobile.byod.patient"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "848348592935-6c4nepokq9t6bk9rnk5j74ocahus44r5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtcchlcA_QQPfWhR7bd7Zx5v7RsgzWmQk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848348592935:android:e6c8adb2b8405fc3",
+        "android_client_info": {
+          "package_name": "ionic.hrsmobile.byod.patient.qa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "848348592935-6c4nepokq9t6bk9rnk5j74ocahus44r5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtcchlcA_QQPfWhR7bd7Zx5v7RsgzWmQk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
