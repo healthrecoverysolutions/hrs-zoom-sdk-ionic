@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="zm_config_conf_activity">cordova.plugin.zoom.ZoomNewMeetingActivity</string>
+    <string name="zm_config_conf_activity">com.cordova.plugin.zoom.Zoom.NewZoomMeetingActivity</string>
 </resources>
