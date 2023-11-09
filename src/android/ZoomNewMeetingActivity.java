@@ -51,7 +51,6 @@ public class MyNewMeetingActivity extends NewMeetingActivity {
     public void onDestroy() {
         Log.d(TAG, "Zoom on destroy " + this);
         super.onDestroy();
-        //Toast.makeText(this, "MyNewMeetingActivity onDestroy", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -90,16 +89,4 @@ public class MyNewMeetingActivity extends NewMeetingActivity {
 
     }
 
-//    @Override
-//    public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
-//        if (keyCode == KeyEvent.KEYCODE_BACK) {
-//            Intent intent = new Intent(this, MainActivity.class);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-//            this.startActivity(intent);
-//            ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
-//            zoomUIService.showMiniMeetingWindow();
-//            ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(0, 0, 360, 540));
-//        }
-//        return true;
-//    }
 }
