@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import com.hrs.patient.MainActivity;
+
 import us.zoom.sdk.CustomizedMiniMeetingViewSize;
 import us.zoom.sdk.MeetingService;
 import us.zoom.sdk.NewMeetingActivity;
@@ -20,9 +21,14 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         Log.d(TAG, "NewZoomMeetingActivity oncreate " + this);
         appResourcesPackage = getPackageName();
-        super.onCreate(savedInstanceState);
+
+        /**
+         * Handled Zoom Default UI back button "<" to provide minimise behaviour when pressing back. In the current zoom code,
+         * this was closing our app. We wanted to minimise the call and continue using our app simultaneously
+         */
         ImageView back = (ImageView) findViewById(getResources().getIdentifier("imgMinimize", "id", appResourcesPackage));//(ImageView) findViewById(R.id.imgMinimize);
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -31,6 +37,10 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
             }
         });
 
+        /**
+         * Handled Zoom Default UI Leave button to leave the call and launch our main activity. With some zoom issues, sometimes
+         * main activity was not launched and it was ending the application.
+         */
         Button btnLeave = (Button) findViewById(getResources().getIdentifier("btnLeave", "id", appResourcesPackage));// R.id.btnLeave);
         btnLeave.setOnClickListener(new View.OnClickListener() {
             @Override
