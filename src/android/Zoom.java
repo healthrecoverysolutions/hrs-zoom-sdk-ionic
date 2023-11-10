@@ -13,14 +13,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.util.Log;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
 import com.cordova.plugin.zoom.NewZoomMeetingActivity;
-import com.hrs.patient.MainActivity;
 
 import us.zoom.sdk.ChatMessageDeleteType;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
@@ -28,7 +25,6 @@ import us.zoom.sdk.IRequestLocalRecordingPrivilegeHandler;
 import us.zoom.sdk.InMeetingChatController;
 import us.zoom.sdk.LocalRecordingRequestPrivilegeStatus;
 import us.zoom.sdk.MeetingParameter;
-import us.zoom.sdk.SimpleZoomUIDelegate;
 import us.zoom.sdk.VideoQuality;
 import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomSDKAuthenticationListener;
@@ -56,7 +52,6 @@ import us.zoom.sdk.StartMeetingParamsWithoutLogin;
 import us.zoom.sdk.JoinMeetingParams;
 import us.zoom.sdk.JoinMeetingOptions;
 
-import cordova.plugin.zoom.AuthThread;
 import us.zoom.sdk.ZoomUIService;
 
 /**
@@ -591,7 +586,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    
+
                     int response = meetingService.joinMeetingWithParams(
                         cordova.getActivity().getApplicationContext(),params, opts);
                     if (DEBUG) { Log.i(TAG, "In JoinMeeting, response=" + getMeetingErrorMessage(response)); }
