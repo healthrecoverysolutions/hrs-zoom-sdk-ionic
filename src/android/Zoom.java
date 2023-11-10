@@ -85,7 +85,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
      */
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext)
-            throws JSONException {
+        throws JSONException {
         if (DEBUG) {
             Log.v(TAG, "----- [execute , action =" + action + "]");
             Log.v(TAG, "----- [execute , args =" + args + "]");
@@ -528,8 +528,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 opts.no_driving_mode = option.isNull("no_driving_mode")? false : option.getBoolean("no_driving_mode");
                 opts.no_invite = option.isNull("no_invite")? false : option.getBoolean("no_invite");
                 opts.no_meeting_end_message = option.isNull("no_meeting_end_message")? false : option.getBoolean("no_meeting_end_message");
-                opts.no_titlebar = option.isNull("no_titlebar")? false : option.getBoolean("no_titlebar");
-
+            opts.no_titlebar = option.isNull("no_titlebar")? false : option.getBoolean("no_titlebar");
+               // opts.no_titlebar = true;
                 opts.no_bottom_toolbar = option.isNull("no_bottom_toolbar")? false : option.getBoolean("no_bottom_toolbar");
                 opts.no_dial_in_via_phone = option.isNull("no_dial_in_via_phone")? false : option.getBoolean("no_dial_in_via_phone");
                 opts.no_dial_out_to_phone = option.isNull("no_dial_out_to_phone")? false : option.getBoolean("no_dial_out_to_phone");
