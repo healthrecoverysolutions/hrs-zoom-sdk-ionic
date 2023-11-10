@@ -1,92 +1,105 @@
-package com.cordova.plugin.zoom.Zoom;
+package com.cordova.plugin.zoom;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-
 import android.view.View;
-
+import android.widget.Button;
 import android.widget.ImageView;
-
-
 import com.hrs.patient.MainActivity;
-
-
 import us.zoom.sdk.CustomizedMiniMeetingViewSize;
+import us.zoom.sdk.MeetingService;
 import us.zoom.sdk.NewMeetingActivity;
 import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomUIService;
 
-public class NewZoomMeetingActivity extends NewMeetingActivity{
+public class NewZoomMeetingActivity extends NewMeetingActivity {
 
-        private String appResourcesPackage = getPackageName();
+    private String appResourcesPackage = getPackageName();
+    private static final String TAG = "ZoomIonicAngularPlugin";
 
-//    @Override
-//    protected int getLayout() {
-//        return getResources().getIdentifier("my_new_meeting_layout", "layout", appResourcesPackage);
-//        // return R.layout.my_new_meeting_layout;
-//    }
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "NewZoomMeetingActivity oncreate " + this);
+        appResourcesPackage = getPackageName();
+        super.onCreate(savedInstanceState);
+        ImageView back = (ImageView) findViewById(getResources().getIdentifier("imgMinimize", "id", appResourcesPackage));//(ImageView) findViewById(R.id.imgMinimize);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                minimizeZoomCall();
+            }
+        });
 
-        private static final String TAG = "ZoomIonicAngularPlugin";
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            Log.d(TAG, "Zoom oncreate "   + this);
-            appResourcesPackage = getPackageName();
-            super.onCreate(savedInstanceState);
-            ImageView back = (ImageView ) findViewById(getResources().getIdentifier("imgMinimize", "id", appResourcesPackage));//(ImageView) findViewById(R.id.imgMinimize);
+        Button btnLeave = (Button) findViewById(getResources().getIdentifier("btnLeave", "id", appResourcesPackage));// R.id.btnLeave);
+        btnLeave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                endMeetingAndMoveToActivity();
+            }
+        });
+    }
 
-            back.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Log.d(TAG, "hurryaaa!!");
-                    minimiseAcitivity();
-                }
-            });
-            //Toast.makeText(this, "MyNewMeetingActivity onCreate", Toast.LENGTH_SHORT).show();
-        }
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "NewZoomMeetingActivity on destroy " + this);
+        super.onDestroy();
+    }
 
-        @Override
-        public void onDestroy() {
-            Log.d(TAG, "Zoom on destroy " + this);
-            super.onDestroy();
-        }
-
-        @Override
-        protected void onPause() {
-            Log.d(TAG, "Zoom on pause " + this);
-            super.onPause();
-        }
-
-        @Override
-        protected void onResume() {
-            Log.d(TAG, "Zoom on resume " + this);
-            super.onResume();
-        }
-
-        @Override
-        public void finish() {
-            Log.d(TAG, "Zoom on finish " + this);
-            super.finish();
-        }
-
-        @Override
-        public void onBackPressed() {
-            //  super.onBackPressed();
-            Log.d(TAG, "Zoom BAck Pressed " + this);
-            minimiseAcitivity();
-        }
-
-        private void minimiseAcitivity() {
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            this.startActivity(intent);
-            ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
-            // ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(0, 0, 360, 540));
-            ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
-            zoomUIService.showMiniMeetingWindow();
-
-        }
+    @Override
+    protected void onPause() {
+        Log.d(TAG, "Zoom on pause " + this);
+        super.onPause();
 
     }
+
+    @Override
+    protected void onResume() {
+        Log.d(TAG, "Zoom on resume " + this);
+        super.onResume();
+    }
+
+    @Override
+    public void finish() {
+        Log.d(TAG, "Zoom on finish " + this);
+        super.finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "Zoom BAck Pressed " + this);
+        minimizeZoomCall();
+    }
+
+    private void minimizeZoomCall() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        this.startActivity(intent);
+        ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
+        //            zoomUIService.setZoomUIDelegate(new SimpleZoomUIDelegate() {
+        //                @Override
+        //                public void afterMeetingMinimized(Activity activity) {
+        //                    Log.d(TAG, "New zoom activity After meeting minimised---->>");
+        //                    Intent intent = new Intent(activity, MainActivity.class);
+        //                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        //                    activity.startActivity(intent);
+        //                }
+        //            });
+        ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
+        zoomUIService.showMiniMeetingWindow();
+    }
+
+    private void endMeetingAndMoveToActivity() {
+        Log.d(TAG, "end zoom call and start main activity");
+        ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
+        zoomUIService.hideMiniMeetingWindow();
+        MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
+        meetingService.leaveCurrentMeeting(true);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        this.startActivity(intent);
+    }
+
+}
 
 

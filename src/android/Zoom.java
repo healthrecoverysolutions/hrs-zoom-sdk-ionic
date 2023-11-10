@@ -19,7 +19,7 @@ import android.util.Log;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
-import com.cordova.plugin.zoom.Zoom.NewZoomMeetingActivity;
+import com.cordova.plugin.zoom.NewZoomMeetingActivity;
 import com.hrs.patient.MainActivity;
 
 import us.zoom.sdk.ChatMessageDeleteType;
@@ -591,17 +591,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
-                    ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
-                    zoomUIService.setZoomUIDelegate(new SimpleZoomUIDelegate() {
-                        @Override
-                        public void afterMeetingMinimized(Activity activity) {
-                            Intent intent = new Intent(activity, MainActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                            activity.startActivity(intent);
-                        }
-                    });
-
+                    
                     int response = meetingService.joinMeetingWithParams(
                         cordova.getActivity().getApplicationContext(),params, opts);
                     if (DEBUG) { Log.i(TAG, "In JoinMeeting, response=" + getMeetingErrorMessage(response)); }
