@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import com.hrs.patient.MainActivity;
 
 import us.zoom.sdk.CustomizedMiniMeetingViewSize;
 import us.zoom.sdk.MeetingService;
@@ -82,19 +81,8 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     }
 
     private void minimizeZoomCall() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        this.startActivity(intent);
+        startMainActivity();
         ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
-        //            zoomUIService.setZoomUIDelegate(new SimpleZoomUIDelegate() {
-        //                @Override
-        //                public void afterMeetingMinimized(Activity activity) {
-        //                    Log.d(TAG, "New zoom activity After meeting minimised---->>");
-        //                    Intent intent = new Intent(activity, MainActivity.class);
-        //                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        //                    activity.startActivity(intent);
-        //                }
-        //            });
         ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
         zoomUIService.showMiniMeetingWindow();
     }
@@ -105,9 +93,20 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
         zoomUIService.hideMiniMeetingWindow();
         MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
         meetingService.leaveCurrentMeeting(true);
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        this.startActivity(intent);
+        startMainActivity();
+    }
+
+    private void startMainActivity() {
+        String activityToStart = appResourcesPackage + ".MainActivity";
+        Log.d(TAG, "activity to start " + activityToStart);
+        try {
+            Class<?> c = Class.forName(activityToStart);
+            Intent intent = new Intent(this, c);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+        } catch (ClassNotFoundException ignored) {
+            Log.e(TAG, "unable to start " + ignored);
+        }
     }
 
 }
