@@ -17,11 +17,12 @@ import android.util.Log;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
+import com.cordova.plugin.zoom.NewZoomMeetingActivity;
+
 import us.zoom.sdk.ChatMessageDeleteType;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
 import us.zoom.sdk.IRequestLocalRecordingPrivilegeHandler;
 import us.zoom.sdk.InMeetingChatController;
-import us.zoom.sdk.InMeetingUserList;
 import us.zoom.sdk.LocalRecordingRequestPrivilegeStatus;
 import us.zoom.sdk.MeetingParameter;
 import us.zoom.sdk.VideoQuality;
@@ -51,7 +52,6 @@ import us.zoom.sdk.StartMeetingParamsWithoutLogin;
 import us.zoom.sdk.JoinMeetingParams;
 import us.zoom.sdk.JoinMeetingOptions;
 
-import cordova.plugin.zoom.AuthThread;
 import us.zoom.sdk.ZoomUIService;
 
 /**
@@ -140,6 +140,11 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 cordova.getActivity().runOnUiThread( // running on a different thread
                     new Runnable() {
                         public void run() {
+                            Log.d(TAG, "Applying an overridden meeting activity instance to extend some behaviour");
+                            ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
+                            zoomUIService.setNewMeetingUI(NewZoomMeetingActivity.class);
+                            zoomUIService.enableMinimizeMeeting(true);
+                            zoomUIService.disablePIPMode(false);
                             joinMeeting(meetingNo, meetingPassword, displayNameJ, optionsJ, callbackContext);
                         }
                     });
@@ -175,6 +180,14 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     @Override
     public void onShareMeetingChatStatusChanged(boolean start) {};
 
+    private void registerMeetingServiceListener() {
+        ZoomSDK zoomSDK = ZoomSDK.getInstance();
+        MeetingService meetingService = zoomSDK.getMeetingService();
+        if(meetingService != null) {
+            meetingService.addListener(this);
+        }
+    }
+
     /**
      * initialize
      *
@@ -209,6 +222,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             public void onZoomSDKInitializeResult(int errorCode, int internalErrorCode) {
                 if(errorCode == ZoomError.ZOOM_ERROR_SUCCESS) {
                     Log.d(TAG, "Initialized the Zoom SDK");
+                    registerMeetingServiceListener();
                     callbackContext.success("Initialize successfully!");
                 } else {
                     Log.d(TAG, "Error initializing zoom sdk " + errorCode);
