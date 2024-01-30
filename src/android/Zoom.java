@@ -13,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
@@ -54,6 +53,8 @@ import us.zoom.sdk.JoinMeetingOptions;
 
 import us.zoom.sdk.ZoomUIService;
 
+import timber.log.Timber;
+
 /**
  * Zoom
  *
@@ -64,8 +65,7 @@ import us.zoom.sdk.ZoomUIService;
  */
 public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener, MeetingServiceListener, InMeetingServiceListener {
     /* Debug variables */
-    private static final String TAG = "ZoomIonicAngularPlugin"; // Earlier tag caused Lint warning The logging tag can be at most 23 characters, was 43 (<------- ZoomIonicAngularPlugin ---------->)
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     public static final Object LOCK = new Object();
 
     private String WEB_DOMAIN = "https://zoom.us";
@@ -87,8 +87,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext)
             throws JSONException {
         if (DEBUG) {
-            Log.v(TAG, "----- [execute , action =" + action + "]");
-            Log.v(TAG, "----- [execute , args =" + args + "]");
+            Timber.d("----- [execute , action =" + action + "]");
+            Timber.d("----- [execute , args =" + args + "]");
         }
 
         cordova.setActivityResultCallback(this);
@@ -122,7 +122,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 String username = args.getString(0);
                 String password = args.getString(1);
                 if (DEBUG) {
-                    Log.v(TAG, "----- [username =" + username + "]");
+                    Timber.d("----- [username =" + username + "]");
                 }
                 this.login(username, password, callbackContext);
                 break;
@@ -140,7 +140,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 cordova.getActivity().runOnUiThread( // running on a different thread
                     new Runnable() {
                         public void run() {
-                            Log.d(TAG, "Applying an overridden meeting activity instance to extend some behaviour");
+                            Timber.d("Applying an overridden meeting activity instance to extend some behaviour");
                             ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
                             zoomUIService.setNewMeetingUI(NewZoomMeetingActivity.class);
                             zoomUIService.enableMinimizeMeeting(true);
@@ -198,7 +198,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
      */
     private void initializeWithJWT(String jwtToken, CallbackContext callbackContext) {
         if (DEBUG) {
-            Log.v(TAG, "********** Zoom's initialize called **********");
+            Timber.d("********** Zoom's initialize called **********");
         }
 
         ZoomSDK mZoomSDK = ZoomSDK.getInstance();
@@ -221,11 +221,11 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             @Override
             public void onZoomSDKInitializeResult(int errorCode, int internalErrorCode) {
                 if(errorCode == ZoomError.ZOOM_ERROR_SUCCESS) {
-                    Log.d(TAG, "Initialized the Zoom SDK");
+                    Timber.d("Initialized the Zoom SDK");
                     registerMeetingServiceListener();
                     callbackContext.success("Initialize successfully!");
                 } else {
-                    Log.d(TAG, "Error initializing zoom sdk " + errorCode);
+                    Timber.d("Error initializing zoom sdk " + errorCode);
                     callbackContext.error(errorCode);
                 }
             }
@@ -247,7 +247,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
      */
     private void initialize(String appKey, String appSecret, CallbackContext callbackContext) {
         if (DEBUG) {
-            Log.v(TAG, "********** Zoom's initialize called **********");
+            Timber.d("********** Zoom's initialize called **********");
         }
 
         ZoomSDK mZoomSDK = ZoomSDK.getInstance();
@@ -278,10 +278,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             @Override
             public void onZoomSDKInitializeResult(int errorCode, int internalErrorCode) {
                 if(errorCode == ZoomError.ZOOM_ERROR_SUCCESS) {
-                    Log.d(TAG, "Initialized the Zoom SDK");
+                    Timber.d("Initialized the Zoom SDK");
                     callbackContext.success("Initialize successfully!");
                 } else {
-                    Log.d(TAG, "Error initializing zoom sdk " + errorCode);
+                    Timber.e("Error initializing zoom sdk " + errorCode);
                     callbackContext.error(errorCode);
                 }
             }
@@ -341,7 +341,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                // TODO Commenting below code as we are not using this and thus dont need this functionality to be ported as per new implementation.
 //               int response = mZoomSDK.loginWithZoom(username, password);
 //               if (DEBUG) {
-//                   Log.v(TAG, "[Login response ^^^^^^^^^^^^^^]= " + response);
+//                   Timber.d("[Login response ^^^^^^^^^^^^^^]= " + response);
 //               }
 //
 //               if (response != ZoomApiError.ZOOM_API_ERROR_SUCCESS) {
@@ -396,7 +396,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         // logout success.
         pluginResult = new PluginResult(PluginResult.Status.OK, true);
         if (DEBUG) {
-            Log.v(TAG, "===============Logout Success!==============");
+            Timber.d("===============Logout Success!==============");
         }
 
         pluginResult.setKeepCallback(true);
@@ -416,7 +416,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 @Override
                 public void run() {
                     if (DEBUG) {
-                        Log.v(TAG, "[#############isLoggedIn Thread run()##############]");
+                        Timber.d("[#############isLoggedIn Thread run()##############]");
                     }
                     ZoomSDK zoomSDK = ZoomSDK.getInstance();
                     if (!zoomSDK.isInitialized()) {
@@ -444,7 +444,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
      */
     private void joinMeeting(String meetingNo, String meetingPassword, String displayName, JSONObject option, CallbackContext callbackContext) {
 
-        if (DEBUG) { Log.v(TAG, "********** Zoom's join meeting called ,meetingNo=" + meetingNo + " **********"); }
+        if (DEBUG) { Timber.d("********** Zoom's join meeting called ,meetingNo=" + meetingNo + " **********"); }
 
         if (meetingNo == null || meetingNo.trim().isEmpty() || meetingNo.equals("null")) {
             callbackContext.error("Meeting number cannot be empty");
@@ -459,8 +459,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         if (DEBUG) {
-            Log.v(TAG, "[Going to Join Meeting]");
-            Log.v(TAG, "[meetingNo=]" + meetingNumber);
+            Timber.d("[Going to Join Meeting]");
+            Timber.d("[meetingNo=]" + meetingNumber);
         }
 
         PluginResult pluginResult = null;
@@ -577,7 +577,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     opts.meeting_views_options += MeetingViewsOptions.NO_BUTTON_SWITCH_AUDIO_SOURCE;
                 }
             } catch (JSONException ex) {
-                if (DEBUG) { Log.i(TAG, ex.getMessage()); }
+                if (DEBUG) { Timber.i(ex.getMessage()); }
             }
 
             cordova.getActivity().runOnUiThread(new Runnable() {
@@ -587,7 +587,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
                     int response = meetingService.joinMeetingWithParams(
                             cordova.getActivity().getApplicationContext(),params, opts);
-                    if (DEBUG) { Log.i(TAG, "In JoinMeeting, response=" + getMeetingErrorMessage(response)); }
+                    if (DEBUG) { Timber.i("In JoinMeeting, response=" + getMeetingErrorMessage(response)); }
                     PluginResult pluginResult = null;
                     if (response != MeetingError.MEETING_ERROR_SUCCESS) {
                         pluginResult =  new PluginResult(PluginResult.Status.ERROR, getMeetingErrorMessage(response));
@@ -608,7 +608,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
                     int response = meetingService.joinMeetingWithParams(
                             cordova.getActivity().getApplicationContext(), params, null);
-                    if (DEBUG) { Log.i(TAG, "In JoinMeeting, response=" + getMeetingErrorMessage(response)); }
+                    if (DEBUG) { Timber.i("In JoinMeeting, response=" + getMeetingErrorMessage(response)); }
                     PluginResult pluginResult = null;
                     if (response != MeetingError.MEETING_ERROR_SUCCESS) {
                         pluginResult =  new PluginResult(PluginResult.Status.ERROR, getMeetingErrorMessage(response));
@@ -656,7 +656,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         PluginResult pluginResult = null;
 
         if (DEBUG) {
-            Log.v(TAG, "[startMeeting] meetingNumber=====" + meetingNumber);
+            Timber.d("[startMeeting] meetingNumber=====" + meetingNumber);
         }
 
         // Get Zoom SDK instance.
@@ -771,7 +771,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     opts.meeting_views_options += MeetingViewsOptions.NO_BUTTON_SWITCH_AUDIO_SOURCE;
                 }
             } catch(JSONException ex) {
-                if (DEBUG) { Log.i(TAG, ex.getMessage()); }
+                if (DEBUG) { Timber.i(ex.getMessage()); }
             }
         }
 
@@ -798,8 +798,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         } else {
             // if user is not logged in, start the meeting with provided tokens.
             if (DEBUG) {
-                Log.v(TAG, "[+++++++++++++++Going to start meeting with ZAK++++++++++++++++]");
-                Log.v(TAG, "[userId==="+userId);
+                Timber.d("[+++++++++++++++Going to start meeting with ZAK++++++++++++++++]");
+                Timber.d("[userId==="+userId);
             }
             if (zoomToken.length() != 0 && zoomAccessToken.length() != 0 && userId.length() != 0) {
                 StartMeetingParamsWithoutLogin params = new StartMeetingParamsWithoutLogin();
@@ -930,7 +930,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     opts.meeting_views_options += MeetingViewsOptions.NO_BUTTON_SWITCH_AUDIO_SOURCE;
                 }
             } catch (JSONException ex) {
-                Log.i(TAG, ex.getMessage());
+                Timber.i(ex.getMessage());
             }
         }
 
@@ -939,7 +939,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             public void run() {
                 int response = meetingService.startInstantMeeting(cordova.getActivity().getApplicationContext(), opts);
                 if (DEBUG) {
-                    Log.i(TAG, "onClickBtnLoginUserStartInstant, response=" + getMeetingErrorMessage(response));
+                    Timber.i("onClickBtnLoginUserStartInstant, response=" + getMeetingErrorMessage(response));
                 }
                 PluginResult pluginResult = null;
                 if (response != MeetingError.MEETING_ERROR_SUCCESS) {
@@ -969,7 +969,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 @Override
                 public void run() {
                     if (DEBUG) {
-                        Log.v(TAG, "[#############setLocale Thread run()##############]");
+                        Timber.d("[#############setLocale Thread run()##############]");
                     }
                     ZoomSDK zoomSDK = ZoomSDK.getInstance();
                     try {
@@ -996,7 +996,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
      */
     @Override
     public void onZoomSDKLoginResult(long result) {
-            if (DEBUG) { Log.v(TAG, "*********onZoomSDKLoginResult********* result =====" + result); }
+            if (DEBUG) { Timber.d("*********onZoomSDKLoginResult********* result =====" + result); }
 
             try {
                 JSONObject res = new JSONObject();
@@ -1075,7 +1075,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         if (DEBUG) {
-            Log.v(TAG, "******getAuthErrorMessage*********" + message.toString());
+            Timber.d("******getAuthErrorMessage*********" + message.toString());
         }
         return message.toString();
     }
@@ -1112,7 +1112,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         if (DEBUG) {
-            Log.v(TAG, "******getAuthErrorMessage*********" + message.toString());
+            Timber.d("******getAuthErrorMessage*********" + message.toString());
         }
 
         return message.toString();
@@ -1125,7 +1125,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
      */
     @Override
     public void onZoomAuthIdentityExpired() {
-        Log.v(TAG, "onZoomAuthIdentityExpired is triggered");
+        Timber.d("onZoomAuthIdentityExpired is triggered");
     }
 
     /**
@@ -1153,7 +1153,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     @Override
     public void onMeetingStatusChanged(MeetingStatus meetingStatus, int errorCode,
                                        int internalErrorCode) {
-        if (DEBUG) { Log.i(TAG, "onMeetingStatusChanged, meetingStatus=" + meetingStatus + ", errorCode=" + errorCode
+        if (DEBUG) { Timber.i("onMeetingStatusChanged, meetingStatus=" + meetingStatus + ", errorCode=" + errorCode
                 + ", internalErrorCode=" + internalErrorCode); }
 
         if(meetingStatus == MeetingStatus.MEETING_STATUS_FAILED && errorCode == MeetingError.MEETING_ERROR_CLIENT_INCOMPATIBLE) {
@@ -1264,7 +1264,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         if (DEBUG) {
-            Log.v(TAG, "******getMeetingErrorMessage*********" + message.toString());
+            Timber.d("******getMeetingErrorMessage*********" + message.toString());
         }
         return message.toString();
     }
@@ -1278,7 +1278,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             // Unregister Event Listener for this call
             inMeetingService.removeListener(this);
         } catch (Exception e) {
-            Log.v(TAG, e.getMessage());
+            Timber.d(e.getMessage());
         }
     }
 

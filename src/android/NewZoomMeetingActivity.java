@@ -1,8 +1,7 @@
-package com.cordova.plugin.zoom;
+package cordova.plugin.zoom;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -13,15 +12,16 @@ import us.zoom.sdk.NewMeetingActivity;
 import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomUIService;
 
+import timber.log.Timber;
+
 public class NewZoomMeetingActivity extends NewMeetingActivity {
 
     private String appResourcesPackage = getPackageName();
-    private static final String TAG = "ZoomIonicAngularPlugin";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "NewZoomMeetingActivity oncreate " + this);
+        Timber.d("NewZoomMeetingActivity oncreate " + this);
         appResourcesPackage = getPackageName();
 
         /**
@@ -51,32 +51,32 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "NewZoomMeetingActivity on destroy " + this);
+        Timber.d("NewZoomMeetingActivity on destroy " + this);
         super.onDestroy();
     }
 
     @Override
     protected void onPause() {
-        Log.d(TAG, "Zoom on pause " + this);
+        Timber.d("Zoom on pause " + this);
         super.onPause();
 
     }
 
     @Override
     protected void onResume() {
-        Log.d(TAG, "Zoom on resume " + this);
+        Timber.d("Zoom on resume " + this);
         super.onResume();
     }
 
     @Override
     public void finish() {
-        Log.d(TAG, "Zoom on finish " + this);
+        Timber.d("Zoom on finish " + this);
         super.finish();
     }
 
     @Override
     public void onBackPressed() {
-        Log.d(TAG, "Zoom BAck Pressed " + this);
+        Timber.d("Zoom BAck Pressed " + this);
         minimizeZoomCall();
     }
 
@@ -88,7 +88,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     }
 
     private void endMeetingAndMoveToActivity() {
-        Log.d(TAG, "end zoom call and start main activity");
+        Timber.d("end zoom call and start main activity");
         ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
         zoomUIService.hideMiniMeetingWindow();
         MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
@@ -98,14 +98,14 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
 
     private void startMainActivity() {
         String activityToStart = appResourcesPackage + ".MainActivity";
-        Log.d(TAG, "activity to start " + activityToStart);
+        Timber.d("activity to start " + activityToStart);
         try {
             Class<?> c = Class.forName(activityToStart);
             Intent intent = new Intent(this, c);
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
         } catch (ClassNotFoundException ignored) {
-            Log.e(TAG, "unable to start " + ignored);
+            Timber.e("unable to start " + ignored);
         }
     }
 
