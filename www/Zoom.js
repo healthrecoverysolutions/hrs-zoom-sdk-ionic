@@ -60,6 +60,14 @@ var zoom = {
         callNativeFunction('setLocale', [languageTag], success, error);
     },
 
+    getOverlayState: function() {
+        return execAsPromise('getOverlayState', []);
+    },
+    
+    minimize: function() {
+        return execAsPromise('minimize', []);
+    },
+
     addMeetingLeaveListener: function (callback, scope) {
         var type = typeof callback;
 

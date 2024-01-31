@@ -16,8 +16,6 @@ import org.json.JSONObject;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
-import com.cordova.plugin.zoom.NewZoomMeetingActivity;
-
 import us.zoom.sdk.ChatMessageDeleteType;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
 import us.zoom.sdk.IRequestLocalRecordingPrivilegeHandler;
@@ -67,10 +65,29 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     /* Debug variables */
     private static final boolean DEBUG = true;
     public static final Object LOCK = new Object();
+    private static Zoom mInstance = null;
 
     private String WEB_DOMAIN = "https://zoom.us";
 
     private CallbackContext callbackContext;
+    private boolean minimized = false;
+    private NewZoomMeetingActivity mZoomMeetingActivity = null;
+
+    public static Zoom getInstance() {
+        return mInstance;
+    }
+
+    @Override
+    protected void pluginInitialize() {
+        super.pluginInitialize();
+        mInstance = this;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mInstance = null;
+    }
 
     /**
      * execute
@@ -168,6 +185,15 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 String languageTag = args.getString(0);
                 this.setLocale(languageTag, callbackContext);
                 break;
+            case "getOverlayState":
+                JSONObject result = new JSONObject()
+                    .put("active", mZoomMeetingActivity != null)
+                    .put("minimized", minimized);
+                callbackContext.success(result);
+                break;
+            case "minimize":
+                minimize(callbackContext);
+                break;
             default:
                 return false;
         }
@@ -186,6 +212,39 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         if(meetingService != null) {
             meetingService.addListener(this);
         }
+    }
+
+    public void onZoomMeetingActivityPictureInPictureModeChange(boolean pipActive) {
+        minimized = pipActive;
+    }
+
+    public void onZoomMeetingActivityCreate(NewZoomMeetingActivity activity) {
+        mZoomMeetingActivity = activity;
+    }
+
+    public void onZoomMeetingActivityDestroy(NewZoomMeetingActivity activity) {
+        if (mZoomMeetingActivity == activity) {
+            mZoomMeetingActivity = null;
+        }
+    }
+
+    private void minimize(CallbackContext callbackContext) {
+        cordova.getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                try {
+                    if (mZoomMeetingActivity != null) {
+                        mZoomMeetingActivity.minimizeZoomCall();
+                        callbackContext.success();
+                    } else {
+                        callbackContext.error("NewZoomMeetingActivity not started");
+                    }
+                } catch (Exception ex) {
+                    String errorMessage = "minimize Error: " + ex.getMessage();
+                    Timber.e(errorMessage);
+                    callbackContext.error(errorMessage);
+                }
+            }
+        });
     }
 
     /**
@@ -238,7 +297,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     /**
      * initialize
-     * @deprecated 
+     * @deprecated
      * Initialize Zoom SDK. <Dev Note : this method should not be used now and is deprecated. Use initializeWithJWT instead for initialization
      *
      * @param appKey        Zoom SDK app key.

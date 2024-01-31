@@ -714,6 +714,20 @@
     });
 }
 
+- (void)getOverlayState:(CDVInvokedUrlCommand*)command {
+    NSMutableDictionary* err = [[NSMutableDictionary alloc] init];
+    [err setObject:@"unimplemented" forKey:@"message"];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:err];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)minimize:(CDVInvokedUrlCommand*)command {
+    NSMutableDictionary* err = [[NSMutableDictionary alloc] init];
+    [err setObject:@"unimplemented" forKey:@"message"];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:err];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 - (void)onMobileRTCAuthReturn:(MobileRTCAuthError)returnValue
 {
     if (DEBUG) {

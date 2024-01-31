@@ -72,4 +72,19 @@
  * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
  */
 - (void)setLocale:(CDVInvokedUrlCommand*)command;
+/**
+ * setLocale
+ *
+ * Check if the active video window is minimized.
+ * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
+ * @returns Promise<{active: boolean, minimized: boolean}>
+ */
+- (void)getOverlayState:(CDVInvokedUrlCommand*)command;
+/**
+ * setLocale
+ *
+ * Request that the active video window be minimized
+ * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
+ */
+- (void)minimize:(CDVInvokedUrlCommand*)command;
 @end
