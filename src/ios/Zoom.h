@@ -83,8 +83,8 @@
 /**
  * setLocale
  *
- * Request that the active video window be minimized
+ * Request that the active video window be minimized/maximized
  * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
  */
-- (void)minimize:(CDVInvokedUrlCommand*)command;
+- (void)setMinimized:(CDVInvokedUrlCommand*)command;
 @end

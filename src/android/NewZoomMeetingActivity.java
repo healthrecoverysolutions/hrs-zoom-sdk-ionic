@@ -102,6 +102,23 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
         }
     }
 
+    public void maximizeZoomCall() {
+        // https://stackoverflow.com/a/43288507
+        moveTaskToBack(false);
+        Intent intent = new Intent(NewZoomMeetingActivity.this, NewZoomMeetingActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+
+        ZoomSDK sdk = ZoomSDK.getInstance();
+        ZoomUIService zoomUIService = sdk.getZoomUIService();
+        zoomUIService.hideMiniMeetingWindow();
+
+        Zoom pluginRef = Zoom.getInstance();
+        if (pluginRef != null) {
+            pluginRef.onZoomMeetingActivityPictureInPictureModeChange(false);
+        }
+    }
+
     private void endMeetingAndMoveToActivity() {
         Timber.d("end zoom call and start main activity");
         ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();

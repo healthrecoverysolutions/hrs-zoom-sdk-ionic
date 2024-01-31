@@ -64,8 +64,8 @@ var zoom = {
         return execAsPromise('getOverlayState', []);
     },
     
-    minimize: function() {
-        return execAsPromise('minimize', []);
+    setMinimized: function(minimized) {
+        return execAsPromise('setMinimized', [minimized]);
     },
 
     addMeetingLeaveListener: function (callback, scope) {

@@ -185,14 +185,13 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 String languageTag = args.getString(0);
                 this.setLocale(languageTag, callbackContext);
                 break;
-            case "getOverlayState":
-                JSONObject result = new JSONObject()
-                    .put("active", mZoomMeetingActivity != null)
-                    .put("minimized", minimized);
+            case "isMinimized":
+                JSONObject result = new JSONObject().put("minimized", minimized);
                 callbackContext.success(result);
                 break;
-            case "minimize":
-                minimize(callbackContext);
+            case "setMinimized":
+                boolean requestMinimized = args.getBoolean(0);
+                setMinimized(requestMinimized, callbackContext);
                 break;
             default:
                 return false;
@@ -229,19 +228,28 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
     }
 
-    private void minimize(CallbackContext callbackContext) {
+    private void setMinimized(boolean requestMinimized, CallbackContext callbackContext) {
         cordova.getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 try {
-                    if (minimized) {
+                    if (mZoomMeetingActivity == null) {
+                        callbackContext.error("NewZoomMeetingActivity not started");
+                        return;
+                    }
+                    if (minimized && requestMinimized) {
                         callbackContext.error("already minimized");
                         return;
                     }
-                    if (mZoomMeetingActivity != null) {
+                    if (!minimized && !requestMinimized) {
+                        callbackContext.error("already maximized");
+                        return;
+                    }
+                    if (requestMinimized) {
                         mZoomMeetingActivity.minimizeZoomCall();
                         callbackContext.success();
                     } else {
-                        callbackContext.error("NewZoomMeetingActivity not started");
+                        mZoomMeetingActivity.maximizeZoomCall();
+                        callbackContext.success();
                     }
                 } catch (Exception ex) {
                     String errorMessage = "minimize Error: " + ex.getMessage();
