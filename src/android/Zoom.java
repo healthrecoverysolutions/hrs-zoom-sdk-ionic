@@ -225,6 +225,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     public void onZoomMeetingActivityDestroy(NewZoomMeetingActivity activity) {
         if (mZoomMeetingActivity == activity) {
             mZoomMeetingActivity = null;
+            minimized = false;
         }
     }
 
@@ -232,6 +233,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         cordova.getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 try {
+                    if (minimized) {
+                        callbackContext.error("already minimized");
+                        return;
+                    }
                     if (mZoomMeetingActivity != null) {
                         mZoomMeetingActivity.minimizeZoomCall();
                         callbackContext.success();
