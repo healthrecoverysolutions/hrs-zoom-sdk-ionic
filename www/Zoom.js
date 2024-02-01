@@ -72,7 +72,7 @@ var zoom = {
      * Set a function map of events to be listened for, for example:
      * 
      * ```javascript
-     * cordova.plugins.Zoom.setEventListenerMap({
+     * cordova.plugins.Zoom.setSharedEventListenerMap({
      *     overlayStateChanged: function (overlayState) { ... }
      * });
      * ```
@@ -80,12 +80,9 @@ var zoom = {
      * Available Events:
      * - overlayStateChanged - data is getOverlayState() response
      */
-    setEventListenerMap: function(listenerMap, error) {
-        if (typeof error !== 'function') {
-            error = function() {};
-        }
+    setSharedEventListenerMap: function(listenerMap) {
         if (typeof listenerMap !== 'object' || listenerMap === null) {
-            error('Listener object must be defined');
+            console.log('ERROR: Listener object must be defined');
             return;
         }
         var listener = function (payload) {
@@ -94,6 +91,9 @@ var zoom = {
                 && typeof listenerMap[payload.type] === 'function') {
                 listenerMap[payload.type](payload.data);
             }
+        };
+        var error = function (err) {
+            listener({type: 'onError', data: err});
         };
         callNativeFunction('setSharedEventListener', [], listener, error);
     },
