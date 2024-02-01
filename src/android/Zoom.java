@@ -216,6 +216,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     }
 
     private void emitJsEvent(String type, JSONObject data) {
+        Timber.d("emitJsEvent -> %s", type);
         try {
             if (sharedEventContext == null) {
                 return;
