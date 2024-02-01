@@ -203,21 +203,32 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     }
 
     private JSONObject getCurrentOverlayState() {
-        return new JSONObject()
-            .put("active", mZoomMeetingActivity != null)
-            .put("minimized", minimized);
+        boolean active = mZoomMeetingActivity != null;
+        JSONObject result = new JSONObject();
+        try {
+            result
+                .put("active", active)
+                .put("minimized", minimized);
+        } catch (JSONException e) {
+            Timber.e("getCurrentOverlayState failed! -> %s", e.getMessage());
+        }
+        return result;
     }
 
     private void emitJsEvent(String type, JSONObject data) {
-        if (sharedEventContext == null) {
-            return;
-        }
-        JSONOBject payload = new JSONObject()
+        try {
+            if (sharedEventContext == null) {
+                return;
+            }
+            JSONObject payload = new JSONObject()
                 .put("type", type)
                 .put("data", data);
-        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, payload);
-        pluginResult.setKeepCallback(true);
-        sharedEventContext.success(pluginResult);
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, payload);
+            pluginResult.setKeepCallback(true);
+            sharedEventContext.sendPluginResult(pluginResult);
+        } catch (JSONException e) {
+            Timber.e("emitJsEvent failed! -> %s", e.getMessage());
+        }
     }
 
     @Override
