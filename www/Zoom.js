@@ -68,6 +68,24 @@ var zoom = {
         return execAsPromise('setMinimized', [minimized]);
     },
 
+    setEventListenerMap: function(listenerMap, error) {
+        if (typeof error !== 'function') {
+            error = function() {};
+        }
+        if (typeof listenerMap !== 'object' || listenerMap === null) {
+            error('Listener object must be defined');
+            return;
+        }
+        var listener = function (payload) {
+            if (payload 
+                && typeof payload.data === 'string' 
+                && typeof listenerMap[payload.type] === 'function') {
+                listenerMap[payload.type](payload.data);
+            }
+        };
+        callNativeFunction('setSharedEventListener', [], listener, error);
+    },
+
     addMeetingLeaveListener: function (callback, scope) {
         var type = typeof callback;
 

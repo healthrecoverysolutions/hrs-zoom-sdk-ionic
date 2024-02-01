@@ -73,7 +73,7 @@
  */
 - (void)setLocale:(CDVInvokedUrlCommand*)command;
 /**
- * setLocale
+ * getOverlayState
  *
  * Check if the active video window is minimized.
  * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
@@ -81,10 +81,17 @@
  */
 - (void)getOverlayState:(CDVInvokedUrlCommand*)command;
 /**
- * setLocale
+ * setMinimized
  *
  * Request that the active video window be minimized/maximized
  * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
  */
 - (void)setMinimized:(CDVInvokedUrlCommand*)command;
+/**
+ * setSharedEventListener
+ *
+ * set a long-lived callback to listen for unsolicited plugin events
+ * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
+ */
+- (void)setSharedEventListener:(CDVInvokedUrlCommand*)command;
 @end

@@ -728,6 +728,13 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)setSharedEventListener:(CDVInvokedUrlCommand*)command {
+    NSMutableDictionary* err = [[NSMutableDictionary alloc] init];
+    [err setObject:@"unimplemented" forKey:@"message"];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:err];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 - (void)onMobileRTCAuthReturn:(MobileRTCAuthError)returnValue
 {
     if (DEBUG) {

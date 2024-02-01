@@ -69,7 +69,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     private String WEB_DOMAIN = "https://zoom.us";
 
-    private CallbackContext callbackContext;
+    private CallbackContext callbackContext = null;
+    private CallbackContext sharedEventContext = null;
     private boolean minimized = false;
     private NewZoomMeetingActivity mZoomMeetingActivity = null;
 
@@ -185,18 +186,38 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 String languageTag = args.getString(0);
                 this.setLocale(languageTag, callbackContext);
                 break;
-            case "isMinimized":
-                JSONObject result = new JSONObject().put("minimized", minimized);
-                callbackContext.success(result);
+            case "getOverlayState":
+                callbackContext.success(getCurrentOverlayState());
                 break;
             case "setMinimized":
                 boolean requestMinimized = args.getBoolean(0);
                 setMinimized(requestMinimized, callbackContext);
                 break;
+            case "setSharedEventListener":
+                sharedEventContext = callbackContext;
+                break;
             default:
                 return false;
         }
         return true;
+    }
+
+    private JSONObject getCurrentOverlayState() {
+        return new JSONObject()
+            .put("active", mZoomMeetingActivity != null)
+            .put("minimized", minimized);
+    }
+
+    private void emitJsEvent(String type, JSONObject data) {
+        if (sharedEventContext == null) {
+            return;
+        }
+        JSONOBject payload = new JSONObject()
+                .put("type", type)
+                .put("data", data);
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, payload);
+        pluginResult.setKeepCallback(true);
+        sharedEventContext.success(pluginResult);
     }
 
     @Override
@@ -213,18 +234,26 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
     }
 
+    private void notifyOverlayStateChange() {
+        emitJsEvent("overlayStateChanged", getCurrentOverlayState());
+    }
+
     public void onZoomMeetingActivityPictureInPictureModeChange(boolean pipActive) {
         minimized = pipActive;
+        notifyOverlayStateChange();
     }
 
     public void onZoomMeetingActivityCreate(NewZoomMeetingActivity activity) {
         mZoomMeetingActivity = activity;
+        minimized = false;
+        notifyOverlayStateChange();
     }
 
     public void onZoomMeetingActivityDestroy(NewZoomMeetingActivity activity) {
         if (mZoomMeetingActivity == activity) {
             mZoomMeetingActivity = null;
             minimized = false;
+            notifyOverlayStateChange();
         }
     }
 
