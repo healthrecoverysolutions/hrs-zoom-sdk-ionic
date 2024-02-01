@@ -715,22 +715,20 @@
 }
 
 - (void)getOverlayState:(CDVInvokedUrlCommand*)command {
-    NSMutableDictionary* err = [[NSMutableDictionary alloc] init];
-    [err setObject:@"unimplemented" forKey:@"message"];
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:err];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    [self sendUnsupportedResponse: command];
 }
 
 - (void)setMinimized:(CDVInvokedUrlCommand*)command {
-    NSMutableDictionary* err = [[NSMutableDictionary alloc] init];
-    [err setObject:@"unimplemented" forKey:@"message"];
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:err];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    [self sendUnsupportedResponse: command];
 }
 
 - (void)setSharedEventListener:(CDVInvokedUrlCommand*)command {
+    [self sendUnsupportedResponse: command];
+}
+
+- (void)sendUnsupportedResponse:(CDVInvokedUrlCommand*)command {
     NSMutableDictionary* err = [[NSMutableDictionary alloc] init];
-    [err setObject:@"unimplemented" forKey:@"message"];
+    [err setObject:@"not supported" forKey:@"message"];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:err];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
