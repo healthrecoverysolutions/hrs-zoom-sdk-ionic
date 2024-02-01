@@ -68,6 +68,18 @@ var zoom = {
         return execAsPromise('setMinimized', [minimized]);
     },
 
+    /**
+     * Set a function map of events to be listened for, for example:
+     * 
+     * ```javascript
+     * cordova.plugins.Zoom.setEventListenerMap({
+     *     overlayStateChanged: function (overlayState) { ... }
+     * });
+     * ```
+     * 
+     * Available Events:
+     * - overlayStateChanged - data is getOverlayState() response
+     */
     setEventListenerMap: function(listenerMap, error) {
         if (typeof error !== 'function') {
             error = function() {};
