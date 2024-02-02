@@ -274,7 +274,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             public void run() {
                 try {
                     if (mZoomMeetingActivity == null) {
-                        callbackContext.error("NewZoomMeetingActivity not started");
+                        callbackContext.error("overlay not active");
                         return;
                     }
                     if (minimized && requestMinimized) {
