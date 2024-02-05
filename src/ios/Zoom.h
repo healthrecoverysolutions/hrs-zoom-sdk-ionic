@@ -12,7 +12,7 @@
  *
  *  A Cordova Plugin to use Zoom Video Conferencing services on Cordova applications.
  */
-@interface Zoom :  CDVPlugin<MobileRTCAuthDelegate, MobileRTCMeetingServiceDelegate, MobileRTCUserServiceDelegate> {
+@interface Zoom :  CDVPlugin<MobileRTCAuthDelegate, MobileRTCMeetingServiceDelegate, MobileRTCUserServiceDelegate, UIAlertViewDelegate> {
     NSString *callbackId;
     CDVPluginResult* pluginResult;
 }
@@ -94,4 +94,11 @@
  * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
  */
 - (void)setSharedEventListener:(CDVInvokedUrlCommand*)command;
+/**
+ * presentActionSheet
+ *
+ * Show an action sheet dialog to the user
+ * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
+ */
+- (void)presentActionSheet:(CDVInvokedUrlCommand*)command;
 @end

@@ -68,6 +68,22 @@ var zoom = {
         return execAsPromise('setMinimized', [minimized]);
     },
 
+    /*
+    // Example
+    cordova.plugins.Zoom.presentAlert({
+        type: 'actionsheet',
+        title: 'Test',
+        message: 'This is a test message!',
+        buttons: [
+            {text: 'Yep', role: 'default'},
+            {text: 'Nah', role: 'destructive'}
+        ]
+    }).then(...);
+    */
+    presentAlert: function(options) {
+        return execAsPromise('presentAlert', [options]);
+    },
+
     /**
      * Set a function map of events to be listened for, for example:
      * 

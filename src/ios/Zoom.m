@@ -13,6 +13,7 @@
 
 @implementation Zoom
 
+UIWindow* activeAlert;
 
 // This method has been deprecated. Now the authservice takes jwtToken at the place of appKey and appSecret.
 - (void)initialize:(CDVInvokedUrlCommand*)command
@@ -715,23 +716,151 @@
     });
 }
 
-- (void)getOverlayState:(CDVInvokedUrlCommand*)command {
+- (void)getOverlayState:(CDVInvokedUrlCommand*)command
+{
     [self sendUnsupportedResponse: command];
 }
 
-- (void)setMinimized:(CDVInvokedUrlCommand*)command {
+- (void)setMinimized:(CDVInvokedUrlCommand*)command
+{
     [self sendUnsupportedResponse: command];
 }
 
-- (void)setSharedEventListener:(CDVInvokedUrlCommand*)command {
+- (void)setSharedEventListener:(CDVInvokedUrlCommand*)command
+{
     [self sendUnsupportedResponse: command];
 }
 
-- (void)sendUnsupportedResponse:(CDVInvokedUrlCommand*)command {
+- (void)sendUnsupportedResponse:(CDVInvokedUrlCommand*)command
+{
     NSMutableDictionary* err = [[NSMutableDictionary alloc] init];
     [err setObject:@"not supported" forKey:@"error"];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:err];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (BOOL)dismissActionSheetIfActive
+{
+    if (activeAlert != nil)
+    {
+        [activeAlert setHidden:true];
+        activeAlert = nil;
+        return true;
+    }
+    return false;
+}
+
+- (UIAlertControllerStyle)parseAlertControllerStyle:(NSString*)forType
+{
+    if ([@"actionsheet" isEqualToString:forType]) {
+        return UIAlertControllerStyleActionSheet;
+    }
+    return UIAlertControllerStyleAlert;
+}
+
+- (UIAlertActionStyle)parseActionStyle:(NSString*)forRole
+{
+    if ([@"destructive" isEqualToString:forRole]) {
+        return UIAlertActionStyleDestructive;
+    }
+    if ([@"cancel" isEqualToString:forRole]) {
+        return UIAlertActionStyleCancel;
+    }
+    return UIAlertActionStyleDefault;
+}
+
+- (void)presentAlert:(CDVInvokedUrlCommand*)command
+{
+    NSString* callbackId = command.callbackId;
+    NSDictionary* options = [command.arguments objectAtIndex:0];
+    
+    if (options == nil)
+    {
+        CDVPluginResult* result = [CDVPluginResult
+                                   resultWithStatus:CDVCommandStatus_ERROR
+                                   messageAsString:@"button options must be provided"];
+        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+        return;
+    }
+    
+    NSString* type = [options objectForKey:@"type"];
+    NSString* title = [options objectForKey:@"title"];
+    NSString* message = [options objectForKey:@"message"];
+    NSArray* buttons = [options objectForKey:@"buttons"];
+    BOOL dismissPrevious = [options objectForKey:@"dismissPrevious"];
+    int count = buttons != nil ? (int)[buttons count] : 0;
+    
+    if (title == nil && message == nil)
+    {
+        CDVPluginResult* result = [CDVPluginResult
+                                   resultWithStatus:CDVCommandStatus_ERROR
+                                   messageAsString:@"title or message must be provided"];
+        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+        return;
+    }
+    
+    if (count <= 0)
+    {
+        CDVPluginResult* result = [CDVPluginResult
+                                   resultWithStatus:CDVCommandStatus_ERROR
+                                   messageAsString:@"buttons must be provided"];
+        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+        return;
+    }
+    
+    if (activeAlert != nil)
+    {
+        if (dismissPrevious)
+        {
+            [self dismissActionSheetIfActive];
+        }
+        else
+        {
+            CDVPluginResult* result = [CDVPluginResult
+                                       resultWithStatus:CDVCommandStatus_ERROR
+                                       messageAsString:@"action sheet already active"];
+            [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+            return;
+        }
+    }
+
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:title
+                               message:message
+                               preferredStyle:[self parseAlertControllerStyle:type]];
+    
+    activeAlert = [[UIWindow alloc] initWithFrame: [UIScreen mainScreen].bounds];
+
+    __weak Zoom* weakZoom = self;
+
+    for (int n = 0; n < count; n++)
+    {
+        NSDictionary* buttonOptions = [buttons objectAtIndex:n];
+        
+        if (buttonOptions == nil)
+        {
+            continue;
+        }
+        
+        NSString* buttonText = [buttonOptions objectForKey:@"text"];
+        NSString* buttonRole = [buttonOptions objectForKey:@"role"];
+
+        [alert addAction:[UIAlertAction actionWithTitle:buttonText
+                                                            style:[self parseActionStyle:buttonRole]
+                                                            handler:^(UIAlertAction * action)
+        {
+            [self dismissActionSheetIfActive];
+            CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)n];
+            [weakZoom.commandDelegate sendPluginResult:result callbackId:callbackId];
+        }]];
+    }
+
+    // Run later to avoid the "took a long time" log message.
+    dispatch_async(dispatch_get_main_queue(), ^{
+        activeAlert.rootViewController = [UIViewController new];
+        activeAlert.windowLevel = UIWindowLevelAlert + 1;
+        [activeAlert makeKeyAndVisible];
+        [activeAlert.rootViewController presentViewController:alert animated:YES completion:nil];
+    });
 }
 
 - (void)onMobileRTCAuthReturn:(MobileRTCAuthError)returnValue
