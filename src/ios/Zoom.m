@@ -63,6 +63,7 @@
 
 //Added new method to set jwtToken in MobileRTCAuthService
 - (void)initializeWithJWT:(CDVInvokedUrlCommand*)command{
+    DDLogDebug(@"initializeWithJWT");
     pluginResult = nil;
     callbackId = command.callbackId;
     // Get variables.
