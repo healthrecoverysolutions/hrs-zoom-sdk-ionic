@@ -380,7 +380,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
             AlertDialog.Builder builder = new AlertDialog.Builder(targetActivity)
                 .setTitle(title)
-                .setMessage(message);
+                .setMessage(message)
+                .setCancelable(false);
 
             for (int i = 0; i < buttonCount; i++) {
                 makeDialogButton(builder, buttons.getJSONObject(i), i, callbackContext);
