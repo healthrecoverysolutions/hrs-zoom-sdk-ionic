@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
@@ -71,6 +72,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     private CallbackContext callbackContext = null;
     private CallbackContext sharedEventContext = null;
+    private AlertDialog activeAlert = null;
     private boolean minimized = false;
     private NewZoomMeetingActivity mZoomMeetingActivity = null;
 
@@ -196,6 +198,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             case "setSharedEventListener":
                 sharedEventContext = callbackContext;
                 break;
+            case "presentAlert":
+                JSONObject options = args.getJSONObject(0);
+                presentAlert(options, callbackContext);
+                break;
             default:
                 return false;
         }
@@ -299,6 +305,97 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 }
             }
         });
+    }
+
+    private void makeDialogButton(
+        AlertDialog.Builder builder,
+        JSONObject buttonConfig,
+        int index,
+        CallbackContext callbackContext
+    ) {
+
+        if (buttonConfig == null) {
+            return;
+        }
+
+        try {
+            String buttonText = buttonConfig.getString("text");
+            String buttonRole = buttonConfig.getString("role");
+
+            DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    callbackContext.success(index);
+                }
+            };
+
+            switch (buttonRole) {
+                case "positive":
+                    builder.setPositiveButton(buttonText, listener);
+                    break;
+                case "negative":
+                case "cancel":
+                case "destructive":
+                    builder.setNegativeButton(buttonText, listener);
+                    break;
+                default:
+                    builder.setNeutralButton(buttonText, listener);
+                    break;
+            }
+        } catch (JSONException e) {
+            Timber.e("failed to add dialog button at " + index + " -> " + e.getMessage());
+        }
+    }
+
+    private void presentAlert(JSONObject options, CallbackContext callbackContext) {
+        try {
+            if (activeAlert != null) {
+                if (options.optBoolean("dismissPrevious")) {
+                    activeAlert.dismiss();
+                } else {
+                    callbackContext.error("alert dialog already active");
+                    return;
+                }
+            }
+
+            JSONArray buttons = options.getJSONArray("buttons");
+            int buttonCount = buttons.length();
+
+            if (buttonCount <= 0) {
+                callbackContext.error("buttons must be provided");
+                return;
+            }
+
+            String title = options.optString("title");
+            String message = options.optString("message");
+
+            if (title.isEmpty() && message.isEmpty()) {
+                callbackContext.error("title or message must be provided");
+                return;
+            }
+
+            Activity targetActivity = mZoomMeetingActivity != null
+                ? mZoomMeetingActivity
+                : cordova.getActivity();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(targetActivity)
+                .setTitle(title)
+                .setMessage(message);
+
+            for (int i = 0; i < buttonCount; i++) {
+                makeDialogButton(builder, buttons.getJSONObject(i), i, callbackContext);
+            }
+
+            targetActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activeAlert = builder.show();
+                }
+            });
+        } catch (JSONException e) {
+            Timber.e("presentAlert failed! -> %s", e.getMessage());
+            callbackContext.error(e.getMessage());
+        }
     }
 
     /**
