@@ -12,7 +12,7 @@
  *
  *  A Cordova Plugin to use Zoom Video Conferencing services on Cordova applications.
  */
-@interface Zoom :  CDVPlugin<MobileRTCAuthDelegate, MobileRTCMeetingServiceDelegate, MobileRTCUserServiceDelegate> {
+@interface Zoom :  CDVPlugin<MobileRTCAuthDelegate, MobileRTCMeetingServiceDelegate, MobileRTCUserServiceDelegate, UIAlertViewDelegate> {
     NSString *callbackId;
     CDVPluginResult* pluginResult;
 }
@@ -72,4 +72,33 @@
  * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
  */
 - (void)setLocale:(CDVInvokedUrlCommand*)command;
+/**
+ * getOverlayState
+ *
+ * Check if the active video window is minimized.
+ * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
+ * @returns Promise<{active: boolean, minimized: boolean}>
+ */
+- (void)getOverlayState:(CDVInvokedUrlCommand*)command;
+/**
+ * setMinimized
+ *
+ * Request that the active video window be minimized/maximized
+ * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
+ */
+- (void)setMinimized:(CDVInvokedUrlCommand*)command;
+/**
+ * setSharedEventListener
+ *
+ * set a long-lived callback to listen for unsolicited plugin events
+ * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
+ */
+- (void)setSharedEventListener:(CDVInvokedUrlCommand*)command;
+/**
+ * presentActionSheet
+ *
+ * Show an action sheet dialog to the user
+ * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
+ */
+- (void)presentActionSheet:(CDVInvokedUrlCommand*)command;
 @end

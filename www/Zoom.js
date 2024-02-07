@@ -60,6 +60,65 @@ var zoom = {
         callNativeFunction('setLocale', [languageTag], success, error);
     },
 
+    getOverlayState: function() {
+        return execAsPromise('getOverlayState', []);
+    },
+    
+    setMinimized: function(minimized) {
+        return execAsPromise('setMinimized', [minimized]);
+    },
+
+    /*
+    // Example
+    cordova.plugins.Zoom.presentAlert({
+        type: 'actionsheet',
+        title: 'Test',
+        message: 'This is a test message!',
+        buttons: [
+            {text: 'Yep', role: 'default'},
+            {text: 'Nah', role: 'destructive'}
+        ]
+    }).then(...);
+    */
+    presentAlert: function(options) {
+        return execAsPromise('presentAlert', [options]);
+    },
+
+    /**
+     * Set a function map of events to be listened for, for example:
+     * 
+     * ```javascript
+     * cordova.plugins.Zoom.setSharedEventListenerMap({
+     *     overlayStateChanged: function (overlayState) { ... }
+     * });
+     * ```
+     * 
+     * Available Events:
+     * - overlayStateChanged - data is getOverlayState() response
+     */
+    setSharedEventListenerMap: function(listenerMap) {
+        if (typeof listenerMap !== 'object' || listenerMap === null) {
+            console.log('ERROR: Listener object must be defined');
+            return;
+        }
+        var listener = function (payload) {
+            if (!payload || (typeof payload.type !== 'string')) {
+                return;
+            }
+            if (typeof listenerMap[payload.type] === 'function') {
+                listenerMap[payload.type](payload.data);
+            } else if (typeof listenerMap['onMessage'] === 'function') {
+                listenerMap['onMessage'](payload);
+            } else {
+                console.log('WARNING: Zoom.setSharedEventListenerMap() unhandled payload type = "' + payload.type + '"');
+            }
+        };
+        var error = function (err) {
+            listener({type: 'onError', data: err});
+        };
+        callNativeFunction('setSharedEventListener', [], listener, error);
+    },
+
     addMeetingLeaveListener: function (callback, scope) {
         var type = typeof callback;
 

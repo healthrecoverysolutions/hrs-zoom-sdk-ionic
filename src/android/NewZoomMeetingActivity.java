@@ -24,6 +24,11 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
         Timber.d("NewZoomMeetingActivity oncreate " + this);
         appResourcesPackage = getPackageName();
 
+        Zoom pluginRef = Zoom.getInstance();
+        if (pluginRef != null) {
+            pluginRef.onZoomMeetingActivityCreate(this);
+        }
+
         /**
          * Handled Zoom Default UI back button "<" to provide minimise behaviour when pressing back. In the current zoom code,
          * this was closing our app. We wanted to minimise the call and continue using our app simultaneously
@@ -53,6 +58,11 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     public void onDestroy() {
         Timber.d("NewZoomMeetingActivity on destroy " + this);
         super.onDestroy();
+
+        Zoom pluginRef = Zoom.getInstance();
+        if (pluginRef != null) {
+            pluginRef.onZoomMeetingActivityDestroy(this);
+        }
     }
 
     @Override
@@ -80,11 +90,33 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
         minimizeZoomCall();
     }
 
-    private void minimizeZoomCall() {
+    public void minimizeZoomCall() {
         startMainActivity();
         ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
         ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
-        zoomUIService.showMiniMeetingWindow();
+        boolean minimized = zoomUIService.showMiniMeetingWindow();
+
+        Zoom pluginRef = Zoom.getInstance();
+        if (pluginRef != null) {
+            pluginRef.onZoomMeetingActivityPictureInPictureModeChange(minimized);
+        }
+    }
+
+    public void maximizeZoomCall() {
+        // https://stackoverflow.com/a/43288507
+        moveTaskToBack(false);
+        Intent intent = new Intent(NewZoomMeetingActivity.this, NewZoomMeetingActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+
+        ZoomSDK sdk = ZoomSDK.getInstance();
+        ZoomUIService zoomUIService = sdk.getZoomUIService();
+        zoomUIService.hideMiniMeetingWindow();
+
+        Zoom pluginRef = Zoom.getInstance();
+        if (pluginRef != null) {
+            pluginRef.onZoomMeetingActivityPictureInPictureModeChange(false);
+        }
     }
 
     private void endMeetingAndMoveToActivity() {

@@ -13,10 +13,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-
-import com.cordova.plugin.zoom.NewZoomMeetingActivity;
 
 import us.zoom.sdk.ChatMessageDeleteType;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
@@ -67,10 +66,31 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     /* Debug variables */
     private static final boolean DEBUG = true;
     public static final Object LOCK = new Object();
+    private static Zoom mInstance = null;
 
     private String WEB_DOMAIN = "https://zoom.us";
 
-    private CallbackContext callbackContext;
+    private CallbackContext callbackContext = null;
+    private CallbackContext sharedEventContext = null;
+    private AlertDialog activeAlert = null;
+    private boolean minimized = false;
+    private NewZoomMeetingActivity mZoomMeetingActivity = null;
+
+    public static Zoom getInstance() {
+        return mInstance;
+    }
+
+    @Override
+    protected void pluginInitialize() {
+        super.pluginInitialize();
+        mInstance = this;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mInstance = null;
+    }
 
     /**
      * execute
@@ -168,10 +188,54 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 String languageTag = args.getString(0);
                 this.setLocale(languageTag, callbackContext);
                 break;
+            case "getOverlayState":
+                callbackContext.success(getCurrentOverlayState());
+                break;
+            case "setMinimized":
+                boolean requestMinimized = args.getBoolean(0);
+                setMinimized(requestMinimized, callbackContext);
+                break;
+            case "setSharedEventListener":
+                sharedEventContext = callbackContext;
+                break;
+            case "presentAlert":
+                JSONObject options = args.getJSONObject(0);
+                presentAlert(options, callbackContext);
+                break;
             default:
                 return false;
         }
         return true;
+    }
+
+    private JSONObject getCurrentOverlayState() {
+        boolean active = mZoomMeetingActivity != null;
+        JSONObject result = new JSONObject();
+        try {
+            result
+                .put("active", active)
+                .put("minimized", minimized);
+        } catch (JSONException e) {
+            Timber.e("getCurrentOverlayState failed! -> %s", e.getMessage());
+        }
+        return result;
+    }
+
+    private void emitJsEvent(String type, JSONObject data) {
+        Timber.d("emitJsEvent -> %s", type);
+        try {
+            if (sharedEventContext == null) {
+                return;
+            }
+            JSONObject payload = new JSONObject()
+                .put("type", type)
+                .put("data", data);
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, payload);
+            pluginResult.setKeepCallback(true);
+            sharedEventContext.sendPluginResult(pluginResult);
+        } catch (JSONException e) {
+            Timber.e("emitJsEvent failed! -> %s", e.getMessage());
+        }
     }
 
     @Override
@@ -185,6 +249,153 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         MeetingService meetingService = zoomSDK.getMeetingService();
         if(meetingService != null) {
             meetingService.addListener(this);
+        }
+    }
+
+    private void notifyOverlayStateChange() {
+        emitJsEvent("overlayStateChanged", getCurrentOverlayState());
+    }
+
+    public void onZoomMeetingActivityPictureInPictureModeChange(boolean pipActive) {
+        minimized = pipActive;
+        notifyOverlayStateChange();
+    }
+
+    public void onZoomMeetingActivityCreate(NewZoomMeetingActivity activity) {
+        mZoomMeetingActivity = activity;
+        minimized = false;
+        notifyOverlayStateChange();
+    }
+
+    public void onZoomMeetingActivityDestroy(NewZoomMeetingActivity activity) {
+        if (mZoomMeetingActivity == activity) {
+            mZoomMeetingActivity = null;
+            minimized = false;
+            notifyOverlayStateChange();
+        }
+    }
+
+    private void setMinimized(boolean requestMinimized, CallbackContext callbackContext) {
+        cordova.getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                try {
+                    if (mZoomMeetingActivity == null) {
+                        callbackContext.error("overlay not active");
+                        return;
+                    }
+                    if (minimized && requestMinimized) {
+                        callbackContext.error("already minimized");
+                        return;
+                    }
+                    if (!minimized && !requestMinimized) {
+                        callbackContext.error("already maximized");
+                        return;
+                    }
+                    if (requestMinimized) {
+                        mZoomMeetingActivity.minimizeZoomCall();
+                        callbackContext.success();
+                    } else {
+                        mZoomMeetingActivity.maximizeZoomCall();
+                        callbackContext.success();
+                    }
+                } catch (Exception ex) {
+                    String errorMessage = "minimize Error: " + ex.getMessage();
+                    Timber.e(errorMessage);
+                    callbackContext.error(errorMessage);
+                }
+            }
+        });
+    }
+
+    private void makeDialogButton(
+        AlertDialog.Builder builder,
+        JSONObject buttonConfig,
+        int index,
+        CallbackContext callbackContext
+    ) {
+
+        if (buttonConfig == null) {
+            return;
+        }
+
+        try {
+            String buttonText = buttonConfig.getString("text");
+            String buttonRole = buttonConfig.getString("role");
+
+            DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    callbackContext.success(index);
+                }
+            };
+
+            switch (buttonRole) {
+                case "positive":
+                    builder.setPositiveButton(buttonText, listener);
+                    break;
+                case "negative":
+                case "cancel":
+                case "destructive":
+                    builder.setNegativeButton(buttonText, listener);
+                    break;
+                default:
+                    builder.setNeutralButton(buttonText, listener);
+                    break;
+            }
+        } catch (JSONException e) {
+            Timber.e("failed to add dialog button at " + index + " -> " + e.getMessage());
+        }
+    }
+
+    private void presentAlert(JSONObject options, CallbackContext callbackContext) {
+        try {
+            if (activeAlert != null) {
+                if (options.optBoolean("dismissPrevious")) {
+                    activeAlert.dismiss();
+                } else {
+                    callbackContext.error("alert dialog already active");
+                    return;
+                }
+            }
+
+            JSONArray buttons = options.getJSONArray("buttons");
+            int buttonCount = buttons.length();
+
+            if (buttonCount <= 0) {
+                callbackContext.error("buttons must be provided");
+                return;
+            }
+
+            String title = options.optString("title");
+            String message = options.optString("message");
+
+            if (title.isEmpty() && message.isEmpty()) {
+                callbackContext.error("title or message must be provided");
+                return;
+            }
+
+            Activity targetActivity = mZoomMeetingActivity != null
+                ? mZoomMeetingActivity
+                : cordova.getActivity();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(targetActivity)
+                .setTitle(title)
+                .setMessage(message)
+                .setCancelable(false);
+
+            for (int i = 0; i < buttonCount; i++) {
+                makeDialogButton(builder, buttons.getJSONObject(i), i, callbackContext);
+            }
+
+            targetActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activeAlert = builder.show();
+                }
+            });
+        } catch (JSONException e) {
+            Timber.e("presentAlert failed! -> %s", e.getMessage());
+            callbackContext.error(e.getMessage());
         }
     }
 
@@ -238,7 +449,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     /**
      * initialize
-     * @deprecated 
+     * @deprecated
      * Initialize Zoom SDK. <Dev Note : this method should not be used now and is deprecated. Use initializeWithJWT instead for initialization
      *
      * @param appKey        Zoom SDK app key.
