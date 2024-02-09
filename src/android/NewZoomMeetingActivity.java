@@ -16,7 +16,9 @@ import timber.log.Timber;
 
 public class NewZoomMeetingActivity extends NewMeetingActivity {
 
-    private String appResourcesPackage = getPackageName();
+    // NOTE: should not be initialized until onCreate(), otherwise
+    // this will crash non-tablet builds
+    private String appResourcesPackage = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
