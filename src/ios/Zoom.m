@@ -739,6 +739,18 @@ UIWindow* activeAlert;
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)dismissAlert:(CDVInvokedUrlCommand*)command
+{
+    NSString* callbackId = command.callbackId;
+    BOOL dismissed = [self dismissActionSheetIfActive];
+    NSMutableDictionary* resultData = [[NSMutableDictionary alloc] init];
+    [resultData setObject:[NSNumber numberWithBool:dismissed] forKey:@"dismissed"];
+    CDVPluginResult* result = [CDVPluginResult
+                                resultWithStatus:CDVCommandStatus_OK
+                                messageAsDictionary:resultData];
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+}
+
 - (BOOL)dismissActionSheetIfActive
 {
     if (activeAlert != nil)

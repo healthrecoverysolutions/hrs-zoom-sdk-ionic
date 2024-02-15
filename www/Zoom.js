@@ -74,14 +74,30 @@ var zoom = {
         type: 'actionsheet',
         title: 'Test',
         message: 'This is a test message!',
+        dismissPrevious: true, // dismiss the current active alert if one exists
         buttons: [
             {text: 'Yep', role: 'default'},
             {text: 'Nah', role: 'destructive'}
         ]
-    }).then(...);
+    }).then((buttonIndex) => {
+        // index is from the `buttons` array passed in
+        console.log(`button index ${buttonIndex} was pressed`);
+    });
     */
     presentAlert: function(options) {
         return execAsPromise('presentAlert', [options]);
+    },
+
+    /*
+    // Example
+    cordova.plugins.Zoom.dismissAlert().then((status) => {
+        // will be true if the alert is active and was dismissed,
+        // otherwise will be false if no alert is active.
+        console.log(`dismissed = ${status.dismissed}`);
+    });
+    */
+    dismissAlert: function() {
+        return execAsPromise('dismissAlert', []);
     },
 
     /**

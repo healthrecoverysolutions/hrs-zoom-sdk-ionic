@@ -72,6 +72,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     private CallbackContext callbackContext = null;
     private CallbackContext sharedEventContext = null;
+    private CallbackContext activeAlertCallback = null;
     private AlertDialog activeAlert = null;
     private boolean minimized = false;
     private NewZoomMeetingActivity mZoomMeetingActivity = null;
@@ -201,6 +202,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             case "presentAlert":
                 JSONObject options = args.getJSONObject(0);
                 presentAlert(options, callbackContext);
+                break;
+            case "dismissAlert":
+                dismissAlert(callbackContext);
                 break;
             default:
                 return false;
@@ -347,11 +351,44 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
     }
 
+    private Activity getTopActivity() {
+        return mZoomMeetingActivity != null && !minimized
+            ? mZoomMeetingActivity
+            : cordova.getActivity();
+    }
+
+    private void dismissAlert(CallbackContext callbackContext) {
+        getTopActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    boolean dismissed = activeAlert != null;
+                    if (dismissed) {
+                        activeAlert.dismiss();
+                        activeAlert = null;
+                    }
+                    if (callbackContext == null) {
+                        return;
+                    }
+                    JSONObject resultData = new JSONObject().put("dismissed", dismissed);
+                    PluginResult result = new PluginResult(PluginResult.Status.OK, resultData);
+                    callbackContext.sendPluginResult(result);
+                } catch (Exception e) {
+                    Timber.e("presentAlert failed! -> %s", e.getMessage());
+                    if (callbackContext != null) {
+                        callbackContext.error(e.getMessage());
+                    }
+                }
+            }
+        });
+    }
+
     private void presentAlert(JSONObject options, CallbackContext callbackContext) {
         try {
             if (activeAlert != null) {
                 if (options.optBoolean("dismissPrevious")) {
-                    activeAlert.dismiss();
+                    dismissAlert(activeAlertCallback);
+                    activeAlertCallback = null;
                 } else {
                     callbackContext.error("alert dialog already active");
                     return;
@@ -374,10 +411,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 return;
             }
 
-            Activity targetActivity = mZoomMeetingActivity != null
-                ? mZoomMeetingActivity
-                : cordova.getActivity();
-
+            Activity targetActivity = getTopActivity();
             AlertDialog.Builder builder = new AlertDialog.Builder(targetActivity)
                 .setTitle(title)
                 .setMessage(message)
@@ -390,6 +424,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             targetActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    activeAlertCallback = callbackContext;
                     activeAlert = builder.show();
                 }
             });
