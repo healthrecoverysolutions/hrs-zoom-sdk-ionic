@@ -742,7 +742,7 @@ UIWindow* activeAlert;
 - (void)dismissAlert:(CDVInvokedUrlCommand*)command
 {
     NSString* callbackId = command.callbackId;
-    BOOL dismissed = [self dismissActionSheetIfActive];
+    BOOL dismissed = [self dismissAlertIfActive];
     NSMutableDictionary* resultData = [[NSMutableDictionary alloc] init];
     [resultData setObject:[NSNumber numberWithBool:dismissed] forKey:@"dismissed"];
     CDVPluginResult* result = [CDVPluginResult
@@ -751,7 +751,7 @@ UIWindow* activeAlert;
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
-- (BOOL)dismissActionSheetIfActive
+- (BOOL)dismissAlertIfActive
 {
     if (activeAlert != nil)
     {
@@ -824,7 +824,7 @@ UIWindow* activeAlert;
     {
         if (dismissPrevious)
         {
-            [self dismissActionSheetIfActive];
+            [self dismissAlertIfActive];
         }
         else
         {
@@ -860,7 +860,7 @@ UIWindow* activeAlert;
                                                             style:[self parseActionStyle:buttonRole]
                                                             handler:^(UIAlertAction * action)
         {
-            [self dismissActionSheetIfActive];
+            [self dismissAlertIfActive];
             CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)n];
             [weakZoom.commandDelegate sendPluginResult:result callbackId:callbackId];
         }]];
