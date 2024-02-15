@@ -204,7 +204,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 presentAlert(options, callbackContext);
                 break;
             case "dismissAlert":
-                dismissAlert(callbackContext);
+                dismissAndResetCachedAlert(callbackContext);
                 break;
             default:
                 return false;
@@ -357,15 +357,20 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             : cordova.getActivity();
     }
 
-    private void dismissAlert(CallbackContext callbackContext) {
+    private void dismissAndResetCachedAlert(CallbackContext callbackContext) {
+        dismissAlert(activeAlert, callbackContext);
+        activeAlert = null;
+        activeAlertCallback = null;
+    }
+
+    private void dismissAlert(AlertDialog alert, CallbackContext callbackContext) {
         getTopActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    boolean dismissed = activeAlert != null;
+                    boolean dismissed = alert != null;
                     if (dismissed) {
-                        activeAlert.dismiss();
-                        activeAlert = null;
+                        alert.dismiss();
                     }
                     if (callbackContext == null) {
                         return;
@@ -387,8 +392,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         try {
             if (activeAlert != null) {
                 if (options.optBoolean("dismissPrevious")) {
-                    dismissAlert(activeAlertCallback);
-                    activeAlertCallback = null;
+                    dismissAndResetCachedAlert(activeAlertCallback);
                 } else {
                     callbackContext.error("alert dialog already active");
                     return;
