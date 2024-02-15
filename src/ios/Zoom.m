@@ -14,6 +14,7 @@
 @implementation Zoom
 
 UIWindow* activeAlert;
+NSString* activeAlertCallbackId;
 
 // This method has been deprecated. Now the authservice takes jwtToken at the place of appKey and appSecret.
 - (void)initialize:(CDVInvokedUrlCommand*)command
@@ -741,25 +742,34 @@ UIWindow* activeAlert;
 
 - (void)dismissAlert:(CDVInvokedUrlCommand*)command
 {
-    NSString* callbackId = command.callbackId;
-    BOOL dismissed = [self dismissAlertIfActive];
-    NSMutableDictionary* resultData = [[NSMutableDictionary alloc] init];
-    [resultData setObject:[NSNumber numberWithBool:dismissed] forKey:@"dismissed"];
-    CDVPluginResult* result = [CDVPluginResult
-                                resultWithStatus:CDVCommandStatus_OK
-                                messageAsDictionary:resultData];
-    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+    [self dismissAndResetCachedAlert:command.callbackId];
 }
 
-- (BOOL)dismissAlertIfActive
+- (void)dismissAndResetCachedAlert:(NSString*)callbackId
 {
-    if (activeAlert != nil)
-    {
-        [activeAlert setHidden:true];
-        activeAlert = nil;
-        return true;
-    }
-    return false;
+    [self dismissAlertIfActive:activeAlert callbackId:callbackId];
+    activeAlert = nil;
+    activeAlertCallbackId = nil;
+}
+
+- (void)dismissAlertIfActive:(UIWindow*)alert callbackId:(NSString*)callbackId
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        BOOL dismissed = alert != nil;
+        if (dismissed)
+        {
+            [alert setHidden:true];
+        }
+        if (callbackId == nil) {
+            return;
+        }
+        NSMutableDictionary* resultData = [[NSMutableDictionary alloc] init];
+        [resultData setObject:[NSNumber numberWithBool:dismissed] forKey:@"dismissed"];
+        CDVPluginResult* result = [CDVPluginResult
+                                   resultWithStatus:CDVCommandStatus_OK
+                                   messageAsDictionary:resultData];
+        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+    });
 }
 
 - (UIAlertControllerStyle)parseAlertControllerStyle:(NSString*)forType
@@ -824,7 +834,7 @@ UIWindow* activeAlert;
     {
         if (dismissPrevious)
         {
-            [self dismissAlertIfActive];
+            [self dismissAndResetCachedAlert:activeAlertCallbackId];
         }
         else
         {
@@ -841,6 +851,7 @@ UIWindow* activeAlert;
                                preferredStyle:[self parseAlertControllerStyle:type]];
     
     activeAlert = [[UIWindow alloc] initWithFrame: [UIScreen mainScreen].bounds];
+    activeAlertCallbackId = callbackId;
 
     __weak Zoom* weakZoom = self;
 
@@ -860,7 +871,7 @@ UIWindow* activeAlert;
                                                             style:[self parseActionStyle:buttonRole]
                                                             handler:^(UIAlertAction * action)
         {
-            [self dismissAlertIfActive];
+            [self dismissAndResetCachedAlert:nil];
             CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)n];
             [weakZoom.commandDelegate sendPluginResult:result callbackId:callbackId];
         }]];
