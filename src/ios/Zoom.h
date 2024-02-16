@@ -95,10 +95,17 @@
  */
 - (void)setSharedEventListener:(CDVInvokedUrlCommand*)command;
 /**
- * presentActionSheet
+ * presentAlert
  *
- * Show an action sheet dialog to the user
+ * Show an alert dialog to the user
  * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
  */
-- (void)presentActionSheet:(CDVInvokedUrlCommand*)command;
+- (void)presentAlert:(CDVInvokedUrlCommand*)command;
+/**
+ * dismissAlert
+ *
+ * Dismiss the active alert (if one exists)
+ * @param CDVInvokedUrlCommand bridging method to get arguments, callbackId, className and methodName.
+ */
+- (void)dismissAlert:(CDVInvokedUrlCommand*)command;
 @end
