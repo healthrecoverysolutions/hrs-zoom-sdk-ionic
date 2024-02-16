@@ -379,7 +379,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     PluginResult result = new PluginResult(PluginResult.Status.OK, resultData);
                     callbackContext.sendPluginResult(result);
                 } catch (Exception e) {
-                    Timber.e("presentAlert failed! -> %s", e.getMessage());
+                    Timber.e("dismissAlert failed! -> %s", e.getMessage());
                     if (callbackContext != null) {
                         callbackContext.error(e.getMessage());
                     }
