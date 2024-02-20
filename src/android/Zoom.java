@@ -261,17 +261,22 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     }
 
     public void onZoomMeetingActivityPictureInPictureModeChange(boolean pipActive) {
-        minimized = pipActive;
-        notifyOverlayStateChange();
+        Timber.d("onZoomMeetingActivityPictureInPictureModeChange() pipActive = " + pipActive);
+        if (minimized != pipActive) { // only send state change when it actually changes
+            minimized = pipActive;
+            notifyOverlayStateChange();
+        }
     }
 
     public void onZoomMeetingActivityCreate(NewZoomMeetingActivity activity) {
+        Timber.d("onZoomMeetingActivityCreate()");
         mZoomMeetingActivity = activity;
         minimized = false;
         notifyOverlayStateChange();
     }
 
     public void onZoomMeetingActivityDestroy(NewZoomMeetingActivity activity) {
+        Timber.d("onZoomMeetingActivityDestroy()");
         if (mZoomMeetingActivity == activity) {
             mZoomMeetingActivity = null;
             minimized = false;
@@ -282,17 +287,24 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private void setMinimized(boolean requestMinimized, CallbackContext callbackContext) {
         cordova.getActivity().runOnUiThread(new Runnable() {
             public void run() {
+                Timber.d("setMinimized() minimized = " + minimized + ", requestMinimized = " + requestMinimized);
                 try {
                     if (mZoomMeetingActivity == null) {
-                        callbackContext.error("overlay not active");
+                        String errorMessage = "overlay not active";
+                        Timber.w(errorMessage);
+                        callbackContext.error(errorMessage);
                         return;
                     }
                     if (minimized && requestMinimized) {
-                        callbackContext.error("already minimized");
+                        String errorMessage = "already minimized";
+                        Timber.w(errorMessage);
+                        callbackContext.error(errorMessage);
                         return;
                     }
                     if (!minimized && !requestMinimized) {
-                        callbackContext.error("already maximized");
+                        String errorMessage = "already maximized";
+                        Timber.w(errorMessage);
+                        callbackContext.error(errorMessage);
                         return;
                     }
                     if (requestMinimized) {

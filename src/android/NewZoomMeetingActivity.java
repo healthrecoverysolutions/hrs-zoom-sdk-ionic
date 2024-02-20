@@ -58,30 +58,28 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     public void onDestroy() {
         Timber.d("NewZoomMeetingActivity on destroy " + this);
         super.onDestroy();
-
-        Zoom pluginRef = Zoom.getInstance();
-        if (pluginRef != null) {
-            pluginRef.onZoomMeetingActivityDestroy(this);
-        }
+        notifyActivityDestroy();
     }
 
     @Override
     protected void onPause() {
         Timber.d("Zoom on pause " + this);
         super.onPause();
-
+        notifyPipChange(true);
     }
 
     @Override
     protected void onResume() {
         Timber.d("Zoom on resume " + this);
         super.onResume();
+        notifyPipChange(false);
     }
 
     @Override
     public void finish() {
         Timber.d("Zoom on finish " + this);
         super.finish();
+        notifyActivityDestroy();
     }
 
     @Override
@@ -90,19 +88,32 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
         minimizeZoomCall();
     }
 
+    private void notifyPipChange(boolean pipActive) {
+        Timber.d("notifyPipChange() pipActive = " + pipActive);
+        Zoom pluginRef = Zoom.getInstance();
+        if (pluginRef != null) {
+            pluginRef.onZoomMeetingActivityPictureInPictureModeChange(pipActive);
+        }
+    }
+
+    private void notifyActivityDestroy() {
+        Zoom pluginRef = Zoom.getInstance();
+        if (pluginRef != null) {
+            pluginRef.onZoomMeetingActivityDestroy(this);
+        }
+    }
+
     public void minimizeZoomCall() {
+        Timber.d("minimizeZoomCall()");
         startMainActivity();
         ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
         ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
         boolean minimized = zoomUIService.showMiniMeetingWindow();
-
-        Zoom pluginRef = Zoom.getInstance();
-        if (pluginRef != null) {
-            pluginRef.onZoomMeetingActivityPictureInPictureModeChange(minimized);
-        }
+        notifyPipChange(minimized);
     }
 
     public void maximizeZoomCall() {
+        Timber.d("maximizeZoomCall()");
         // https://stackoverflow.com/a/43288507
         moveTaskToBack(false);
         Intent intent = new Intent(NewZoomMeetingActivity.this, NewZoomMeetingActivity.class);
@@ -113,10 +124,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
         ZoomUIService zoomUIService = sdk.getZoomUIService();
         zoomUIService.hideMiniMeetingWindow();
 
-        Zoom pluginRef = Zoom.getInstance();
-        if (pluginRef != null) {
-            pluginRef.onZoomMeetingActivityPictureInPictureModeChange(false);
-        }
+        notifyPipChange(false);
     }
 
     private void endMeetingAndMoveToActivity() {
@@ -140,7 +148,6 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
             Timber.e("unable to start " + ignored);
         }
     }
-
 }
 
 
