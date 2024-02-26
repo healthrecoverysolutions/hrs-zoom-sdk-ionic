@@ -11,7 +11,6 @@ import org.json.JSONObject;
 import java.util.concurrent.Callable;
 
 import java.lang.StringBuilder;
-import android.util.Log;
 
 import us.zoom.sdk.ZoomApiError;
 import us.zoom.sdk.ZoomAuthenticationError;
@@ -20,6 +19,8 @@ import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomSDKInitParams;
 import us.zoom.sdk.ZoomSDKAuthenticationListener;
 import us.zoom.sdk.ZoomSDKInitializeListener;
+
+import timber.log.Timber;
 
 /**
  * AuthThread
@@ -33,8 +34,7 @@ import us.zoom.sdk.ZoomSDKInitializeListener;
  */
 public class AuthThread implements Callable<Boolean>, ZoomSDKInitializeListener {
     /* Debug variables */
-    private static final String TAG = "^^^^^^^^^^AuthThread^^^^^^^^^^^";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     public static Object LOCK;
 
     /* Cordova variables */
@@ -106,7 +106,7 @@ public class AuthThread implements Callable<Boolean>, ZoomSDKInitializeListener 
      * @param webDomain Zoom SDK Web Domain. Default is "zoom.us".
      */
     public void setInitParameters(String appKey, String appSecret, String webDomain) {
-        if (DEBUG) { Log.v(TAG, "Init parameter set"); }
+        if (DEBUG) { Timber.d("Init parameter set"); }
 //        this.initParams.appKey = appKey; // With SDK 5.15.7, these params are no longer valid. We are not using this method anywhere in the code.
 //        this.initParams.appSecret = appSecret;
         this.initParams.domain = webDomain;
@@ -121,7 +121,7 @@ public class AuthThread implements Callable<Boolean>, ZoomSDKInitializeListener 
      */
     public Boolean call() {
         if (DEBUG) {
-            Log.v(TAG, "[In Auth Thread run()]");
+            Timber.d("[In Auth Thread run()]");
         }
         // Get Zoom SDK instance.
         this.mZoomSDK = ZoomSDK.getInstance();
@@ -154,8 +154,8 @@ public class AuthThread implements Callable<Boolean>, ZoomSDKInitializeListener 
     public void onZoomSDKInitializeResult(int errorCode, int internalErrorCode) {
         synchronized (LOCK) {
             if (DEBUG) {
-                Log.v(TAG, "_+_+_+_+_+_+_+_+_+_onZoomSDKInitializeResult in AuthThread.java_+_+_+_+_+");
-                Log.v(TAG,  "Initialize Zoom SDK Result. errorCode="
+                Timber.d("_+_+_+_+_+_+_+_+_+_onZoomSDKInitializeResult in AuthThread.java_+_+_+_+_+");
+                Timber.d("Initialize Zoom SDK Result. errorCode="
                         + errorCode + ", internalErrorCode=" + internalErrorCode);
             }
 
@@ -166,11 +166,11 @@ public class AuthThread implements Callable<Boolean>, ZoomSDKInitializeListener 
                     // Try to auto logged in.
                     int autoRes = this.mZoomSDK.tryAutoLoginZoom();
                     if (DEBUG) {
-                        Log.v(TAG, "+++++++Auto login Zoom++++++: " + getApiErrorMessage(autoRes));
+                        Timber.d("+++++++Auto login Zoom++++++: " + getApiErrorMessage(autoRes));
                         if (autoRes == ZoomApiError.ZOOM_API_ERROR_SUCCESS) {
-                            Log.v(TAG, "Auto logged in success.");
+                            Timber.d("Auto logged in success.");
                         } else {
-                            Log.v(TAG, "Auto logged in error: " + getApiErrorMessage(autoRes));
+                            Timber.d("Auto logged in error: " + getApiErrorMessage(autoRes));
                         }
                     }
                     pluginResult =  new PluginResult(PluginResult.Status.OK, getInitErrorMessage(errorCode));
@@ -201,7 +201,7 @@ public class AuthThread implements Callable<Boolean>, ZoomSDKInitializeListener 
      */
     @Override
     public void onZoomAuthIdentityExpired() {
-        Log.v(TAG, "onZoomAuthIdentityExpired is triggered");
+        Timber.d("onZoomAuthIdentityExpired is triggered");
     }
 
     /**
@@ -246,7 +246,7 @@ public class AuthThread implements Callable<Boolean>, ZoomSDKInitializeListener 
                 break;
         }
         if (DEBUG) {
-            Log.v(TAG, "******getInitErrorMessage*********" + message.toString());
+            Timber.d("******getInitErrorMessage*********" + message.toString());
         }
         return message.toString();
     }
@@ -283,7 +283,7 @@ public class AuthThread implements Callable<Boolean>, ZoomSDKInitializeListener 
         }
 
         if (DEBUG) {
-            Log.v(TAG, "******getAuthErrorMessage*********" + message.toString());
+            Timber.d("******getAuthErrorMessage*********" + message.toString());
         }
 
         return message.toString();

@@ -5,9 +5,11 @@
  *  @version v5.15.7
  */
 #import "Zoom.h"
+#import <CocoaLumberjack/CocoaLumberjack.h>
 
+#define ddLogLevel DDLogLevelAll
 #define kSDKDomain  @"https://zoom.us"
-#define DEBUG   NO
+#define DEBUG   YES
 
 @implementation Zoom
 
@@ -61,6 +63,7 @@
 
 //Added new method to set jwtToken in MobileRTCAuthService
 - (void)initializeWithJWT:(CDVInvokedUrlCommand*)command{
+    DDLogDebug(@"initializeWithJWT");
     pluginResult = nil;
     callbackId = command.callbackId;
     // Get variables.
@@ -164,16 +167,16 @@
     NSDictionary* options = [command.arguments objectAtIndex:3];
 
     if (DEBUG) {
-        NSLog(@"========meeting number======= %@", meetingNo);
-        NSLog(@"========display name======= %@", displayName);
-        NSLog(@"========meeting options===== %@", options);
+        DDLogDebug(@"========meeting number======= %@", meetingNo);
+        DDLogDebug(@"========display name======= %@", displayName);
+        DDLogDebug(@"========meeting options===== %@", options);
     }
     // Meeting number regular expression.
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\d{8,11}" options:0 error:nil];
 
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         if (meetingNo == nil || ![meetingNo isKindOfClass:[NSString class]] || [meetingNo length] == 0 || [regex numberOfMatchesInString:meetingNo options:0 range:NSMakeRange(0, [meetingNo length])] == 0|| displayName == nil || ![displayName isKindOfClass:[NSString class]] || [displayName length] == 0) {
-            NSLog(@"Please enter valid meeting number and display name");
+            DDLogDebug(@"Please enter valid meeting number and display name");
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Please enter valid meeting number and display name"];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
             return;
@@ -328,7 +331,7 @@
     {
         //Return type of muteMyVideo has been replaced with MobileRTCSDKError from MobileRTCVideoError in latest SDK 5.14
         MobileRTCSDKError unmuteResult = [ms muteMyVideo:NO];
-        NSLog(@"onMeetingReady unmuteResult: %d", unmuteResult);
+        DDLogDebug(@"onMeetingReady unmuteResult: %d", unmuteResult);
     }
 }
 
@@ -473,7 +476,7 @@
             if ([[[MobileRTC sharedRTC] getAuthService] isLoggedIn])
             {
                 // Is user is logged in.
-                NSLog(@"start meeting with logged in.");
+                DDLogDebug(@"start meeting with logged in.");
                 MobileRTCMeetingStartParam4LoginlUser * user = [[MobileRTCMeetingStartParam4LoginlUser alloc]init];
                 user.isAppShare = NO;
                 param = user;
@@ -482,9 +485,9 @@
             else
             {
                 // Is user is not logged in.
-                NSLog(@"Start meeting without logged in.");
-                NSLog(@"zoom token: %@",zoomToken);
-                NSLog(@"zak: %@",zoomAccessToken);
+                DDLogDebug(@"Start meeting without logged in.");
+                DDLogDebug(@"zoom token: %@",zoomToken);
+                DDLogDebug(@"zak: %@",zoomAccessToken);
                 if (zoomToken == nil || ![zoomToken isKindOfClass:[NSString class]] || [zoomToken length] == 0 ||
                     zoomAccessToken == nil || ![zoomAccessToken isKindOfClass:[NSString class]] || [zoomAccessToken length] == 0 ||
                     userId == nil || ![userId isKindOfClass:[NSString class]] || [userId length] == 0) {
@@ -513,7 +516,7 @@
             // Start meeting.
             MobileRTCMeetError response = [ms startMeetingWithStartParam:param];
             if (DEBUG) {
-                NSLog(@"start a meeting res:%d", response);
+                DDLogDebug(@"start a meeting res:%d", response);
             }
         }
     });
@@ -521,6 +524,7 @@
 
 - (void)startInstantMeeting:(CDVInvokedUrlCommand*)command
 {
+    DDLogDebug(@"startInstantMeeting");
     pluginResult = nil;
     callbackId = command.callbackId;
     NSDictionary* options = [command.arguments objectAtIndex:0];
@@ -658,7 +662,7 @@
             // Start instant meeting.
 //            MobileRTCMeetError response = [ms startMeetingWithDictionary:paramDict];
 //            if (DEBUG) {
-//                NSLog(@"start an instant meeting res:%d", response);
+//                DDLogDebug(@"start an instant meeting res:%d", response);
 //            }
         }
     });
@@ -700,8 +704,8 @@
 
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         if (DEBUG) {
-            NSLog(@"set language ===== %@", language);
-            NSLog(@"Supported languages: %@", [[MobileRTC sharedRTC] supportedLanguages]);
+            DDLogDebug(@"set language ===== %@", language);
+            DDLogDebug(@"Supported languages: %@", [[MobileRTC sharedRTC] supportedLanguages]);
         }
         // Set language
         [[MobileRTC sharedRTC] setLanguage:language];
@@ -714,7 +718,7 @@
 - (void)onMobileRTCAuthReturn:(MobileRTCAuthError)returnValue
 {
     if (DEBUG) {
-        NSLog(@"onMobileRTCAuthReturn: %@", [self getAuthErrorMessage:returnValue]);
+        DDLogDebug(@"onMobileRTCAuthReturn: %@", [self getAuthErrorMessage:returnValue]);
     }
 
     if (returnValue != MobileRTCAuthError_Success)
@@ -724,7 +728,7 @@
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:message];
     } else {
         NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Initialize successfully, return value: %@", @""), [self getAuthErrorMessage:returnValue]];
-        NSLog(@"%@", message);
+        DDLogDebug(@"%@", message);
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:message];
     }
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
@@ -735,7 +739,7 @@
 {
     // 0 is success, otherwise is failed.
     if (DEBUG) {
-        NSLog(@"onMobileRTCLoginReturn result=%zd", returnValue);
+        DDLogDebug(@"onMobileRTCLoginReturn result=%zd", returnValue);
     }
 
     NSMutableDictionary *res = [[NSMutableDictionary alloc] init];
@@ -758,7 +762,7 @@
 {
     // 0 is success, otherwise is failed.
     if (DEBUG) {
-       NSLog(@"onMobileRTCLogoutReturn result=%zd", returnValue);
+       DDLogDebug(@"onMobileRTCLogoutReturn result=%zd", returnValue);
     }
 
     NSMutableDictionary *res = [[NSMutableDictionary alloc] init];
@@ -780,7 +784,7 @@
 - (void)onMeetingError:(MobileRTCMeetError)error message:(NSString*)message
 {
     if (DEBUG) {
-     NSLog(@"onMeetingError:%zd, message:%@", error, message);
+     DDLogDebug(@"onMeetingError:%zd, message:%@", error, message);
     }
     if (error != MobileRTCMeetError_Success) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[self getMeetErrorMessage:error]];
@@ -927,12 +931,13 @@
             message = @"Unknown error.";
             break;
     }
+    DDLogDebug(@"getMeetErrorMessage for code %d = '%@'", errorCode, message);
     return message;
 }
 
 - (void)onMeetingEndedReason:(MobileRTCMeetingEndReason)reason
 {
-    NSLog(@"onMeetingEndedReason reason: %d", reason);
+    DDLogDebug(@"onMeetingEndedReason reason: %d", reason);
     if (reason == 0) {
         [self.commandDelegate evalJs:@"cordova.plugins.Zoom.fireMeetingLeftEvent()"];
     }
