@@ -290,6 +290,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 break;
             case ACTION_SET_SHARED_EVENT_LISTENER:
                 setSharedEventListener(callbackContext);
+                break;
             default:
                 return false;
         }
