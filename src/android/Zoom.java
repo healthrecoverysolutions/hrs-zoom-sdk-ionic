@@ -130,9 +130,25 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String EVENT_TYPE_FREE_MEETING_UPGRADE_TO_GIFT_FREE_TRIAL_START = "freeMeetingUpgradeToGiftFreeTrialStart";
     private static final String EVENT_TYPE_FREE_MEETING_UPGRADE_TO_GIFT_FREE_TRIAL_STOP = "freeMeetingUpgradeToGiftFreeTrialStop";
     private static final String EVENT_TYPE_FREE_MEETING_UPGRADE_TO_PRO_MEETING = "freeMeetingUpgradeToProMeeting";
+    private static final String EVENT_TYPE_CLOSED_CAPTION_RECEIVED = "closedCaptionReceived";
+    private static final String EVENT_TYPE_RECORDING_STATUS = "recordingStatus";
+    private static final String EVENT_TYPE_LOCAL_RECORDING_STATUS = "localRecordingStatus";
+    private static final String EVENT_TYPE_INVALID_RECLAIM_HOST_KEY = "invalidReclaimHostKey";
+    private static final String EVENT_TYPE_PERMISSION_REQUESTED = "permissionRequested";
+    private static final String EVENT_TYPE_ALL_HANDS_LOWERED = "allHandsLowered";
+    private static final String EVENT_TYPE_LOCAL_VIDEO_ORDER_UPDATED = "localVideoOrderUpdated";
+    private static final String EVENT_TYPE_LOCAL_RECORDING_PRIVILEGE_REQUESTED = "localRecordingPrivilegeRequested";
+    private static final String EVENT_TYPE_SUSPEND_PARTICIPANTS_ACTIVITIES = "suspendParticipantsActivities";
+    private static final String EVENT_TYPE_ALLOW_PARTICIPANTS_START_VIDEO_NOTIFICATION = "allowParticipantsStartVideoNotification";
+    private static final String EVENT_TYPE_ALLOW_PARTICIPANTS_RENAME_NOTIFICATION = "allowParticipantsRenameNotification";
+    private static final String EVENT_TYPE_ALLOW_PARTICIPANTS_UN_MUTE_SELF_NOTIFICATION = "allowParticipantsUnMuteSelfNotification";
+    private static final String EVENT_TYPE_ALLOW_PARTICIPANTS_SHARE_WHITE_BOARD_NOTIFICATION = "allowParticipantsShareWhiteBoardNotification";
+    private static final String EVENT_TYPE_MEETING_LOCK_STATUS = "meetingLockStatus";
+    private static final String EVENT_TYPE_REQUEST_LOCAL_RECORDING_PRIVILEGE_CHANGED = "requestLocalRecordingPrivilegeChanged";
 
     private static final String DATA_KEY_VALUE = "value";
     private static final String DATA_KEY_STATUS = "status";
+    private static final String DATA_KEY_ENABLED = "enabled";
     private static final String DATA_KEY_MEETING_STATUS = "meetingStatus";
     private static final String DATA_KEY_START = "start";
     private static final String DATA_KEY_SUCCESS = "success";
@@ -162,6 +178,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String DATA_KEY_CAN_UPGRADE = "canUpgrade";
     private static final String DATA_KEY_IS_FIRST_GIFT = "isFirstGift";
     private static final String DATA_KEY_PRIVILEGE = "privilege";
+    private static final String DATA_KEY_PRIVILEGE_STATUS = "privilegeStatus";
+    private static final String DATA_KEY_RECORDING_STATUS = "recordingStatus";
+    private static final String DATA_KEY_PERMISSIONS = "permissions";
+    private static final String DATA_KEY_LOCKED = "locked";
 
     private static final String ACTION_INITIALIZE = "initialize";
     private static final String ACTION_INITIALIZE_WITH_JWT = "initializeWithJWT";
@@ -1965,76 +1985,154 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     @Override
     public void onClosedCaptionReceived(String s, long l) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+            eventData.put(DATA_KEY_VALUE, s);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_CLOSED_CAPTION_RECEIVED, eventData);
     }
 
     @Override
     public void onRecordingStatus(RecordingStatus recordingStatus) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_RECORDING_STATUS, recordingStatus.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_RECORDING_STATUS, eventData);
     }
 
     @Override
     public void onLocalRecordingStatus(long l, RecordingStatus recordingStatus) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_RECORDING_STATUS, recordingStatus.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_LOCAL_RECORDING_STATUS, eventData);
     }
 
     @Override
     public void onInvalidReclaimHostkey() {
-
+        emitSharedJsEvent(EVENT_TYPE_INVALID_RECLAIM_HOST_KEY, null);
     }
 
     @Override
     public void onPermissionRequested(String[] strings) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_PERMISSIONS, new JSONArray(strings));
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_PERMISSION_REQUESTED, eventData);
     }
 
     @Override
     public void onAllHandsLowered() {
-
+        emitSharedJsEvent(EVENT_TYPE_ALL_HANDS_LOWERED, null);
     }
 
     @Override
     public void onLocalVideoOrderUpdated(List<Long> list) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_CHANGED_USER_LIST, new JSONArray(list));
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_LOCAL_VIDEO_ORDER_UPDATED, eventData);
     }
 
     @Override
-    public void onLocalRecordingPrivilegeRequested(IRequestLocalRecordingPrivilegeHandler iRequestLocalRecordingPrivilegeHandler) {
+    public void onLocalRecordingPrivilegeRequested(
+        IRequestLocalRecordingPrivilegeHandler iRequestLocalRecordingPrivilegeHandler
+    ) {
+        JSONObject eventData = new JSONObject();
+        try {
+            long userId = iRequestLocalRecordingPrivilegeHandler.getRequesterId();
+            eventData.put(DATA_KEY_USER_ID, userId);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_LOCAL_RECORDING_PRIVILEGE_REQUESTED, eventData);
     }
 
     @Override
     public void onSuspendParticipantsActivities() {
-
+        emitSharedJsEvent(EVENT_TYPE_SUSPEND_PARTICIPANTS_ACTIVITIES, null);
     }
 
     @Override
     public void onAllowParticipantsStartVideoNotification(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_ALLOW_PARTICIPANTS_START_VIDEO_NOTIFICATION, eventData);
     }
 
     @Override
     public void onAllowParticipantsRenameNotification(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_ALLOW_PARTICIPANTS_RENAME_NOTIFICATION, eventData);
     }
 
     @Override
     public void onAllowParticipantsUnmuteSelfNotification(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_ALLOW_PARTICIPANTS_UN_MUTE_SELF_NOTIFICATION, eventData);
     }
 
     @Override
     public void onAllowParticipantsShareWhiteBoardNotification(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_ALLOW_PARTICIPANTS_SHARE_WHITE_BOARD_NOTIFICATION, eventData);
     }
 
     @Override
     public void onMeetingLockStatus(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_LOCKED, b);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_MEETING_LOCK_STATUS, eventData);
     }
 
     @Override
-    public void onRequestLocalRecordingPrivilegeChanged(LocalRecordingRequestPrivilegeStatus localRecordingRequestPrivilegeStatus) {
+    public void onRequestLocalRecordingPrivilegeChanged(
+        LocalRecordingRequestPrivilegeStatus localRecordingRequestPrivilegeStatus
+    ) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_PRIVILEGE_STATUS, localRecordingRequestPrivilegeStatus.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_REQUEST_LOCAL_RECORDING_PRIVILEGE_CHANGED, eventData);
     }
 }
