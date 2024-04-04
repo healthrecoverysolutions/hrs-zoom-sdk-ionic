@@ -112,12 +112,31 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String EVENT_TYPE_USER_AUDIO_TYPE_CHANGED = "userAudioTypeChanged";
     private static final String EVENT_TYPE_MY_AUDIO_SOURCE_TYPE_CHANGED = "myAudioSourceTypeChanged";
     private static final String EVENT_TYPE_LOW_OR_RAISE_HAND_STATUS_CHANGED = "lowOrRaiseHandStatusChanged";
+    private static final String EVENT_TYPE_CHAT_MESSAGE_RECEIVED = "chatMessageReceived";
+    private static final String EVENT_TYPE_CHAT_MESSAGE_DELETE_NOTIFICATION = "chatMessageDeleteNotification";
+    private static final String EVENT_TYPE_USER_NETWORK_QUALITY_CHANGED = "userNetworkQualityChanged";
+    private static final String EVENT_TYPE_SINK_MEETING_VIDEO_QUALITY_CHANGED = "sinkMeetingVideoQualityChanged";
+    private static final String EVENT_TYPE_HOST_ASK_UN_MUTE = "hostAskUnMute";
+    private static final String EVENT_TYPE_HOST_ASK_START_VIDEO = "hostAskStartVideo";
+    private static final String EVENT_TYPE_SILENT_MODE_CHANGED = "silentModeChanged";
+    private static final String EVENT_TYPE_FREE_MEETING_REMINDER = "freeMeetingReminder";
+    private static final String EVENT_TYPE_MEETING_ACTIVE_VIDEO = "meetingActiveVideo";
+    private static final String EVENT_TYPE_SINK_ATTENDEE_CHAT_PRIVILEGE_CHANGED = "sinkAttendeeChatPrivilegeChanged";
+    private static final String EVENT_TYPE_SINK_ALLOW_ATTENDEE_CHAT_NOTIFICATION = "sinkAllowAttendeeChatNotification";
+    private static final String EVENT_TYPE_SINK_PANELIST_CHAT_PRIVILEGE_CHANGED = "sinkPanelistChatPrivilegeChanged";
+    private static final String EVENT_TYPE_USER_NAME_CHANGED = "userNameChanged";
+    private static final String EVENT_TYPE_USER_NAMES_CHANGED = "userNamesChanged";
+    private static final String EVENT_TYPE_FREE_MEETING_NEED_TO_UPGRADE = "freeMeetingNeedToUpgrade";
+    private static final String EVENT_TYPE_FREE_MEETING_UPGRADE_TO_GIFT_FREE_TRIAL_START = "freeMeetingUpgradeToGiftFreeTrialStart";
+    private static final String EVENT_TYPE_FREE_MEETING_UPGRADE_TO_GIFT_FREE_TRIAL_STOP = "freeMeetingUpgradeToGiftFreeTrialStop";
+    private static final String EVENT_TYPE_FREE_MEETING_UPGRADE_TO_PRO_MEETING = "freeMeetingUpgradeToProMeeting";
 
     private static final String DATA_KEY_VALUE = "value";
     private static final String DATA_KEY_STATUS = "status";
     private static final String DATA_KEY_MEETING_STATUS = "meetingStatus";
     private static final String DATA_KEY_START = "start";
     private static final String DATA_KEY_SUCCESS = "success";
+    private static final String DATA_KEY_TYPE = "type";
     private static final String DATA_KEY_ERROR = "error";
     private static final String DATA_KEY_ERROR_CODE = "errorCode";
     private static final String DATA_KEY_INTERNAL_ERROR_CODE = "internalErrorCode";
@@ -137,6 +156,12 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String DATA_KEY_CURRENT_USER_LIST = "currentUserList";
     private static final String DATA_KEY_CHANGED_USER_LIST = "changedUserList";
     private static final String DATA_KEY_USER_ID = "userId";
+    private static final String DATA_KEY_VIDEO_QUALITY = "videoQuality";
+    private static final String DATA_KEY_IN_SILENT_MODE = "inSilentMode";
+    private static final String DATA_KEY_IS_ORIGINAL_HOST = "isOriginalHost";
+    private static final String DATA_KEY_CAN_UPGRADE = "canUpgrade";
+    private static final String DATA_KEY_IS_FIRST_GIFT = "isFirstGift";
+    private static final String DATA_KEY_PRIVILEGE = "privilege";
 
     private static final String ACTION_INITIALIZE = "initialize";
     private static final String ACTION_INITIALIZE_WITH_JWT = "initializeWithJWT";
@@ -1750,75 +1775,192 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     public void onMeetingSecureKeyNotification(byte[] bytes) {}
 
     @Override
-    public void onChatMessageReceived(InMeetingChatMessage inMeetingChatMessage) {}
+    public void onChatMessageReceived(InMeetingChatMessage inMeetingChatMessage) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, inMeetingChatMessage.getSenderUserId());
+            eventData.put(DATA_KEY_VALUE, inMeetingChatMessage.getContent());
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_CHAT_MESSAGE_RECEIVED, eventData);
+    }
 
     @Override
     public void onChatMsgDeleteNotification(String s, ChatMessageDeleteType chatMessageDeleteType) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_VALUE, s);
+            eventData.put(DATA_KEY_TYPE, chatMessageDeleteType.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_CHAT_MESSAGE_DELETE_NOTIFICATION, eventData);
     }
 
     @Override
-    public void onUserNetworkQualityChanged(long userId) {}
+    public void onUserNetworkQualityChanged(long userId) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, userId);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_USER_NETWORK_QUALITY_CHANGED, eventData);
+    }
 
     @Override
     public void onSinkMeetingVideoQualityChanged(VideoQuality videoQuality, long l) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+            eventData.put(DATA_KEY_VIDEO_QUALITY, videoQuality.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_SINK_MEETING_VIDEO_QUALITY_CHANGED, eventData);
     }
 
     @Override
-    public void onHostAskUnMute(long userId) {}
+    public void onHostAskUnMute(long userId) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, userId);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_HOST_ASK_UN_MUTE, eventData);
+    }
 
     @Override
-    public void onHostAskStartVideo(long userId) {}
+    public void onHostAskStartVideo(long userId) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, userId);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_HOST_ASK_START_VIDEO, eventData);
+    }
 
     @Override
-    public void onSilentModeChanged(boolean inSilentMode) {}
+    public void onSilentModeChanged(boolean inSilentMode) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_IN_SILENT_MODE, inSilentMode);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_SILENT_MODE_CHANGED, eventData);
+    }
 
     @Override
-    public void onFreeMeetingReminder(boolean isOrignalHost, boolean canUpgrade, boolean isFirstGift) {}
+    public void onFreeMeetingReminder(boolean isOriginalHost, boolean canUpgrade, boolean isFirstGift) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_IS_ORIGINAL_HOST, isOriginalHost);
+            eventData.put(DATA_KEY_CAN_UPGRADE, canUpgrade);
+            eventData.put(DATA_KEY_IS_FIRST_GIFT, isFirstGift);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_FREE_MEETING_REMINDER, eventData);
+    }
 
     @Override
-    public void onMeetingActiveVideo(long userId) {}
+    public void onMeetingActiveVideo(long userId) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, userId);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MEETING_ACTIVE_VIDEO, eventData);
+    }
 
     @Override
-    public void onSinkAttendeeChatPriviledgeChanged(int privilege) {}
+    public void onSinkAttendeeChatPriviledgeChanged(int privilege) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_PRIVILEGE, privilege);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_SINK_ATTENDEE_CHAT_PRIVILEGE_CHANGED, eventData);
+    }
 
     @Override
-    public void onSinkAllowAttendeeChatNotification(int privilege) {}
+    public void onSinkAllowAttendeeChatNotification(int privilege) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_PRIVILEGE, privilege);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_SINK_ALLOW_ATTENDEE_CHAT_NOTIFICATION, eventData);
+    }
 
     @Override
-    public void onSinkPanelistChatPrivilegeChanged(InMeetingChatController.MobileRTCWebinarPanelistChatPrivilege mobileRTCWebinarPanelistChatPrivilege) {
+    public void onSinkPanelistChatPrivilegeChanged(
+        InMeetingChatController.MobileRTCWebinarPanelistChatPrivilege mobileRTCWebinarPanelistChatPrivilege
+    ) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_PRIVILEGE, mobileRTCWebinarPanelistChatPrivilege.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_SINK_PANELIST_CHAT_PRIVILEGE_CHANGED, eventData);
     }
 
     @Override
     public void onUserNameChanged(long l, String s) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+            eventData.put(DATA_KEY_VALUE, s);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_USER_NAME_CHANGED, eventData);
     }
 
     @Override
     public void onUserNamesChanged(List<Long> list) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_CHANGED_USER_LIST, new JSONArray(list));
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_USER_NAMES_CHANGED, eventData);
     }
 
     @Override
     public void onFreeMeetingNeedToUpgrade(FreeMeetingNeedUpgradeType freeMeetingNeedUpgradeType, String s) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_TYPE, freeMeetingNeedUpgradeType.toString());
+            eventData.put(DATA_KEY_VALUE, s);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_FREE_MEETING_NEED_TO_UPGRADE, eventData);
     }
 
     @Override
     public void onFreeMeetingUpgradeToGiftFreeTrialStart() {
-
+        emitSharedJsEvent(EVENT_TYPE_FREE_MEETING_UPGRADE_TO_GIFT_FREE_TRIAL_START, null);
     }
 
     @Override
     public void onFreeMeetingUpgradeToGiftFreeTrialStop() {
-
+        emitSharedJsEvent(EVENT_TYPE_FREE_MEETING_UPGRADE_TO_GIFT_FREE_TRIAL_STOP, null);
     }
 
     @Override
     public void onFreeMeetingUpgradeToProMeeting() {
-
+        emitSharedJsEvent(EVENT_TYPE_FREE_MEETING_UPGRADE_TO_PRO_MEETING, null);
     }
 
     @Override
