@@ -23,6 +23,8 @@ import us.zoom.sdk.InMeetingChatController;
 import us.zoom.sdk.InMeetingUserList;
 import us.zoom.sdk.LocalRecordingRequestPrivilegeStatus;
 import us.zoom.sdk.MeetingParameter;
+import us.zoom.sdk.MobileRTCFocusModeShareType;
+import us.zoom.sdk.SDKNotificationServiceError;
 import us.zoom.sdk.VideoQuality;
 import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomSDKAuthenticationListener;
@@ -170,7 +172,14 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     }
 
     @Override
-    public void onNotificationServiceStatus(SDKNotificationServiceStatus status) {};
+    public void onNotificationServiceStatus(SDKNotificationServiceStatus status) {}
+
+    @Override
+    public void onNotificationServiceStatus(SDKNotificationServiceStatus sdkNotificationServiceStatus, SDKNotificationServiceError sdkNotificationServiceError) {
+
+    }
+
+    ;
 
     @Override
     public void onShareMeetingChatStatusChanged(boolean start) {};
@@ -224,7 +233,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     /**
      * initialize
-     * @deprecated 
+     * @deprecated
      * Initialize Zoom SDK. <Dev Note : this method should not be used now and is deprecated. Use initializeWithJWT instead for initialization
      *
      * @param appKey        Zoom SDK app key.
@@ -1533,6 +1542,46 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     @Override
     public void onRequestLocalRecordingPrivilegeChanged(LocalRecordingRequestPrivilegeStatus localRecordingRequestPrivilegeStatus) {
+
+    }
+
+    @Override
+    public void onAICompanionActiveChangeNotice(boolean b) {
+
+    }
+
+    @Override
+    public void onParticipantProfilePictureStatusChange(boolean b) {
+
+    }
+
+    @Override
+    public void onCloudRecordingStorageFull(long l) {
+
+    }
+
+    @Override
+    public void onUVCCameraStatusChange(String s, UVCCameraStatus uvcCameraStatus) {
+
+    }
+
+    @Override
+    public void onFocusModeStateChanged(boolean b) {
+
+    }
+
+    @Override
+    public void onFocusModeShareTypeChanged(MobileRTCFocusModeShareType mobileRTCFocusModeShareType) {
+
+    }
+
+    @Override
+    public void onVideoAlphaChannelStatusChanged(boolean b) {
+
+    }
+
+    @Override
+    public void onAllowParticipantsRequestCloudRecording(boolean b) {
 
     }
 }
