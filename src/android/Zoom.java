@@ -304,11 +304,6 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         sharedEventContext = callbackContext;
     }
 
-    /**
-     * Variation of `triggerJSEvent()` that passes event data directly
-     * to application code for more granular control.
-     * (i.e., does not do any unwrapping / remapping from the plugin side)
-     */
     private void emitSharedJsEvent(String type, JSONObject data) {
         Timber.d("emitSharedJsEvent -> %s", type);
         try {
