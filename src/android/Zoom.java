@@ -69,6 +69,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     /* Debug variables */
     private static final boolean DEBUG = true;
     public static final Object LOCK = new Object();
+    private static final JSONObject JSON_OBJECT_EMPTY = new JSONObject();
+    private static final int ZOOM_UI_AUTO_CHANGE_FROM_USER_COUNT = 3;
 
     private static final String WEB_DOMAIN = "https://zoom.us";
 
@@ -206,6 +208,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String ACTION_SET_SHARED_EVENT_LISTENER = "setSharedEventListener";
 
     private CallbackContext callbackContext;
+    private CallbackContext sharedEventContext;
 
     /**
      * execute
@@ -231,7 +234,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         // Commenting below as it causes app crash as known change for latest sdk https://devforum.zoom.us/t/zoomsdk-getinstance-error-when-call-from-not-the-main-thread-since-android-meeting-sdk-v-5-11/71587
         // this.mZoomSDK = ZoomSDK.getInstance();
         switch(action) {
-            case "initialize":
+            case ACTION_INITIALIZE:
                 String appKey = args.getString(0);
                 String appSecret = args.getString(1);
                 cordova.getActivity().runOnUiThread(
@@ -243,7 +246,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
                 break;
 
-            case "initializeWithJWT":
+            case ACTION_INITIALIZE_WITH_JWT:
                 String jwtToken = args.getString(0);
                 cordova.getActivity().runOnUiThread(
                     new Runnable() {
@@ -253,7 +256,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     });
 
                 break;
-            case "login":
+            case ACTION_LOGIN:
                 String username = args.getString(0);
                 String password = args.getString(1);
                 if (DEBUG) {
@@ -261,13 +264,13 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 }
                 this.login(username, password, callbackContext);
                 break;
-            case "logout":
+            case ACTION_LOGOUT:
                 this.logout(callbackContext);
                 break;
-            case "isLoggedIn":
+            case ACTION_IS_LOGGED_IN:
                 this.isLoggedIn(callbackContext);
                 break;
-            case "joinMeeting":
+            case ACTION_JOIN_MEETING:
                 String meetingNo = args.getString(0);
                 String meetingPassword = args.getString(1);
                 String displayNameJ = args.getString(2);
@@ -285,7 +288,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     });
 
                 break;
-            case "startMeeting":
+            case ACTION_START_MEETING:
                 String meetingNum = args.getString(0);
                 String displayNameS = args.getString(1);
                 String zoomToken = args.getString(2);
@@ -295,13 +298,16 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 this.startMeeting(meetingNum, displayNameS, zoomToken,
                         zoomAccessToken, userId, optionsS, callbackContext);
                 break;
-            case "startInstantMeeting":
+            case ACTION_START_INSTANT_MEETING:
                 JSONObject optionsI = args.getJSONObject(0);
                 this.startInstantMeeting(optionsI, callbackContext);
                 break;
-            case "setLocale":
+            case ACTION_SET_LOCALE:
                 String languageTag = args.getString(0);
                 this.setLocale(languageTag, callbackContext);
+                break;
+            case ACTION_SET_SHARED_EVENT_LISTENER:
+                setSharedEventListener(callbackContext);
                 break;
             default:
                 return false;
@@ -309,11 +315,76 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         return true;
     }
 
-    @Override
-    public void onNotificationServiceStatus(SDKNotificationServiceStatus status) {};
+    private void setSharedEventListener(CallbackContext callbackContext) {
+        if (sharedEventContext != null) {
+            sharedEventContext.error("event listener callback overwritten");
+        }
+        sharedEventContext = callbackContext;
+    }
+
+    private void emitSharedJsEvent(String type, JSONObject data) {
+        Timber.d("emitSharedJsEvent -> %s", type);
+        try {
+            if (sharedEventContext == null) {
+                return;
+            }
+            if (data == null) {
+                data = JSON_OBJECT_EMPTY;
+            }
+            JSONObject payload = new JSONObject()
+                .put(KEY_TYPE, type)
+                .put(KEY_DATA, data);
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, payload);
+            pluginResult.setKeepCallback(true);
+            sharedEventContext.sendPluginResult(pluginResult);
+        } catch (JSONException e) {
+            Timber.e("emitSharedJsEvent failed! -> %s", e.getMessage());
+        }
+    }
 
     @Override
-    public void onShareMeetingChatStatusChanged(boolean start) {};
+    public void onNotificationServiceStatus(SDKNotificationServiceStatus status) {
+        JSONObject data = new JSONObject();
+        try {
+            data.put(DATA_KEY_STATUS, status.toString());
+        } catch (JSONException ignored) {
+        }
+        emitSharedJsEvent(EVENT_TYPE_NOTIFICATION_SERVICE_STATUS_CHANGED, data);
+    }
+
+    @Override
+    public void onShareMeetingChatStatusChanged(boolean start) {
+        JSONObject data = new JSONObject();
+        try {
+            data.put(DATA_KEY_START, start);
+        } catch (JSONException ignored) {
+        }
+        emitSharedJsEvent(EVENT_TYPE_SHARED_MEETING_CHAT_STATUS_CHANGED, data);
+    }
+
+    private void onSDKInitializeResult(boolean success, int errorCode, int internalErrorCode) {
+        JSONObject data = new JSONObject();
+        try {
+            data.put(DATA_KEY_SUCCESS, success);
+            data.put(DATA_KEY_ERROR_CODE, errorCode);
+            data.put(DATA_KEY_INTERNAL_ERROR_CODE, internalErrorCode);
+        } catch (JSONException ignored) {
+        }
+        emitSharedJsEvent(EVENT_TYPE_SDK_INITIALIZE_RESULT, data);
+    }
+
+    private void onSDKInitializeAuthIdentityExpired() {
+        emitSharedJsEvent(EVENT_TYPE_SDK_INITIALIZE_AUTH_IDENTITY_EXPIRED, null);
+    }
+
+    private void notifyLoginStatus(boolean isLoggedIn) {
+        JSONObject data = new JSONObject();
+        try {
+            data.put(DATA_KEY_IS_LOGGED_IN, isLoggedIn);
+        } catch (JSONException ignored) {
+        }
+        emitSharedJsEvent(EVENT_TYPE_LOGIN_STATUS_UPDATE, data);
+    }
 
     private void registerMeetingServiceListener() {
         ZoomSDK zoomSDK = ZoomSDK.getInstance();
@@ -346,7 +417,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
         ZoomSDKInitParams params = new ZoomSDKInitParams();
         params.jwtToken = jwtToken;
-        params.domain = this.WEB_DOMAIN;
+        params.domain = WEB_DOMAIN;
         params.enableLog = true;
 
         ZoomSDKInitializeListener listener = new ZoomSDKInitializeListener() {
@@ -355,7 +426,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
              */
             @Override
             public void onZoomSDKInitializeResult(int errorCode, int internalErrorCode) {
-                if(errorCode == ZoomError.ZOOM_ERROR_SUCCESS) {
+                boolean success = errorCode == ZoomError.ZOOM_ERROR_SUCCESS;
+                Zoom.this.onSDKInitializeResult(success, errorCode, internalErrorCode);
+                if(success) {
                     Timber.d("Initialized the Zoom SDK");
                     registerMeetingServiceListener();
                     callbackContext.success("Initialize successfully!");
@@ -366,6 +439,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             }
             @Override
             public void onZoomAuthIdentityExpired() {
+                Zoom.this.onSDKInitializeAuthIdentityExpired();
             }
         };
         mZoomSDK.initialize(cordova.getActivity(), listener, params);
@@ -373,7 +447,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     /**
      * initialize
-     * @deprecated 
+     * @deprecated
      * Initialize Zoom SDK. <Dev Note : this method should not be used now and is deprecated. Use initializeWithJWT instead for initialization
      *
      * @param appKey        Zoom SDK app key.
@@ -412,7 +486,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
              */
             @Override
             public void onZoomSDKInitializeResult(int errorCode, int internalErrorCode) {
-                if(errorCode == ZoomError.ZOOM_ERROR_SUCCESS) {
+                boolean success = errorCode == ZoomError.ZOOM_ERROR_SUCCESS;
+                Zoom.this.onSDKInitializeResult(success, errorCode, internalErrorCode);
+                if(success) {
                     Timber.d("Initialized the Zoom SDK");
                     callbackContext.success("Initialize successfully!");
                 } else {
@@ -422,6 +498,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             }
             @Override
             public void onZoomAuthIdentityExpired() {
+                Zoom.this.onSDKInitializeAuthIdentityExpired();
             }
         };
 
@@ -536,6 +613,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
         pluginResult.setKeepCallback(true);
         callbackContext.sendPluginResult(pluginResult);
+        notifyLoginStatus(false);
     }
 
     /**
@@ -558,12 +636,53 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                         callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "ZoomSDK has not been initialized."));
                         return;
                     }
-                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, zoomSDK.isLoggedIn()));
+                    boolean isLoggedIn = zoomSDK.isLoggedIn();
+                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, isLoggedIn));
+                    notifyLoginStatus(isLoggedIn);
                 }
             });
         } catch (Exception e) {
             callbackContext.error(e.getMessage());
         }
+    }
+
+    private void handleMeetingJoinOrStart(
+        CallbackContext callbackContext,
+        int response,
+        String eventType
+    ) {
+        boolean success = response == MeetingError.MEETING_ERROR_SUCCESS;
+        String message = getMeetingErrorMessage(response);
+        PluginResult.Status status = success ? PluginResult.Status.OK : PluginResult.Status.ERROR;
+
+        if (DEBUG) {
+            Timber.i("handleMeetingJoinOrStart(), response = %s (eventType = %s)", message, eventType);
+        }
+
+        PluginResult pluginResult = new PluginResult(status, message);
+        callbackContext.sendPluginResult(pluginResult);
+
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ERROR_CODE, response);
+            eventData.put(DATA_KEY_MESSAGE, message);
+            eventData.put(DATA_KEY_SUCCESS, success);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(eventType, eventData);
+    }
+
+    private void onJoinMeetingResult(CallbackContext callbackContext, int response) {
+        handleMeetingJoinOrStart(callbackContext, response, EVENT_TYPE_JOIN_MEETING_RESULT);
+    }
+
+    private void onStartMeetingResult(CallbackContext callbackContext, int response) {
+        handleMeetingJoinOrStart(callbackContext, response, EVENT_TYPE_START_MEETING_RESULT);
+    }
+
+    private void onStartInstantMeetingResult(CallbackContext callbackContext, int response) {
+        handleMeetingJoinOrStart(callbackContext, response, EVENT_TYPE_START_INSTANT_MEETING_RESULT);
     }
 
     /**
@@ -598,14 +717,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             Timber.d("[meetingNo=]" + meetingNumber);
         }
 
-        PluginResult pluginResult = null;
-        // If the meeting number is invalid, throw error.
-        if (meetingNumber.length() == 0) {
-            pluginResult =  new PluginResult(PluginResult.Status.ERROR, "You need to enter a meeting number which you want to join.");
-            pluginResult.setKeepCallback(true);
-            callbackContext.sendPluginResult(pluginResult);
-            return;
-        }
+        PluginResult pluginResult;
 
         // Get Zoom SDK instance.
         ZoomSDK zoomSDK = ZoomSDK.getInstance();
@@ -718,21 +830,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
-
                     int response = meetingService.joinMeetingWithParams(
                             cordova.getActivity().getApplicationContext(),params, opts);
-                    if (DEBUG) { Timber.i("In JoinMeeting, response=" + getMeetingErrorMessage(response)); }
-                    PluginResult pluginResult = null;
-                    if (response != MeetingError.MEETING_ERROR_SUCCESS) {
-                        pluginResult =  new PluginResult(PluginResult.Status.ERROR, getMeetingErrorMessage(response));
-                        pluginResult.setKeepCallback(true);
-                        callbackContext.sendPluginResult(pluginResult);
-                    } else {
-                        pluginResult =  new PluginResult(PluginResult.Status.OK, getMeetingErrorMessage(response));
-                        pluginResult.setKeepCallback(true);
-                        callbackContext.sendPluginResult(pluginResult);
-                    }
+                    Zoom.this.onJoinMeetingResult(callbackContext, response);
                 }
             });
         } else {
@@ -740,20 +840,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 @Override
                 public void run() {
                     // If meeting option is not provided, simply join meeting.
-
                     int response = meetingService.joinMeetingWithParams(
                             cordova.getActivity().getApplicationContext(), params, null);
-                    if (DEBUG) { Timber.i("In JoinMeeting, response=" + getMeetingErrorMessage(response)); }
-                    PluginResult pluginResult = null;
-                    if (response != MeetingError.MEETING_ERROR_SUCCESS) {
-                        pluginResult =  new PluginResult(PluginResult.Status.ERROR, getMeetingErrorMessage(response));
-                        pluginResult.setKeepCallback(true);
-                        callbackContext.sendPluginResult(pluginResult);
-                    } else {
-                        pluginResult =  new PluginResult(PluginResult.Status.OK, getMeetingErrorMessage(response));
-                        pluginResult.setKeepCallback(true);
-                        callbackContext.sendPluginResult(pluginResult);
-                    }
+                    Zoom.this.onJoinMeetingResult(callbackContext, response);
                 }
             });
         }
@@ -788,7 +877,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             return;
         }
 
-        PluginResult pluginResult = null;
+        PluginResult pluginResult;
 
         if (DEBUG) {
             Timber.d("[startMeeting] meetingNumber=====" + meetingNumber);
@@ -835,7 +924,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
+                            // stay in current meeting, so do nothing
                         }
                     })
                     .show();
@@ -918,16 +1007,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 @Override
                 public void run() {
                     int response = meetingService.startMeetingWithParams(cordova.getActivity().getApplicationContext(), params, opts);
-                    PluginResult pluginResult = null;
-                    if (response != MeetingError.MEETING_ERROR_SUCCESS) {
-                        pluginResult =  new PluginResult(PluginResult.Status.ERROR, getMeetingErrorMessage(response));
-                        pluginResult.setKeepCallback(true);
-                        callbackContext.sendPluginResult(pluginResult);
-                    } else {
-                        pluginResult =  new PluginResult(PluginResult.Status.OK, getMeetingErrorMessage(response));
-                        pluginResult.setKeepCallback(true);
-                        callbackContext.sendPluginResult(pluginResult);
-                    }
+                    Zoom.this.onStartMeetingResult(callbackContext, response);
                 }
             });
         } else {
@@ -953,16 +1033,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     @Override
                     public void run() {
                         int response = meetingService.startMeetingWithParams(cordova.getActivity().getApplicationContext(), params, opts);
-                        PluginResult pluginResult = null;
-                        if (response != MeetingError.MEETING_ERROR_SUCCESS) {
-                            pluginResult =  new PluginResult(PluginResult.Status.ERROR, getMeetingErrorMessage(response));
-                            pluginResult.setKeepCallback(true);
-                            callbackContext.sendPluginResult(pluginResult);
-                        } else {
-                            pluginResult =  new PluginResult(PluginResult.Status.OK, getMeetingErrorMessage(response));
-                            pluginResult.setKeepCallback(true);
-                            callbackContext.sendPluginResult(pluginResult);
-                        }
+                        Zoom.this.onStartMeetingResult(callbackContext, response);
                     }
                 });
             } else {
@@ -1073,19 +1144,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             @Override
             public void run() {
                 int response = meetingService.startInstantMeeting(cordova.getActivity().getApplicationContext(), opts);
-                if (DEBUG) {
-                    Timber.i("onClickBtnLoginUserStartInstant, response=" + getMeetingErrorMessage(response));
-                }
-                PluginResult pluginResult = null;
-                if (response != MeetingError.MEETING_ERROR_SUCCESS) {
-                    pluginResult =  new PluginResult(PluginResult.Status.ERROR, getMeetingErrorMessage(response));
-                    pluginResult.setKeepCallback(true);
-                    callbackContext.sendPluginResult(pluginResult);
-                } else {
-                    pluginResult =  new PluginResult(PluginResult.Status.OK, getMeetingErrorMessage(response));
-                    pluginResult.setKeepCallback(true);
-                    callbackContext.sendPluginResult(pluginResult);
-                }
+                Zoom.this.onStartInstantMeetingResult(callbackContext, response);
             }
         });
     }
@@ -1131,25 +1190,30 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
      */
     @Override
     public void onZoomSDKLoginResult(long result) {
-            if (DEBUG) { Timber.d("*********onZoomSDKLoginResult********* result =====" + result); }
+            if (DEBUG) {
+                Timber.d("*********onZoomSDKLoginResult********* result ===== %s", result);
+            }
 
             try {
-                JSONObject res = new JSONObject();
-                PluginResult pluginResult = null;
+                boolean success = result == ZoomAuthenticationError.ZOOM_AUTH_ERROR_SUCCESS;
+                String authErrorMessage = getAuthErrorMessage(result);
+                String message = "Logged in successfully";
+                PluginResult.Status resultStatus = PluginResult.Status.OK;
+                JSONObject data = new JSONObject();
 
-                if (result == ZoomAuthenticationError.ZOOM_AUTH_ERROR_SUCCESS) {
-                    // login success
-                    res.put("result", true);
-                    res.put("message", "Logged in successfully");
-                    pluginResult = new PluginResult(PluginResult.Status.OK, res);
-                } else {
-                    // login error
-                    res.put("result", false);
-                    res.put("message", "Login attempt failed! Reason: " + getAuthErrorMessage(result));
-                    pluginResult = new PluginResult(PluginResult.Status.ERROR, res);
+                if (!success) {
+                    message = "Login attempt failed! Reason: " + authErrorMessage;
+                    resultStatus = PluginResult.Status.ERROR;
                 }
-                pluginResult.setKeepCallback(true);
+
+                data.put(DATA_KEY_RESULT, success); // backward compatibility
+                data.put(DATA_KEY_SUCCESS, success);
+                data.put(DATA_KEY_MESSAGE, message);
+                data.put(DATA_KEY_AUTH_ERROR_MESSAGE, authErrorMessage);
+
+                PluginResult pluginResult = new PluginResult(resultStatus, data);
                 callbackContext.sendPluginResult(pluginResult);
+                emitSharedJsEvent(EVENT_TYPE_SDK_LOGIN_RESULT, data);
             } catch(JSONException e) {
                 callbackContext.error(e.getMessage());
             }
@@ -1165,22 +1229,25 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     @Override
     public void onZoomSDKLogoutResult(long result) {
             try {
-                JSONObject res = new JSONObject();
-                PluginResult pluginResult = null;
+                boolean success = result == ZoomAuthenticationError.ZOOM_AUTH_ERROR_SUCCESS;
+                String authErrorMessage = getAuthErrorMessage(result);
+                String message = "Logged out successfully";
+                PluginResult.Status resultStatus = PluginResult.Status.OK;
+                JSONObject data = new JSONObject();
 
-                if (result == ZoomAuthenticationError.ZOOM_AUTH_ERROR_SUCCESS) {
-                    // logout success
-                    res.put("result", true);
-                    res.put("message", "Logged out successfully");
-                    pluginResult = new PluginResult(PluginResult.Status.OK, res);
-                } else {
-                    // logout error
-                    res.put("result", false);
-                    res.put("message", "Logout attempt failed! Reason: " + getAuthErrorMessage(result));
-                    pluginResult = new PluginResult(PluginResult.Status.ERROR, res);
+                if (!success) {
+                    message = "Logout attempt failed! Reason: " + authErrorMessage;
+                    resultStatus = PluginResult.Status.ERROR;
                 }
-                pluginResult.setKeepCallback(true);
+
+                data.put(DATA_KEY_RESULT, success); // backward compatibility
+                data.put(DATA_KEY_SUCCESS, success);
+                data.put(DATA_KEY_MESSAGE, message);
+                data.put(DATA_KEY_AUTH_ERROR_MESSAGE, authErrorMessage);
+
+                PluginResult pluginResult = new PluginResult(resultStatus, data);
                 callbackContext.sendPluginResult(pluginResult);
+                emitSharedJsEvent(EVENT_TYPE_SDK_LOGOUT_RESULT, data);
             } catch (JSONException e) {
                 callbackContext.error(e.getMessage());
             }
@@ -1261,6 +1328,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     @Override
     public void onZoomAuthIdentityExpired() {
         Timber.d("onZoomAuthIdentityExpired is triggered");
+        emitSharedJsEvent(EVENT_TYPE_AUTH_IDENTITY_EXPIRED, null);
     }
 
     /**
@@ -1270,6 +1338,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
      */
     @Override
     public void onZoomIdentityExpired() {
+        emitSharedJsEvent(EVENT_TYPE_IDENTITY_EXPIRED, null);
         ZoomSDK mZoomSDK = ZoomSDK.getInstance();
         if (mZoomSDK.isLoggedIn()) {
             mZoomSDK.logoutZoom();
@@ -1288,10 +1357,15 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     @Override
     public void onMeetingStatusChanged(MeetingStatus meetingStatus, int errorCode,
                                        int internalErrorCode) {
-        if (DEBUG) { Timber.i("onMeetingStatusChanged, meetingStatus=" + meetingStatus + ", errorCode=" + errorCode
-                + ", internalErrorCode=" + internalErrorCode); }
+        if (DEBUG) {
+            Timber.i("onMeetingStatusChanged,"
+                + " meetingStatus=" + meetingStatus
+                + ", errorCode=" + errorCode
+                + ", internalErrorCode=" + internalErrorCode);
+        }
 
-        if(meetingStatus == MeetingStatus.MEETING_STATUS_FAILED && errorCode == MeetingError.MEETING_ERROR_CLIENT_INCOMPATIBLE) {
+        if (meetingStatus == MeetingStatus.MEETING_STATUS_FAILED
+            && errorCode == MeetingError.MEETING_ERROR_CLIENT_INCOMPATIBLE) {
             final android.widget.Toast toast = android.widget.Toast.makeText(
                     cordova.getActivity().getApplicationContext(),
                     "Version of ZoomSDK is too low!",
@@ -1299,11 +1373,33 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             );
             toast.show();
         }
+
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_MEETING_STATUS, meetingStatus.toString());
+            eventData.put(DATA_KEY_ERROR_CODE, errorCode);
+            eventData.put(DATA_KEY_INTERNAL_ERROR_CODE, internalErrorCode);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MEETING_STATUS_CHANGED, eventData);
     }
 
     @Override
     public void onMeetingParameterNotification(MeetingParameter meetingParameter) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_MEETING_HOST, meetingParameter.meeting_host);
+            eventData.put(DATA_KEY_MEETING_NUMBER, meetingParameter.meeting_number);
+            eventData.put(DATA_KEY_MEETING_TOPIC, meetingParameter.meeting_topic);
+            eventData.put(DATA_KEY_MEETING_TYPE, meetingParameter.meeting_type.toString());
+            eventData.put(DATA_KEY_IS_AUTO_RECORDING_CLOUD, meetingParameter.is_auto_recording_cloud);
+            eventData.put(DATA_KEY_IS_AUTO_RECORDING_LOCAL, meetingParameter.is_auto_recording_local);
+            eventData.put(DATA_KEY_IS_VIEW_ONLY, meetingParameter.isViewOnly);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_MEETING_PARAMETER_NOTIFICATION, eventData);
     }
 
     /**
@@ -1415,274 +1511,652 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         } catch (Exception e) {
             Timber.d(e.getMessage());
         }
+
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_MEETING_NUMBER, l);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MEETING_LEAVE_COMPLETE, eventData);
     }
 
     @Override
-    public void onMeetingNeedPasswordOrDisplayName(boolean b, boolean b1, InMeetingEventHandler inMeetingEventHandler) {}
+    public void onMeetingNeedPasswordOrDisplayName(boolean b, boolean b1, InMeetingEventHandler inMeetingEventHandler) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_NEEDS_PASSWORD, b);
+            eventData.put(DATA_KEY_NEEDS_DISPLAY_NAME, b1);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MEETING_NEEDS_PASSWORD_OR_DISPLAY_NAME, eventData);
+    }
 
     @Override
     public void onWebinarNeedRegister(String s) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_VALUE, s);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_WEBINAR_NEEDS_REGISTER, eventData);
     }
 
     //@Override
     public void onWebinarNeedRegister() {}
 
     @Override
-    public void onJoinWebinarNeedUserNameAndEmail(InMeetingEventHandler inMeetingEventHandler) {}
+    public void onJoinWebinarNeedUserNameAndEmail(InMeetingEventHandler inMeetingEventHandler) {
+        emitSharedJsEvent(EVENT_TYPE_WEBINAR_NEEDS_USER_NAME_AND_EMAIL, null);
+    }
 
     @Override
     public void onMeetingNeedCloseOtherMeeting(InMeetingEventHandler inMeetingEventHandler) {
-
+        emitSharedJsEvent(EVENT_TYPE_MEETING_NEEDS_TO_CLOSE_OTHER_MEETING, null);
     }
 
     //@Override
     public void onMeetingNeedColseOtherMeeting(InMeetingEventHandler inMeetingEventHandler) {}
 
     @Override
-    public void onMeetingFail(int i, int i1) {}
+    public void onMeetingFail(int i, int i1) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ERROR_CODE, i);
+            eventData.put(DATA_KEY_INTERNAL_ERROR_CODE, i1);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MEETING_FAIL, eventData);
+    }
 
     @Override
     public void onMeetingUserJoin(List<Long> list) {
-        InMeetingService userList = ZoomSDK.getInstance().getInMeetingService();
         ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
-        if(userList.getInMeetingUserList()!=null && userList.getInMeetingUserList().size()>=3) {
+        InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
+        List<Long> currentUserList = meetingService.getInMeetingUserList();
+
+        if (currentUserList != null && currentUserList.size() >= ZOOM_UI_AUTO_CHANGE_FROM_USER_COUNT) {
             zoomUIService.switchToVideoWall(); // gallery view
         } else {
             zoomUIService.switchToActiveSpeaker(); // switch to speaker view
         }
+
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_CURRENT_USER_LIST, new JSONArray(currentUserList));
+            eventData.put(DATA_KEY_CHANGED_USER_LIST, new JSONArray(list));
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MEETING_USER_JOIN, eventData);
     }
 
     @Override
     public void onMeetingUserLeave(List<Long> list) {
-        InMeetingService userList = ZoomSDK.getInstance().getInMeetingService();
         ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
-        if(userList.getInMeetingUserList()!=null && userList.getInMeetingUserList().size() < 3) {
+        InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
+        List<Long> currentUserList = meetingService.getInMeetingUserList();
+
+        if (currentUserList !=null && currentUserList.size() < ZOOM_UI_AUTO_CHANGE_FROM_USER_COUNT) {
             zoomUIService.switchToActiveSpeaker();
         } else {
             zoomUIService.switchToVideoWall();
         }
+
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_CURRENT_USER_LIST, new JSONArray(currentUserList));
+            eventData.put(DATA_KEY_CHANGED_USER_LIST, new JSONArray(list));
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MEETING_USER_LEAVE, eventData);
     }
 
     @Override
-    public void onMeetingUserUpdated(long l) {}
+    public void onMeetingUserUpdated(long l) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MEETING_USER_UPDATED, eventData);
+    }
 
     @Override
     public void onInMeetingUserAvatarPathUpdated(long l) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_IN_MEETING_USER_AVATAR_PATH_UPDATED, eventData);
     }
 
     @Override
-    public void onMeetingHostChanged(long l) {}
+    public void onMeetingHostChanged(long l) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MEETING_HOST_CHANGED, eventData);
+    }
 
     @Override
-    public void onMeetingCoHostChanged(long l) {}
+    public void onMeetingCoHostChanged(long l) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MEETING_CO_HOST_CHANGED, eventData);
+    }
 
     @Override
     public void onMeetingCoHostChange(long l, boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+            eventData.put(DATA_KEY_VALUE, b);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_MEETING_CO_HOST_CHANGED, eventData);
     }
 
     @Override
-    public void onActiveVideoUserChanged(long var1) {}
+    public void onActiveVideoUserChanged(long var1) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, var1);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_ACTIVE_VIDEO_USER_CHANGED, eventData);
+    }
 
     @Override
-    public void onActiveSpeakerVideoUserChanged(long var1) {}
+    public void onActiveSpeakerVideoUserChanged(long var1) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, var1);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_ACTIVE_SPEAKER_VIDEO_USER_CHANGED, eventData);
+    }
 
     @Override
     public void onHostVideoOrderUpdated(List<Long> list) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_CHANGED_USER_LIST, new JSONArray(list));
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_HOST_VIDEO_ORDER_UPDATED, eventData);
     }
 
     @Override
     public void onFollowHostVideoOrderChanged(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_VALUE, b);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_FOLLOW_HOST_VIDEO_ORDER_CHANGED, eventData);
     }
 
     @Override
-    public void onSpotlightVideoChanged(boolean b) {}
+    public void onSpotlightVideoChanged(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_VALUE, b);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_SPOTLIGHT_VIDEO_CHANGED, eventData);
+    }
 
     @Override
     public void onSpotlightVideoChanged(List<Long> list) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_CHANGED_USER_LIST, new JSONArray(list));
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_SPOTLIGHT_VIDEO_CHANGED, eventData);
     }
 
     @Override
     public void onUserVideoStatusChanged(long l, VideoStatus videoStatus) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+            eventData.put(DATA_KEY_STATUS, videoStatus.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_USER_VIDEO_STATUS_CHANGED, eventData);
     }
 
     //@Override
     public void onUserVideoStatusChanged(long l) {}
 
     @Override
-    public void onMicrophoneStatusError(InMeetingAudioController.MobileRTCMicrophoneError mobileRTCMicrophoneError) {}
+    public void onMicrophoneStatusError(InMeetingAudioController.MobileRTCMicrophoneError mobileRTCMicrophoneError) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ERROR, mobileRTCMicrophoneError.toString());
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MICROPHONE_STATUS_ERROR, eventData);
+    }
 
     @Override
     public void onUserAudioStatusChanged(long l, AudioStatus audioStatus) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+            eventData.put(DATA_KEY_STATUS, audioStatus.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_USER_AUDIO_STATUS_CHANGED, eventData);
     }
 
     //@Override
-    public void onUserAudioStatusChanged(long l) {}
+    public void onUserAudioStatusChanged(long l) {
+    }
 
     @Override
-    public void onUserAudioTypeChanged(long l) {}
+    public void onUserAudioTypeChanged(long l) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_VALUE, l);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_USER_AUDIO_TYPE_CHANGED, eventData);
+    }
 
     @Override
-    public void onMyAudioSourceTypeChanged(int i) {}
+    public void onMyAudioSourceTypeChanged(int i) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_VALUE, i);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MY_AUDIO_SOURCE_TYPE_CHANGED, eventData);
+    }
 
     @Override
-    public void onLowOrRaiseHandStatusChanged(long l, boolean b) {}
+    public void onLowOrRaiseHandStatusChanged(long l, boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+            eventData.put(DATA_KEY_VALUE, b);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_LOW_OR_RAISE_HAND_STATUS_CHANGED, eventData);
+    }
 
     //@Override
     public void onMeetingSecureKeyNotification(byte[] bytes) {}
 
     @Override
-    public void onChatMessageReceived(InMeetingChatMessage inMeetingChatMessage) {}
+    public void onChatMessageReceived(InMeetingChatMessage inMeetingChatMessage) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, inMeetingChatMessage.getSenderUserId());
+            eventData.put(DATA_KEY_VALUE, inMeetingChatMessage.getContent());
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_CHAT_MESSAGE_RECEIVED, eventData);
+    }
 
     @Override
     public void onChatMsgDeleteNotification(String s, ChatMessageDeleteType chatMessageDeleteType) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_VALUE, s);
+            eventData.put(DATA_KEY_TYPE, chatMessageDeleteType.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_CHAT_MESSAGE_DELETE_NOTIFICATION, eventData);
     }
 
     @Override
-    public void onUserNetworkQualityChanged(long userId) {}
+    public void onUserNetworkQualityChanged(long userId) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, userId);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_USER_NETWORK_QUALITY_CHANGED, eventData);
+    }
 
     @Override
     public void onSinkMeetingVideoQualityChanged(VideoQuality videoQuality, long l) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+            eventData.put(DATA_KEY_VIDEO_QUALITY, videoQuality.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_SINK_MEETING_VIDEO_QUALITY_CHANGED, eventData);
     }
 
     @Override
-    public void onHostAskUnMute(long userId) {}
+    public void onHostAskUnMute(long userId) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, userId);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_HOST_ASK_UN_MUTE, eventData);
+    }
 
     @Override
-    public void onHostAskStartVideo(long userId) {}
+    public void onHostAskStartVideo(long userId) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, userId);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_HOST_ASK_START_VIDEO, eventData);
+    }
 
     @Override
-    public void onSilentModeChanged(boolean inSilentMode) {}
+    public void onSilentModeChanged(boolean inSilentMode) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_IN_SILENT_MODE, inSilentMode);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_SILENT_MODE_CHANGED, eventData);
+    }
 
     @Override
-    public void onFreeMeetingReminder(boolean isOrignalHost, boolean canUpgrade, boolean isFirstGift) {}
+    public void onFreeMeetingReminder(boolean isOriginalHost, boolean canUpgrade, boolean isFirstGift) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_IS_ORIGINAL_HOST, isOriginalHost);
+            eventData.put(DATA_KEY_CAN_UPGRADE, canUpgrade);
+            eventData.put(DATA_KEY_IS_FIRST_GIFT, isFirstGift);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_FREE_MEETING_REMINDER, eventData);
+    }
 
     @Override
-    public void onMeetingActiveVideo(long userId) {}
+    public void onMeetingActiveVideo(long userId) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, userId);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_MEETING_ACTIVE_VIDEO, eventData);
+    }
 
     @Override
-    public void onSinkAttendeeChatPriviledgeChanged(int privilege) {}
+    public void onSinkAttendeeChatPriviledgeChanged(int privilege) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_PRIVILEGE, privilege);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_SINK_ATTENDEE_CHAT_PRIVILEGE_CHANGED, eventData);
+    }
 
     @Override
-    public void onSinkAllowAttendeeChatNotification(int privilege) {}
+    public void onSinkAllowAttendeeChatNotification(int privilege) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_PRIVILEGE, privilege);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_SINK_ALLOW_ATTENDEE_CHAT_NOTIFICATION, eventData);
+    }
 
     @Override
-    public void onSinkPanelistChatPrivilegeChanged(InMeetingChatController.MobileRTCWebinarPanelistChatPrivilege mobileRTCWebinarPanelistChatPrivilege) {
+    public void onSinkPanelistChatPrivilegeChanged(
+        InMeetingChatController.MobileRTCWebinarPanelistChatPrivilege mobileRTCWebinarPanelistChatPrivilege
+    ) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_PRIVILEGE, mobileRTCWebinarPanelistChatPrivilege.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_SINK_PANELIST_CHAT_PRIVILEGE_CHANGED, eventData);
     }
 
     @Override
     public void onUserNameChanged(long l, String s) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+            eventData.put(DATA_KEY_VALUE, s);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_USER_NAME_CHANGED, eventData);
     }
 
     @Override
     public void onUserNamesChanged(List<Long> list) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_CHANGED_USER_LIST, new JSONArray(list));
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_USER_NAMES_CHANGED, eventData);
     }
 
     @Override
     public void onFreeMeetingNeedToUpgrade(FreeMeetingNeedUpgradeType freeMeetingNeedUpgradeType, String s) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_TYPE, freeMeetingNeedUpgradeType.toString());
+            eventData.put(DATA_KEY_VALUE, s);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_FREE_MEETING_NEED_TO_UPGRADE, eventData);
     }
 
     @Override
     public void onFreeMeetingUpgradeToGiftFreeTrialStart() {
-
+        emitSharedJsEvent(EVENT_TYPE_FREE_MEETING_UPGRADE_TO_GIFT_FREE_TRIAL_START, null);
     }
 
     @Override
     public void onFreeMeetingUpgradeToGiftFreeTrialStop() {
-
+        emitSharedJsEvent(EVENT_TYPE_FREE_MEETING_UPGRADE_TO_GIFT_FREE_TRIAL_STOP, null);
     }
 
     @Override
     public void onFreeMeetingUpgradeToProMeeting() {
-
+        emitSharedJsEvent(EVENT_TYPE_FREE_MEETING_UPGRADE_TO_PRO_MEETING, null);
     }
 
     @Override
     public void onClosedCaptionReceived(String s, long l) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+            eventData.put(DATA_KEY_VALUE, s);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_CLOSED_CAPTION_RECEIVED, eventData);
     }
 
     @Override
     public void onRecordingStatus(RecordingStatus recordingStatus) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_RECORDING_STATUS, recordingStatus.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_RECORDING_STATUS, eventData);
     }
 
     @Override
     public void onLocalRecordingStatus(long l, RecordingStatus recordingStatus) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_RECORDING_STATUS, recordingStatus.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_LOCAL_RECORDING_STATUS, eventData);
     }
 
     @Override
     public void onInvalidReclaimHostkey() {
-
+        emitSharedJsEvent(EVENT_TYPE_INVALID_RECLAIM_HOST_KEY, null);
     }
 
     @Override
     public void onPermissionRequested(String[] strings) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_PERMISSIONS, new JSONArray(strings));
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_PERMISSION_REQUESTED, eventData);
     }
 
     @Override
     public void onAllHandsLowered() {
-
+        emitSharedJsEvent(EVENT_TYPE_ALL_HANDS_LOWERED, null);
     }
 
     @Override
     public void onLocalVideoOrderUpdated(List<Long> list) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_CHANGED_USER_LIST, new JSONArray(list));
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_LOCAL_VIDEO_ORDER_UPDATED, eventData);
     }
 
     @Override
-    public void onLocalRecordingPrivilegeRequested(IRequestLocalRecordingPrivilegeHandler iRequestLocalRecordingPrivilegeHandler) {
+    public void onLocalRecordingPrivilegeRequested(
+        IRequestLocalRecordingPrivilegeHandler iRequestLocalRecordingPrivilegeHandler
+    ) {
+        JSONObject eventData = new JSONObject();
+        try {
+            long userId = iRequestLocalRecordingPrivilegeHandler.getRequesterId();
+            eventData.put(DATA_KEY_USER_ID, userId);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_LOCAL_RECORDING_PRIVILEGE_REQUESTED, eventData);
     }
 
     @Override
     public void onSuspendParticipantsActivities() {
-
+        emitSharedJsEvent(EVENT_TYPE_SUSPEND_PARTICIPANTS_ACTIVITIES, null);
     }
 
     @Override
     public void onAllowParticipantsStartVideoNotification(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_ALLOW_PARTICIPANTS_START_VIDEO_NOTIFICATION, eventData);
     }
 
     @Override
     public void onAllowParticipantsRenameNotification(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_ALLOW_PARTICIPANTS_RENAME_NOTIFICATION, eventData);
     }
 
     @Override
     public void onAllowParticipantsUnmuteSelfNotification(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_ALLOW_PARTICIPANTS_UN_MUTE_SELF_NOTIFICATION, eventData);
     }
 
     @Override
     public void onAllowParticipantsShareWhiteBoardNotification(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_ALLOW_PARTICIPANTS_SHARE_WHITE_BOARD_NOTIFICATION, eventData);
     }
 
     @Override
     public void onMeetingLockStatus(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_LOCKED, b);
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_MEETING_LOCK_STATUS, eventData);
     }
 
     @Override
-    public void onRequestLocalRecordingPrivilegeChanged(LocalRecordingRequestPrivilegeStatus localRecordingRequestPrivilegeStatus) {
+    public void onRequestLocalRecordingPrivilegeChanged(
+        LocalRecordingRequestPrivilegeStatus localRecordingRequestPrivilegeStatus
+    ) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_PRIVILEGE_STATUS, localRecordingRequestPrivilegeStatus.toString());
+        } catch (JSONException ignored) {
+        }
 
+        emitSharedJsEvent(EVENT_TYPE_REQUEST_LOCAL_RECORDING_PRIVILEGE_CHANGED, eventData);
     }
 
     @Override
