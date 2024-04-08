@@ -87,6 +87,10 @@ var zoom = {
         }
 
         fn.apply(scope);
+    },
+
+    setSharedEventListener: function(listener, error) {
+        return callNativeFunction('setSharedEventListener', [], listener, error);
     }
 };
 
