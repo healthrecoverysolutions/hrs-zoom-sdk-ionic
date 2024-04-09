@@ -2,7 +2,7 @@
  *  Zoom.h
  *
  *  @author Carson Chen (carson.chen@zoom.us)
- *  @version v4.4.55130.0712
+ *  @version v5.17.11.14222
  */
 
 #import <Cordova/CDV.h>
@@ -12,7 +12,7 @@
  *
  *  A Cordova Plugin to use Zoom Video Conferencing services on Cordova applications.
  */
-@interface Zoom :  CDVPlugin<MobileRTCAuthDelegate, MobileRTCMeetingServiceDelegate, MobileRTCUserServiceDelegate> {
+@interface Zoom :  CDVPlugin<MobileRTCAuthDelegate, MobileRTCMeetingServiceDelegate, MobileRTCSMSServiceDelegate> {
     NSString *callbackId;
     CDVPluginResult* pluginResult;
 }
