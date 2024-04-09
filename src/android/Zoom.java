@@ -23,6 +23,8 @@ import us.zoom.sdk.InMeetingChatController;
 import us.zoom.sdk.InMeetingUserList;
 import us.zoom.sdk.LocalRecordingRequestPrivilegeStatus;
 import us.zoom.sdk.MeetingParameter;
+import us.zoom.sdk.MobileRTCFocusModeShareType;
+import us.zoom.sdk.SDKNotificationServiceError;
 import us.zoom.sdk.VideoQuality;
 import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomSDKAuthenticationListener;
@@ -61,7 +63,7 @@ import timber.log.Timber;
  * A Cordova Plugin to use Zoom Video Conferencing services on Cordova applications.
  *
  * @author  Zoom Video Communications, Inc.
- * @version v5.15.7
+ * @version v5.17.11
  */
 public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener, MeetingServiceListener, InMeetingServiceListener {
     /* Debug variables */
@@ -145,6 +147,15 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String EVENT_TYPE_ALLOW_PARTICIPANTS_SHARE_WHITE_BOARD_NOTIFICATION = "allowParticipantsShareWhiteBoardNotification";
     private static final String EVENT_TYPE_MEETING_LOCK_STATUS = "meetingLockStatus";
     private static final String EVENT_TYPE_REQUEST_LOCAL_RECORDING_PRIVILEGE_CHANGED = "requestLocalRecordingPrivilegeChanged";
+    private static final String EVENT_TYPE_AI_COMPANION_ACTIVE_CHANGE_NOTICE = "aiCompanionActiveChangeNotice";
+    private static final String EVENT_TYPE_PARTICIPANT_PROFILE_PICTURE_STATUS_CHANGE = "participantProfilePictureStatusChange";
+    private static final String EVENT_TYPE_CLOUD_RECORDING_STORAGE_FULL = "cloudRecordingStorageFull";
+    private static final String EVENT_TYPE_UVC_CAMERA_STATUS_CHANGE = "uvcCameraStatusChange";
+    private static final String EVENT_TYPE_FOCUS_MODE_STATE_CHANGED = "focusModeStateChanged";
+    private static final String EVENT_TYPE_FOCUS_MODE_SHARE_TYPE_CHANGED = "focusModeShareTypeChanged";
+    private static final String EVENT_TYPE_VIDEO_ALPHA_CHANNEL_STATUS_CHANGED = "videoAlphaChannelStatusChanged";
+    private static final String EVENT_TYPE_ALLOW_PARTICIPANT_REQUEST_CLOUD_RECORDING= "allowParticipantRequestCloudRecording";
+    private static final String EVENT_TYPE_NOTIFICATION_SERVICE_STATUS = "notificationServiceStatus";
 
     private static final String DATA_KEY_VALUE = "value";
     private static final String DATA_KEY_STATUS = "status";
@@ -182,6 +193,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String DATA_KEY_RECORDING_STATUS = "recordingStatus";
     private static final String DATA_KEY_PERMISSIONS = "permissions";
     private static final String DATA_KEY_LOCKED = "locked";
+    private static final String DATA_KEY_UVC_CAMERA_STATUS = "uvcCameraStatus";
+    private static final String DATA_KEY_FOCUS_MODE_SHARE_TYPE = "focusModeShareType";
 
     private static final String ACTION_INITIALIZE = "initialize";
     private static final String ACTION_INITIALIZE_WITH_JWT = "initializeWithJWT";
@@ -2130,5 +2143,109 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         emitSharedJsEvent(EVENT_TYPE_REQUEST_LOCAL_RECORDING_PRIVILEGE_CHANGED, eventData);
+    }
+
+    @Override
+    public void onAICompanionActiveChangeNotice(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_AI_COMPANION_ACTIVE_CHANGE_NOTICE, eventData);
+    }
+
+    @Override
+    public void onParticipantProfilePictureStatusChange(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_PARTICIPANT_PROFILE_PICTURE_STATUS_CHANGE, eventData);
+    }
+
+    @Override
+    public void onCloudRecordingStorageFull(long l) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_CLOUD_RECORDING_STORAGE_FULL, eventData);
+    }
+
+    @Override
+    public void onUVCCameraStatusChange(String s, UVCCameraStatus uvcCameraStatus) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_MESSAGE, s);
+            eventData.put(DATA_KEY_UVC_CAMERA_STATUS, uvcCameraStatus.toString());
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_UVC_CAMERA_STATUS_CHANGE, eventData);
+    }
+
+    @Override
+    public void onFocusModeStateChanged(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_FOCUS_MODE_STATE_CHANGED, eventData);
+    }
+
+    @Override
+    public void onFocusModeShareTypeChanged(MobileRTCFocusModeShareType mobileRTCFocusModeShareType) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_FOCUS_MODE_SHARE_TYPE, mobileRTCFocusModeShareType.toString());
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_FOCUS_MODE_SHARE_TYPE_CHANGED, eventData);
+    }
+
+    @Override
+    public void onVideoAlphaChannelStatusChanged(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_VIDEO_ALPHA_CHANNEL_STATUS_CHANGED, eventData);
+    }
+
+    @Override
+    public void onAllowParticipantsRequestCloudRecording(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_ALLOW_PARTICIPANT_REQUEST_CLOUD_RECORDING, eventData);
+    }
+
+    @Override
+    public void onNotificationServiceStatus(
+        SDKNotificationServiceStatus sdkNotificationServiceStatus,
+        SDKNotificationServiceError sdkNotificationServiceError
+    ) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_STATUS, sdkNotificationServiceStatus.toString());
+            eventData.put(DATA_KEY_ERROR, sdkNotificationServiceError.toString());
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_NOTIFICATION_SERVICE_STATUS, eventData);
     }
 }
