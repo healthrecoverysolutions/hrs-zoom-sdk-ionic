@@ -24,6 +24,8 @@ import us.zoom.sdk.IRequestLocalRecordingPrivilegeHandler;
 import us.zoom.sdk.InMeetingChatController;
 import us.zoom.sdk.LocalRecordingRequestPrivilegeStatus;
 import us.zoom.sdk.MeetingParameter;
+import us.zoom.sdk.MobileRTCFocusModeShareType;
+import us.zoom.sdk.SDKNotificationServiceError;
 import us.zoom.sdk.VideoQuality;
 import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomSDKAuthenticationListener;
@@ -61,14 +63,147 @@ import timber.log.Timber;
  * A Cordova Plugin to use Zoom Video Conferencing services on Cordova applications.
  *
  * @author  Zoom Video Communications, Inc.
- * @version v5.15.7
+ * @version v5.17.11
  */
 public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener, MeetingServiceListener, InMeetingServiceListener {
     /* Debug variables */
     private static final boolean DEBUG = true;
     public static final Object LOCK = new Object();
 
-    private String WEB_DOMAIN = "https://zoom.us";
+    private static final String WEB_DOMAIN = "https://zoom.us";
+
+    private static final String KEY_TYPE = "type";
+    private static final String KEY_DATA = "data";
+
+    private static final String EVENT_TYPE_NOTIFICATION_SERVICE_STATUS_CHANGED = "notificationServiceStatusChanged";
+    private static final String EVENT_TYPE_SHARED_MEETING_CHAT_STATUS_CHANGED = "sharedMeetingChatStatusChanged";
+    private static final String EVENT_TYPE_SDK_INITIALIZE_RESULT = "sdkInitializeResult";
+    private static final String EVENT_TYPE_SDK_INITIALIZE_AUTH_IDENTITY_EXPIRED = "sdkInitializeAuthIdentityExpired";
+    private static final String EVENT_TYPE_AUTH_IDENTITY_EXPIRED = "authIdentityExpired";
+    private static final String EVENT_TYPE_IDENTITY_EXPIRED = "identityExpired";
+    private static final String EVENT_TYPE_LOGIN_STATUS_UPDATE = "loginStatusUpdate";
+    private static final String EVENT_TYPE_JOIN_MEETING_RESULT = "joinMeetingResult";
+    private static final String EVENT_TYPE_START_MEETING_RESULT = "startMeetingResult";
+    private static final String EVENT_TYPE_START_INSTANT_MEETING_RESULT = "startInstantMeetingResult";
+    private static final String EVENT_TYPE_SDK_LOGIN_RESULT = "sdkLoginResult";
+    private static final String EVENT_TYPE_SDK_LOGOUT_RESULT = "sdkLogoutResult";
+    private static final String EVENT_TYPE_MEETING_STATUS_CHANGED = "meetingStatusChanged";
+    private static final String EVENT_TYPE_MEETING_PARAMETER_NOTIFICATION = "meetingParameterNotification";
+    private static final String EVENT_TYPE_MEETING_LEAVE_COMPLETE = "meetingLeaveComplete";
+    private static final String EVENT_TYPE_MEETING_NEEDS_PASSWORD_OR_DISPLAY_NAME = "meetingNeedsPasswordOrDisplayName";
+    private static final String EVENT_TYPE_WEBINAR_NEEDS_REGISTER = "webinarNeedsRegister";
+    private static final String EVENT_TYPE_WEBINAR_NEEDS_USER_NAME_AND_EMAIL = "webinarNeedsUserNameAndEmail";
+    private static final String EVENT_TYPE_MEETING_NEEDS_TO_CLOSE_OTHER_MEETING = "meetingNeedsToCloseOtherMeeting";
+    private static final String EVENT_TYPE_MEETING_FAIL = "meetingFail";
+    private static final String EVENT_TYPE_MEETING_USER_JOIN = "meetingUserJoin";
+    private static final String EVENT_TYPE_MEETING_USER_LEAVE = "meetingUserLeave";
+    private static final String EVENT_TYPE_MEETING_USER_UPDATED = "meetingUserUpdated";
+    private static final String EVENT_TYPE_IN_MEETING_USER_AVATAR_PATH_UPDATED = "inMeetingUserAvatarPathUpdated";
+    private static final String EVENT_TYPE_MEETING_HOST_CHANGED = "meetingHostChanged";
+    private static final String EVENT_TYPE_MEETING_CO_HOST_CHANGED = "meetingCoHostChanged";
+    private static final String EVENT_TYPE_ACTIVE_VIDEO_USER_CHANGED = "activeVideoUserChanged";
+    private static final String EVENT_TYPE_ACTIVE_SPEAKER_VIDEO_USER_CHANGED = "activeSpeakerVideoUserChanged";
+    private static final String EVENT_TYPE_HOST_VIDEO_ORDER_UPDATED = "hostVideoOrderUpdated";
+    private static final String EVENT_TYPE_FOLLOW_HOST_VIDEO_ORDER_CHANGED = "followHostVideoOrderChanged";
+    private static final String EVENT_TYPE_SPOTLIGHT_VIDEO_CHANGED = "spotlightVideoChanged";
+    private static final String EVENT_TYPE_USER_VIDEO_STATUS_CHANGED = "userVideoStatusChanged";
+    private static final String EVENT_TYPE_MICROPHONE_STATUS_ERROR = "microphoneStatusError";
+    private static final String EVENT_TYPE_USER_AUDIO_STATUS_CHANGED = "userAudioStatusChanged";
+    private static final String EVENT_TYPE_USER_AUDIO_TYPE_CHANGED = "userAudioTypeChanged";
+    private static final String EVENT_TYPE_MY_AUDIO_SOURCE_TYPE_CHANGED = "myAudioSourceTypeChanged";
+    private static final String EVENT_TYPE_LOW_OR_RAISE_HAND_STATUS_CHANGED = "lowOrRaiseHandStatusChanged";
+    private static final String EVENT_TYPE_CHAT_MESSAGE_RECEIVED = "chatMessageReceived";
+    private static final String EVENT_TYPE_CHAT_MESSAGE_DELETE_NOTIFICATION = "chatMessageDeleteNotification";
+    private static final String EVENT_TYPE_USER_NETWORK_QUALITY_CHANGED = "userNetworkQualityChanged";
+    private static final String EVENT_TYPE_SINK_MEETING_VIDEO_QUALITY_CHANGED = "sinkMeetingVideoQualityChanged";
+    private static final String EVENT_TYPE_HOST_ASK_UN_MUTE = "hostAskUnMute";
+    private static final String EVENT_TYPE_HOST_ASK_START_VIDEO = "hostAskStartVideo";
+    private static final String EVENT_TYPE_SILENT_MODE_CHANGED = "silentModeChanged";
+    private static final String EVENT_TYPE_FREE_MEETING_REMINDER = "freeMeetingReminder";
+    private static final String EVENT_TYPE_MEETING_ACTIVE_VIDEO = "meetingActiveVideo";
+    private static final String EVENT_TYPE_SINK_ATTENDEE_CHAT_PRIVILEGE_CHANGED = "sinkAttendeeChatPrivilegeChanged";
+    private static final String EVENT_TYPE_SINK_ALLOW_ATTENDEE_CHAT_NOTIFICATION = "sinkAllowAttendeeChatNotification";
+    private static final String EVENT_TYPE_SINK_PANELIST_CHAT_PRIVILEGE_CHANGED = "sinkPanelistChatPrivilegeChanged";
+    private static final String EVENT_TYPE_USER_NAME_CHANGED = "userNameChanged";
+    private static final String EVENT_TYPE_USER_NAMES_CHANGED = "userNamesChanged";
+    private static final String EVENT_TYPE_FREE_MEETING_NEED_TO_UPGRADE = "freeMeetingNeedToUpgrade";
+    private static final String EVENT_TYPE_FREE_MEETING_UPGRADE_TO_GIFT_FREE_TRIAL_START = "freeMeetingUpgradeToGiftFreeTrialStart";
+    private static final String EVENT_TYPE_FREE_MEETING_UPGRADE_TO_GIFT_FREE_TRIAL_STOP = "freeMeetingUpgradeToGiftFreeTrialStop";
+    private static final String EVENT_TYPE_FREE_MEETING_UPGRADE_TO_PRO_MEETING = "freeMeetingUpgradeToProMeeting";
+    private static final String EVENT_TYPE_CLOSED_CAPTION_RECEIVED = "closedCaptionReceived";
+    private static final String EVENT_TYPE_RECORDING_STATUS = "recordingStatus";
+    private static final String EVENT_TYPE_LOCAL_RECORDING_STATUS = "localRecordingStatus";
+    private static final String EVENT_TYPE_INVALID_RECLAIM_HOST_KEY = "invalidReclaimHostKey";
+    private static final String EVENT_TYPE_PERMISSION_REQUESTED = "permissionRequested";
+    private static final String EVENT_TYPE_ALL_HANDS_LOWERED = "allHandsLowered";
+    private static final String EVENT_TYPE_LOCAL_VIDEO_ORDER_UPDATED = "localVideoOrderUpdated";
+    private static final String EVENT_TYPE_LOCAL_RECORDING_PRIVILEGE_REQUESTED = "localRecordingPrivilegeRequested";
+    private static final String EVENT_TYPE_SUSPEND_PARTICIPANTS_ACTIVITIES = "suspendParticipantsActivities";
+    private static final String EVENT_TYPE_ALLOW_PARTICIPANTS_START_VIDEO_NOTIFICATION = "allowParticipantsStartVideoNotification";
+    private static final String EVENT_TYPE_ALLOW_PARTICIPANTS_RENAME_NOTIFICATION = "allowParticipantsRenameNotification";
+    private static final String EVENT_TYPE_ALLOW_PARTICIPANTS_UN_MUTE_SELF_NOTIFICATION = "allowParticipantsUnMuteSelfNotification";
+    private static final String EVENT_TYPE_ALLOW_PARTICIPANTS_SHARE_WHITE_BOARD_NOTIFICATION = "allowParticipantsShareWhiteBoardNotification";
+    private static final String EVENT_TYPE_MEETING_LOCK_STATUS = "meetingLockStatus";
+    private static final String EVENT_TYPE_REQUEST_LOCAL_RECORDING_PRIVILEGE_CHANGED = "requestLocalRecordingPrivilegeChanged";
+    private static final String EVENT_TYPE_AI_COMPANION_ACTIVE_CHANGE_NOTICE = "aiCompanionActiveChangeNotice";
+    private static final String EVENT_TYPE_PARTICIPANT_PROFILE_PICTURE_STATUS_CHANGE = "participantProfilePictureStatusChange";
+    private static final String EVENT_TYPE_CLOUD_RECORDING_STORAGE_FULL = "cloudRecordingStorageFull";
+    private static final String EVENT_TYPE_UVC_CAMERA_STATUS_CHANGE = "uvcCameraStatusChange";
+    private static final String EVENT_TYPE_FOCUS_MODE_STATE_CHANGED = "focusModeStateChanged";
+    private static final String EVENT_TYPE_FOCUS_MODE_SHARE_TYPE_CHANGED = "focusModeShareTypeChanged";
+    private static final String EVENT_TYPE_VIDEO_ALPHA_CHANNEL_STATUS_CHANGED = "videoAlphaChannelStatusChanged";
+    private static final String EVENT_TYPE_ALLOW_PARTICIPANT_REQUEST_CLOUD_RECORDING= "allowParticipantRequestCloudRecording";
+    private static final String EVENT_TYPE_NOTIFICATION_SERVICE_STATUS = "notificationServiceStatus";
+
+    private static final String DATA_KEY_VALUE = "value";
+    private static final String DATA_KEY_STATUS = "status";
+    private static final String DATA_KEY_ENABLED = "enabled";
+    private static final String DATA_KEY_MEETING_STATUS = "meetingStatus";
+    private static final String DATA_KEY_START = "start";
+    private static final String DATA_KEY_SUCCESS = "success";
+    private static final String DATA_KEY_TYPE = "type";
+    private static final String DATA_KEY_ERROR = "error";
+    private static final String DATA_KEY_ERROR_CODE = "errorCode";
+    private static final String DATA_KEY_INTERNAL_ERROR_CODE = "internalErrorCode";
+    private static final String DATA_KEY_IS_LOGGED_IN = "isLoggedIn";
+    private static final String DATA_KEY_MESSAGE = "message";
+    private static final String DATA_KEY_AUTH_ERROR_MESSAGE = "authErrorMessage";
+    private static final String DATA_KEY_RESULT = "result";
+    private static final String DATA_KEY_MEETING_HOST = "meetingHost";
+    private static final String DATA_KEY_MEETING_NUMBER = "meetingNumber";
+    private static final String DATA_KEY_MEETING_TOPIC = "meetingTopic";
+    private static final String DATA_KEY_MEETING_TYPE = "meetingType";
+    private static final String DATA_KEY_IS_AUTO_RECORDING_CLOUD = "isAutoRecordingCloud";
+    private static final String DATA_KEY_IS_AUTO_RECORDING_LOCAL = "isAutoRecordingLocal";
+    private static final String DATA_KEY_IS_VIEW_ONLY = "isViewOnly";
+    private static final String DATA_KEY_NEEDS_PASSWORD = "needsPassword";
+    private static final String DATA_KEY_NEEDS_DISPLAY_NAME = "needsDisplayName";
+    private static final String DATA_KEY_CURRENT_USER_LIST = "currentUserList";
+    private static final String DATA_KEY_CHANGED_USER_LIST = "changedUserList";
+    private static final String DATA_KEY_USER_ID = "userId";
+    private static final String DATA_KEY_VIDEO_QUALITY = "videoQuality";
+    private static final String DATA_KEY_IN_SILENT_MODE = "inSilentMode";
+    private static final String DATA_KEY_IS_ORIGINAL_HOST = "isOriginalHost";
+    private static final String DATA_KEY_CAN_UPGRADE = "canUpgrade";
+    private static final String DATA_KEY_IS_FIRST_GIFT = "isFirstGift";
+    private static final String DATA_KEY_PRIVILEGE = "privilege";
+    private static final String DATA_KEY_PRIVILEGE_STATUS = "privilegeStatus";
+    private static final String DATA_KEY_RECORDING_STATUS = "recordingStatus";
+    private static final String DATA_KEY_PERMISSIONS = "permissions";
+    private static final String DATA_KEY_LOCKED = "locked";
+    private static final String DATA_KEY_UVC_CAMERA_STATUS = "uvcCameraStatus";
+    private static final String DATA_KEY_FOCUS_MODE_SHARE_TYPE = "focusModeShareType";
+
+    private static final String ACTION_INITIALIZE = "initialize";
+    private static final String ACTION_INITIALIZE_WITH_JWT = "initializeWithJWT";
+    private static final String ACTION_LOGIN = "login";
+    private static final String ACTION_LOGOUT = "logout";
+    private static final String ACTION_IS_LOGGED_IN = "isLoggedIn";
+    private static final String ACTION_JOIN_MEETING = "joinMeeting";
+    private static final String ACTION_START_MEETING = "startMeeting";
+    private static final String ACTION_START_INSTANT_MEETING = "startInstantMeeting";
+    private static final String ACTION_SET_LOCALE = "setLocale";
+    private static final String ACTION_SET_SHARED_EVENT_LISTENER = "setSharedEventListener";
 
     private CallbackContext callbackContext;
 
@@ -1548,5 +1683,109 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     @Override
     public void onRequestLocalRecordingPrivilegeChanged(LocalRecordingRequestPrivilegeStatus localRecordingRequestPrivilegeStatus) {
 
+    }
+
+    @Override
+    public void onAICompanionActiveChangeNotice(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_AI_COMPANION_ACTIVE_CHANGE_NOTICE, eventData);
+    }
+
+    @Override
+    public void onParticipantProfilePictureStatusChange(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_PARTICIPANT_PROFILE_PICTURE_STATUS_CHANGE, eventData);
+    }
+
+    @Override
+    public void onCloudRecordingStorageFull(long l) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_CLOUD_RECORDING_STORAGE_FULL, eventData);
+    }
+
+    @Override
+    public void onUVCCameraStatusChange(String s, UVCCameraStatus uvcCameraStatus) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_MESSAGE, s);
+            eventData.put(DATA_KEY_UVC_CAMERA_STATUS, uvcCameraStatus.toString());
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_UVC_CAMERA_STATUS_CHANGE, eventData);
+    }
+
+    @Override
+    public void onFocusModeStateChanged(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_FOCUS_MODE_STATE_CHANGED, eventData);
+    }
+
+    @Override
+    public void onFocusModeShareTypeChanged(MobileRTCFocusModeShareType mobileRTCFocusModeShareType) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_FOCUS_MODE_SHARE_TYPE, mobileRTCFocusModeShareType.toString());
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_FOCUS_MODE_SHARE_TYPE_CHANGED, eventData);
+    }
+
+    @Override
+    public void onVideoAlphaChannelStatusChanged(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_VIDEO_ALPHA_CHANNEL_STATUS_CHANGED, eventData);
+    }
+
+    @Override
+    public void onAllowParticipantsRequestCloudRecording(boolean b) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_ENABLED, b);
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_ALLOW_PARTICIPANT_REQUEST_CLOUD_RECORDING, eventData);
+    }
+
+    @Override
+    public void onNotificationServiceStatus(
+        SDKNotificationServiceStatus sdkNotificationServiceStatus,
+        SDKNotificationServiceError sdkNotificationServiceError
+    ) {
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_STATUS, sdkNotificationServiceStatus.toString());
+            eventData.put(DATA_KEY_ERROR, sdkNotificationServiceError.toString());
+        } catch (JSONException ignored) {
+        }
+
+        emitSharedJsEvent(EVENT_TYPE_NOTIFICATION_SERVICE_STATUS, eventData);
     }
 }
