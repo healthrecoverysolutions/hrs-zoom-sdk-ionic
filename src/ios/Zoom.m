@@ -2,7 +2,7 @@
  *  Zoom.m
  *
  *  @author Zoom Video Communications, Inc.
- *  @version v5.15.7
+ *  @version v5.17.11.14222
  */
 #import "Zoom.h"
 #import <CocoaLumberjack/CocoaLumberjack.h>
