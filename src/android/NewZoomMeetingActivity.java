@@ -1,10 +1,24 @@
 package cordova.plugin.zoom;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.hrs.patient.R;
 
 import us.zoom.sdk.CustomizedMiniMeetingViewSize;
 import us.zoom.sdk.MeetingService;
@@ -47,6 +61,83 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
                 endMeetingAndMoveToActivity();
             }
         });
+
+        // working code programmatically
+//         linearLayout = new LinearLayout(this);
+//        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+//            LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+//        linearLayout.setBackgroundColor(Color.TRANSPARENT);
+//        layoutParams.setMargins(0, 100, 0, 0);
+//         userWaiting = new TextView(this);
+//         userWaiting.setText("Waiting for other participants to join...");
+//         userWaiting.setTextColor(Color.WHITE);
+//         userWaiting.setTypeface(Typeface.DEFAULT_BOLD);
+//         userWaiting.setPadding(0, 5, 5, 0);
+//         userWaiting.setBackgroundColor(Color.BLACK);
+//         userWaiting.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//         userWaiting.setGravity(Gravity.CENTER_HORIZONTAL);
+//
+//         userWaiting.setTextSize(20);
+//         linearLayout.addView(userWaiting, layoutParams);
+//         container_in_conf = (FrameLayout) findViewById(R.id.container_in_conf);
+
+        // from layout
+        LayoutInflater li = LayoutInflater.from(this);
+        linearLayout = (LinearLayout) li.inflate(R.layout.zoom_user_waiting_layout, null, false);
+        container_in_conf = (FrameLayout) findViewById(R.id.container_in_conf);
+
+    }
+    static TextView userWaiting ;
+    static LinearLayout linearLayout;
+    static FrameLayout container_in_conf;
+    public static void toggleWaitingMessage(boolean show) {
+
+//        if(show) {
+//            container_in_conf.addView(userWaiting);
+//        } else {
+//            container_in_conf.removeView(userWaiting);
+//        }
+//
+
+
+        if(show) {
+            container_in_conf.addView(linearLayout);
+        } else {
+            container_in_conf.removeView(linearLayout);
+        }
+    }
+
+    public static Context getFrontActivityContext() {
+        return getFrontActivity();
+    }
+
+    public static void showAlertDialog() {
+//        runOnUiThread(
+//            new Runnable() {
+//                public void run() {
+
+                    // show a dialog
+                    // Use the Builder class for convenient dialog construction.
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getFrontActivity());
+                    builder.setMessage("There is another incoming call, please end the current call to answer that or ignore for now")
+                        .setPositiveButton("End Call", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                               // endMeeting();
+                            }
+                        })
+                        .setNegativeButton("Ignore", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancels the dialog.
+                            }
+                        });
+                    // Create the AlertDialog object and return it.
+
+                    AlertDialog alert11 =  builder.create();
+                    // alert11.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                    alert11.show();
+                    // Toast.makeText(cordova.getContext(), "There is another incoming call, please end the current call to answer that or ignore for now" + status, Toast.LENGTH_LONG).show();
+           //     }
+          //  });
     }
 
     @Override
