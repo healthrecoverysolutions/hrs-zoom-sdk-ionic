@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
 import android.view.WindowManager;
@@ -336,7 +337,11 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                  //   NewZoomMeetingActivity.showAlertDialog();
 //                    // show a dialog
 //                    // Use the Builder class for convenient dialog construction.
-                    AlertDialog.Builder builder = new AlertDialog.Builder(NewZoomMeetingActivity.getFrontActivityContext());
+                    Context context = NewZoomMeetingActivity.getFrontActivityContext(); // maximised
+                    if(context == null) {
+                        context = cordova.getContext();
+                    }
+                    AlertDialog.Builder builder = new AlertDialog.Builder(/*NewZoomMeetingActivity.getFrontActivityContext()*/ context);
                     builder.setMessage("There is another incoming call, please end the current call to answer that or ignore for now")
                         .setPositiveButton("End Call", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -1674,7 +1679,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         cordova.getActivity().runOnUiThread(
             new Runnable() {
                 public void run() {
-                    Toast.makeText(cordova.getContext(), "Call Declined. Your clinician/caregiver couldn't answer. Please try again later.", Toast.LENGTH_LONG).show();
+                    // Toast.makeText(cordova.getContext(), "Call Declined. Your clinician/caregiver couldn't answer. Please try again later.", Toast.LENGTH_LONG).show();
 
                     MeetingService mService = ZoomSDK.getInstance().getMeetingService();
                     mService.leaveCurrentMeeting(true); // If it is TRUE and the current user is the meeting host, the meeting ends directly.
