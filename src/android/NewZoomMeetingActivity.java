@@ -21,7 +21,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
 
     private String appResourcesPackage;
     private static LinearLayout userWaitingLayout;
-    private static FrameLayout container_in_conf;
+    private static FrameLayout containerInConf;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,14 +55,14 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
 
         LayoutInflater li = LayoutInflater.from(this);
         userWaitingLayout =  (LinearLayout) li.inflate(getResources().getIdentifier("zoom_user_waiting_layout", "layout", appResourcesPackage), null, false);
-        container_in_conf = (FrameLayout) findViewById(getResources().getIdentifier("container_in_conf", "id", appResourcesPackage));
+        containerInConf = (FrameLayout) findViewById(getResources().getIdentifier("container_in_conf", "id", appResourcesPackage));
     }
 
     public static void enableWaitingMessage(boolean show) {
         if(show) {
-            container_in_conf.addView(userWaitingLayout);
+            containerInConf.addView(userWaitingLayout);
         } else {
-            container_in_conf.removeView(userWaitingLayout);
+            containerInConf.removeView(userWaitingLayout);
         }
     }
 
