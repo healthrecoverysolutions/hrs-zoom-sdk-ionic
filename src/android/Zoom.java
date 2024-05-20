@@ -308,6 +308,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             case ACTION_SET_SHARED_EVENT_LISTENER:
                 setSharedEventListener(callbackContext);
                 break;
+
             default:
                 return false;
         }
@@ -1567,7 +1568,6 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             eventData.put(DATA_KEY_INTERNAL_ERROR_CODE, i1);
         } catch (JSONException ignored) {
         }
-
         emitSharedJsEvent(EVENT_TYPE_MEETING_FAIL, eventData);
     }
 
@@ -1583,22 +1583,23 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             zoomUIService.switchToActiveSpeaker(); // switch to speaker view
         }
 
+        int inMeetingUserListSize = meetingService.getInMeetingUserList().size();
+        NewZoomMeetingActivity.enableWaitingMessage((inMeetingUserListSize <= 1));
+
         JSONObject eventData = new JSONObject();
         try {
             eventData.put(DATA_KEY_CURRENT_USER_LIST, new JSONArray(currentUserList));
             eventData.put(DATA_KEY_CHANGED_USER_LIST, new JSONArray(list));
         } catch (JSONException ignored) {
         }
-
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_JOIN, eventData);
     }
 
     @Override
     public void onMeetingUserLeave(List<Long> list) {
         ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
-        InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
-        List<Long> currentUserList = meetingService.getInMeetingUserList();
-
+        InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
+        List<Long> currentUserList = inMeetingService.getInMeetingUserList();
         if (currentUserList !=null && currentUserList.size() < ZOOM_UI_AUTO_CHANGE_FROM_USER_COUNT) {
             zoomUIService.switchToActiveSpeaker();
         } else {
@@ -1613,6 +1614,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_LEAVE, eventData);
+        if (currentUserList !=null && currentUserList.size() == 1) {
+            MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
+            meetingService.leaveCurrentMeeting(true); // If it is TRUE and the current user is the meeting host, the meeting ends directly.
+        }
     }
 
     @Override
