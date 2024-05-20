@@ -19,7 +19,7 @@ import timber.log.Timber;
 
 public class NewZoomMeetingActivity extends NewMeetingActivity {
 
-    private String appResourcesPackage = getPackageName();
+    private String appResourcesPackage;
     private static LinearLayout userWaitingLayout;
     private static FrameLayout container_in_conf;
 
@@ -58,7 +58,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
         container_in_conf = (FrameLayout) findViewById(getResources().getIdentifier("container_in_conf", "id", appResourcesPackage));
     }
 
-    public static void toggleWaitingMessage(boolean show) {
+    public static void enableWaitingMessage(boolean show) {
         if(show) {
             container_in_conf.addView(userWaitingLayout);
         } else {

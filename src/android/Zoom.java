@@ -1577,6 +1577,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
         InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
         List<Long> currentUserList = meetingService.getInMeetingUserList();
+
         if (currentUserList != null && currentUserList.size() >= ZOOM_UI_AUTO_CHANGE_FROM_USER_COUNT) {
             zoomUIService.switchToVideoWall(); // gallery view
         } else {
@@ -1584,7 +1585,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         int inMeetingUserListSize = meetingService.getInMeetingUserList().size();
-        NewZoomMeetingActivity.toggleWaitingMessage((inMeetingUserListSize <= 1) ? true : false);
+        NewZoomMeetingActivity.enableWaitingMessage((inMeetingUserListSize <= 1) ? true : false);
 
         JSONObject eventData = new JSONObject();
         try {
@@ -1593,20 +1594,19 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         } catch (JSONException ignored) {
         }
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_JOIN, eventData);
-
-
     }
 
     @Override
     public void onMeetingUserLeave(List<Long> list) {
         ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
-        InMeetingService imMeetingService = ZoomSDK.getInstance().getInMeetingService();
-        List<Long> currentUserList = imMeetingService.getInMeetingUserList();
+        InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
+        List<Long> currentUserList = inMeetingService.getInMeetingUserList();
         if (currentUserList !=null && currentUserList.size() < ZOOM_UI_AUTO_CHANGE_FROM_USER_COUNT) {
             zoomUIService.switchToActiveSpeaker();
         } else {
             zoomUIService.switchToVideoWall();
         }
+
         JSONObject eventData = new JSONObject();
         try {
             eventData.put(DATA_KEY_CURRENT_USER_LIST, new JSONArray(currentUserList));
