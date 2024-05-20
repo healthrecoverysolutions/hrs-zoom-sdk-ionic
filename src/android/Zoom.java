@@ -1568,7 +1568,6 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             eventData.put(DATA_KEY_INTERNAL_ERROR_CODE, i1);
         } catch (JSONException ignored) {
         }
-
         emitSharedJsEvent(EVENT_TYPE_MEETING_FAIL, eventData);
     }
 
@@ -1585,7 +1584,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         int inMeetingUserListSize = meetingService.getInMeetingUserList().size();
-        NewZoomMeetingActivity.enableWaitingMessage((inMeetingUserListSize <= 1) ? true : false);
+        NewZoomMeetingActivity.enableWaitingMessage((inMeetingUserListSize <= 1));
 
         JSONObject eventData = new JSONObject();
         try {
@@ -1613,6 +1612,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             eventData.put(DATA_KEY_CHANGED_USER_LIST, new JSONArray(list));
         } catch (JSONException ignored) {
         }
+
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_LEAVE, eventData);
         if (currentUserList !=null && currentUserList.size() == 1) {
             MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
