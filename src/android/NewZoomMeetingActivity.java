@@ -2,9 +2,12 @@ package cordova.plugin.zoom;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import us.zoom.sdk.CustomizedMiniMeetingViewSize;
 import us.zoom.sdk.MeetingService;
@@ -17,6 +20,8 @@ import timber.log.Timber;
 public class NewZoomMeetingActivity extends NewMeetingActivity {
 
     private String appResourcesPackage = getPackageName();
+    private static LinearLayout userWaitingLayout;
+    private static FrameLayout container_in_conf;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,6 +52,18 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
                 endMeetingAndMoveToActivity();
             }
         });
+
+        LayoutInflater li = LayoutInflater.from(this);
+        userWaitingLayout =  (LinearLayout) li.inflate(getResources().getIdentifier("zoom_user_waiting_layout", "layout", appResourcesPackage), null, false);
+        container_in_conf = (FrameLayout) findViewById(getResources().getIdentifier("container_in_conf", "id", appResourcesPackage));
+    }
+
+    public static void toggleWaitingMessage(boolean show) {
+        if(show) {
+            container_in_conf.addView(userWaitingLayout);
+        } else {
+            container_in_conf.removeView(userWaitingLayout);
+        }
     }
 
     @Override
