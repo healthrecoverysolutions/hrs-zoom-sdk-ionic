@@ -13,6 +13,7 @@
 
 @implementation Zoom
 
+UILabel *waitingMessageLabel;
 
 // This method has been deprecated. Now the authservice takes jwtToken at the place of appKey and appSecret.
 - (void)initialize:(CDVInvokedUrlCommand*)command
@@ -331,6 +332,9 @@
         //Return type of muteMyVideo has been replaced with MobileRTCSDKError from MobileRTCVideoError in latest SDK 5.14
         MobileRTCSDKError unmuteResult = [ms muteMyVideo:NO];
         DDLogDebug(@"onMeetingReady unmuteResult: %d", unmuteResult);
+        if([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count == 1){
+            [self addWaitingForParticipantsMessage];
+        }
     }
 }
 
@@ -947,12 +951,16 @@
     if ([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 2){
         // Added one second delay in view switching to get the UI opearations done when new user joins the call
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        [[[MobileRTC sharedRTC] getMeetingService] switchToVideoWall];
+            [[[MobileRTC sharedRTC] getMeetingService] switchToVideoWall];
+            [self hideWaitingForParticipateMessage];
         });
     }else{
         // Added one second delay in view switching to get the UI opearations done when new user joins the call
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             [[[MobileRTC sharedRTC] getMeetingService] switchToActiveSpeaker];
+            if([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 1){
+                [self hideWaitingForParticipateMessage];
+            }
         });
     }
 }
@@ -966,10 +974,42 @@
         });
     }else{
         // Added one second delay in view switching to get the UI opearations done when user leaves the call
+        if([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count <= 1){
+            MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
+            [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
+            return;
+        }
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             [[[MobileRTC sharedRTC] getMeetingService] switchToActiveSpeaker];
         });
     }
 }
 
+// Method for showing waiting message if there is only one user in meeting.
+-(void) addWaitingForParticipantsMessage{
+    UIView *meetingView = [[MobileRTC sharedRTC] getMeetingService].meetingView;
+    waitingMessageLabel = [[UILabel alloc] initWithFrame:CGRectMake(250, 100, 200, 40)];
+    waitingMessageLabel.textColor = UIColor.whiteColor;
+    waitingMessageLabel.font = [UIFont boldSystemFontOfSize:16];
+    waitingMessageLabel.text = @"Waiting for others to join…";
+    waitingMessageLabel.backgroundColor = UIColor.blackColor;
+    [waitingMessageLabel setTextAlignment:NSTextAlignmentCenter];
+    [waitingMessageLabel.layer setCornerRadius:10.0];
+    [waitingMessageLabel setClipsToBounds:YES];
+    [waitingMessageLabel setAlpha:0.7];
+    [waitingMessageLabel setHidden:NO];
+    [meetingView addSubview:waitingMessageLabel];
+    [waitingMessageLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [[waitingMessageLabel.widthAnchor constraintEqualToConstant:250] setActive:YES];
+    [[waitingMessageLabel.heightAnchor constraintEqualToConstant:50] setActive:YES];
+    [[waitingMessageLabel.centerXAnchor constraintEqualToAnchor:meetingView.centerXAnchor] setActive:YES];
+    [[waitingMessageLabel.topAnchor constraintEqualToAnchor:meetingView.topAnchor constant:125] setActive:YES];
+}
+
+// Method for hiding waiting message when others have joined the meeting.
+-(void) hideWaitingForParticipateMessage{
+    if(waitingMessageLabel){
+        [waitingMessageLabel setHidden:YES];
+    }
+}
 @end
