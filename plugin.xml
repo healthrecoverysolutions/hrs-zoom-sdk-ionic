@@ -63,7 +63,7 @@
         <framework src="libs/ios/MobileRTC.xcframework" custom="true" embed="true" />
         <header-file src="src/ios/Zoom.h" />
         <source-file src="src/ios/Zoom.m" />
-        <header-file src="src/ios/AdditionalZoomUIComponents.h" />
-        <source-file src="src/ios/AdditionalZoomUIComponents.m" />
+        <header-file src="src/ios/CustomMessageComponent.h" />
+        <source-file src="src/ios/CustomMessageComponent.m" />
     </platform>
 </plugin>
