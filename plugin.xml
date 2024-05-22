@@ -12,7 +12,7 @@
         </config-file>
        <config-file target="res/values/strings.xml" parent="/*">
         <string name="zm_msg_meeting_permission">For the best meeting experience, Zoom may ask to access to your microphone, camera, nearby devices and storage.</string>
-       </config-file> 
+       </config-file>
         <config-file parent="/*" target="AndroidManifest.xml">
             <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
             <uses-permission android:name="android.permission.INTERNET" />
@@ -62,5 +62,7 @@
         <framework src="libs/ios/MobileRTC.xcframework" custom="true" embed="true" />
         <header-file src="src/ios/Zoom.h" />
         <source-file src="src/ios/Zoom.m" />
+        <header-file src="src/ios/AdditionalZoomUIComponents.h" />
+        <source-file src="src/ios/AdditionalZoomUIComponents.m" />
     </platform>
 </plugin>
