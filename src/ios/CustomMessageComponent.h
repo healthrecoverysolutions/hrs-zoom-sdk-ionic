@@ -9,8 +9,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AdditionalZoomUIComponents : UIView
-
+@interface CustomMessageComponent : UIView
+-(void) setMessageLabelText: (NSString*) message;
 @end
 
 NS_ASSUME_NONNULL_END

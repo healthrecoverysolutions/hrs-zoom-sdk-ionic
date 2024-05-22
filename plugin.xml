@@ -51,6 +51,7 @@
             </feature>
         </config-file>
         <resource-file src="libs/ios/MobileRTCResources.bundle" />
+        <resource-file src="www/Localizable.strings" target="Localizable.strings" />
         <podspec>
             <config>
                 <source url="https://cdn.cocoapods.org/" />

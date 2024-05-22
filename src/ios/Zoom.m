@@ -6,14 +6,14 @@
  */
 #import "Zoom.h"
 #import <CocoaLumberjack/CocoaLumberjack.h>
-#import "AdditionalZoomUIComponents.h"
+#import "CustomMessageComponent.h"
 #define ddLogLevel DDLogLevelAll
 #define kSDKDomain  @"https://zoom.us"
 #define DEBUG   YES
 
 @implementation Zoom
 
-AdditionalZoomUIComponents *additionalZoomMessageView;
+CustomMessageComponent *customMessageComponent;
 
 // This method has been deprecated. Now the authservice takes jwtToken at the place of appKey and appSecret.
 - (void)initialize:(CDVInvokedUrlCommand*)command
@@ -990,19 +990,20 @@ AdditionalZoomUIComponents *additionalZoomMessageView;
 // Method for adding "Waiting for others to join.." message if there is only one user in meeting.
 -(void) addWaitingForParticipantsMessage{
     UIView *meetingView = [[MobileRTC sharedRTC] getMeetingService].meetingView;
-    additionalZoomMessageView = [[AdditionalZoomUIComponents alloc] initWithFrame:CGRectMake(meetingView.frame.origin.x, meetingView.frame.origin.y, meetingView.frame.size.width, meetingView.frame.size.height)];
-    [meetingView addSubview:additionalZoomMessageView];
-    [additionalZoomMessageView setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [[additionalZoomMessageView.widthAnchor constraintEqualToConstant:meetingView.frame.size.width] setActive:YES];
-    [[additionalZoomMessageView.heightAnchor constraintEqualToConstant:meetingView.frame.size.height] setActive:YES];
-    [[additionalZoomMessageView.leadingAnchor constraintEqualToAnchor:meetingView.leadingAnchor] setActive:YES];
-    [[additionalZoomMessageView.trailingAnchor constraintEqualToAnchor:meetingView.trailingAnchor constant:0] setActive:YES];
+    customMessageComponent = [[CustomMessageComponent alloc] initWithFrame:CGRectMake(meetingView.frame.origin.x, meetingView.frame.origin.y, meetingView.frame.size.width, meetingView.frame.size.height)];
+    [meetingView addSubview:customMessageComponent];
+    [customMessageComponent setMessageLabelText: @"Waiting for others to join…"];
+    [customMessageComponent setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [[customMessageComponent.widthAnchor constraintEqualToConstant:meetingView.frame.size.width] setActive:YES];
+    [[customMessageComponent.heightAnchor constraintEqualToConstant:meetingView.frame.size.height] setActive:YES];
+    [[customMessageComponent.leadingAnchor constraintEqualToAnchor:meetingView.leadingAnchor] setActive:YES];
+    [[customMessageComponent.trailingAnchor constraintEqualToAnchor:meetingView.trailingAnchor constant:0] setActive:YES];
 }
 
 // Method for hiding "Waiting for others to join.." message when others have joined the meeting.
 -(void) hideWaitingForParticipateMessage{
-    if(additionalZoomMessageView){
-        [additionalZoomMessageView setHidden:YES];
+    if(customMessageComponent){
+        [customMessageComponent setHidden:YES];
     }
 }
 @end
