@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import us.zoom.sdk.CustomizedMiniMeetingViewSize;
-import us.zoom.sdk.MeetingService;
 import us.zoom.sdk.NewMeetingActivity;
 import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomUIService;
@@ -106,10 +105,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
 
     private void endMeetingAndMoveToActivity() {
         Timber.d("end zoom call and start main activity");
-        ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
-        zoomUIService.hideMiniMeetingWindow();
-        MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
-        meetingService.leaveCurrentMeeting(true);
+        Zoom.getInstance().leaveMeeting();
         startMainActivity();
     }
 

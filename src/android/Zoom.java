@@ -14,7 +14,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.os.Handler;
+import android.widget.Button;
+import android.widget.TextView;
 
 
 import us.zoom.sdk.ChatMessageDeleteType;
@@ -208,6 +214,24 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     private CallbackContext callbackContext;
     private CallbackContext sharedEventContext;
+    private final Handler callIgnoredHandler = new Handler();
+    private static Zoom mInstance = null;
+
+    public static Zoom getInstance() {
+        return mInstance;
+    }
+
+    @Override
+    protected void pluginInitialize() {
+        super.pluginInitialize();
+        mInstance = this;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mInstance = null;
+    }
 
     /**
      * execute
@@ -1576,15 +1600,29 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
         InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
         List<Long> currentUserList = meetingService.getInMeetingUserList();
-
+        int inMeetingUserListSize = currentUserList.size();
         if (currentUserList != null && currentUserList.size() >= ZOOM_UI_AUTO_CHANGE_FROM_USER_COUNT) {
             zoomUIService.switchToVideoWall(); // gallery view
         } else {
             zoomUIService.switchToActiveSpeaker(); // switch to speaker view
         }
 
-        int inMeetingUserListSize = meetingService.getInMeetingUserList().size();
+        // Schedule a task to run after a specified duration and check the number of participants to identify call missed/ignored use case
+        if (inMeetingUserListSize == 1) { // patient is the only one who has joined
+            final Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    checkCallIgnoredByParticipant();
+                }
+            };
+            callIgnoredHandler.postDelayed(runnable, 90000); // Show after 90 seconds as this is the ringing time at clinician/caregivers end
+        }
+
         NewZoomMeetingActivity.enableWaitingMessage((inMeetingUserListSize <= 1));
+        if(inMeetingUserListSize > 1) {
+            if(callIgnoredHandler!=null)
+                callIgnoredHandler.removeCallbacksAndMessages(null); // clear the scheduler as other participant has joined and now we wont need to cancel the call after 90 seconds
+        }
 
         JSONObject eventData = new JSONObject();
         try {
@@ -1593,6 +1631,20 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         } catch (JSONException ignored) {
         }
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_JOIN, eventData);
+    }
+
+    private void checkCallIgnoredByParticipant() {
+        cordova.getActivity().runOnUiThread(
+            new Runnable() {
+                public void run() {
+                    InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
+                    List<Long> currentUserList = meetingService.getInMeetingUserList();
+                    if (meetingService != null && currentUserList != null && currentUserList.size() <= 1) {
+                        int resId = cordova.getActivity().getResources().getIdentifier("zoom_call_missed_message", "string", cordova.getActivity().getPackageName());
+                        showMessageDialog(cordova.getActivity().getResources().getString(resId), 8000); // inform user that call was ignored/missed by the other participant
+                    }
+                }
+            });
     }
 
     @Override
@@ -1615,9 +1667,73 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_LEAVE, eventData);
         if (currentUserList !=null && currentUserList.size() == 1) {
-            MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
-            meetingService.leaveCurrentMeeting(true); // If it is TRUE and the current user is the meeting host, the meeting ends directly.
+            leaveMeeting();
         }
+    }
+
+    public void showMessageDialog(String message, int autoDismissTimeInMillis) {
+        cordova.getActivity().runOnUiThread(
+            new Runnable() {
+                public void run() {
+                    Context context = NewZoomMeetingActivity.getFrontActivity(); // maximised
+                    if(context == null) {
+                        context = cordova.getContext();
+                    }
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Dialog_MinWidth);
+                    builder.setMessage(message)
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                leaveMeeting();
+                            }
+                        });
+
+                    AlertDialog messageDialog = builder.create();
+                    messageDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                        @Override
+                        public void onShow(DialogInterface dialog) {
+                            Button btnPositive = messageDialog.getButton(Dialog.BUTTON_POSITIVE);
+                            btnPositive.setTextSize(20);
+                            btnPositive.setTextColor(Color.WHITE);
+                            btnPositive.setBackgroundColor(Color.DKGRAY);
+                        }
+                    });
+                    messageDialog.show();
+                    TextView textView = (TextView) messageDialog.findViewById(android.R.id.message);
+                    textView.setTextSize(20);
+
+                    setAutoDismissDialog(messageDialog, autoDismissTimeInMillis); // dismiss dialog within a specified duration if no action taken by user
+                }
+            });
+    }
+
+    private void setAutoDismissDialog(AlertDialog messageDialog, int timeInMilliS) {
+        final Handler handler = new Handler();
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (messageDialog!=null && messageDialog.isShowing()) {
+                    messageDialog.dismiss();
+                }
+            }
+        };
+        messageDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                handler.removeCallbacks(runnable);
+                leaveMeeting();
+            }
+        });
+        handler.postDelayed(runnable, timeInMilliS); // We dismiss the dialog after timeInMilliS and leave the meeting.
+    }
+
+
+    public void leaveMeeting() {
+        ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
+        zoomUIService.hideMiniMeetingWindow();
+        MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
+        meetingService.leaveCurrentMeeting(true); // If it is TRUE and the current user is the meeting host, the meeting ends directly.
+        if(callIgnoredHandler!=null)
+            callIgnoredHandler.removeCallbacksAndMessages(null);
     }
 
     @Override
