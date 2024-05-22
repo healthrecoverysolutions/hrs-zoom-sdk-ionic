@@ -992,7 +992,7 @@ CustomMessageComponent *customMessageComponent;
     UIView *meetingView = [[MobileRTC sharedRTC] getMeetingService].meetingView;
     customMessageComponent = [[CustomMessageComponent alloc] initWithFrame:CGRectMake(meetingView.frame.origin.x, meetingView.frame.origin.y, meetingView.frame.size.width, meetingView.frame.size.height)];
     [meetingView addSubview:customMessageComponent];
-    [customMessageComponent setMessageLabelText: @"Waiting for others to join…"];
+    [customMessageComponent setMessageLabelText: NSLocalizedString(@"zoom_waiting_message", @"")];
     [customMessageComponent setTranslatesAutoresizingMaskIntoConstraints:NO];
     [[customMessageComponent.widthAnchor constraintEqualToConstant:meetingView.frame.size.width] setActive:YES];
     [[customMessageComponent.heightAnchor constraintEqualToConstant:meetingView.frame.size.height] setActive:YES];
