@@ -1,8 +1,4 @@
 /* 
-  Localizable.strings
-  PatientConnect Mobile
-
-  Created by Anubhav Saxena on 22/05/24.
-  
+  Localizable.strings  
 */
 "zoom_waiting_message" = "Waiting for others to join…";
