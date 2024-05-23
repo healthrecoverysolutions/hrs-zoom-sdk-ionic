@@ -13,15 +13,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
 
 import us.zoom.sdk.ChatMessageDeleteType;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
@@ -1641,7 +1644,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     List<Long> currentUserList = meetingService.getInMeetingUserList();
                     if (meetingService != null && currentUserList != null && currentUserList.size() <= 1) {
                         int resId = cordova.getActivity().getResources().getIdentifier("zoom_call_missed_message", "string", cordova.getActivity().getPackageName());
-                        showMessageDialog(cordova.getActivity().getResources().getString(resId), 8000); // inform user that call was ignored/missed by the other participant
+                        showMessageDialog(cordova.getActivity().getResources().getString(resId), 9000); // inform user that call was ignored/missed by the other participant
                     }
                 }
             });
@@ -1676,8 +1679,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             new Runnable() {
                 public void run() {
                     Context context = NewZoomMeetingActivity.getFrontActivity(); // maximised
-                    if(context == null) {
-                        context = cordova.getContext();
+                    if (context == null) {
+                        context = cordova.getActivity();
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Dialog_MinWidth);
                     builder.setMessage(message)
@@ -1688,6 +1691,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                         });
 
                     AlertDialog messageDialog = builder.create();
+                    messageDialog.setCanceledOnTouchOutside(false);
                     messageDialog.setOnShowListener(new DialogInterface.OnShowListener() {
                         @Override
                         public void onShow(DialogInterface dialog) {
@@ -1697,35 +1701,34 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                             btnPositive.setBackgroundColor(Color.DKGRAY);
                         }
                     });
-                    messageDialog.show();
-                    TextView textView = (TextView) messageDialog.findViewById(android.R.id.message);
-                    textView.setTextSize(20);
+                    if(context != null && (context instanceof Activity && !((AppCompatActivity) context).isFinishing())){
+                        messageDialog.show();
+                        TextView textView = (TextView) messageDialog.findViewById(android.R.id.message);
+                        textView.setTextSize(20);
+                    } else {
+                        Timber.e("Couldnt show the zoom message dialog as activity is null or not active");
+                    }
 
-                    setAutoDismissDialog(messageDialog, autoDismissTimeInMillis); // dismiss dialog within a specified duration if no action taken by user
+                    new CountDownTimer(autoDismissTimeInMillis, 1000) { // show the countdown on the dialog
+                        public void onTick(long millisUntilFinished) {
+                            if(messageDialog!=null && messageDialog.isShowing()) {
+                                int resId = cordova.getActivity().getResources().getIdentifier("zoom_call_missed_message", "string", cordova.getActivity().getPackageName());
+                                String message = cordova.getActivity().getString(resId, String.valueOf(millisUntilFinished / 1000));
+                                messageDialog.setMessage(message);
+                            }
+                        }
+
+                        public void onFinish() {
+                            //work done
+                            if(messageDialog!=null && messageDialog.isShowing()) {
+                                messageDialog.dismiss();
+                            }
+                            leaveMeeting();
+                        }
+                    }.start();
                 }
             });
     }
-
-    private void setAutoDismissDialog(AlertDialog messageDialog, int timeInMilliS) {
-        final Handler handler = new Handler();
-        final Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                if (messageDialog!=null && messageDialog.isShowing()) {
-                    messageDialog.dismiss();
-                }
-            }
-        };
-        messageDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                handler.removeCallbacks(runnable);
-                leaveMeeting();
-            }
-        });
-        handler.postDelayed(runnable, timeInMilliS); // We dismiss the dialog after timeInMilliS and leave the meeting.
-    }
-
 
     public void leaveMeeting() {
         ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
