@@ -18,6 +18,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -25,6 +26,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Lifecycle;
 
 import us.zoom.sdk.ChatMessageDeleteType;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
@@ -223,6 +225,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     public static Zoom getInstance() {
         return mInstance;
     }
+
 
     @Override
     protected void pluginInitialize() {
@@ -1735,8 +1738,23 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         zoomUIService.hideMiniMeetingWindow();
         MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
         meetingService.leaveCurrentMeeting(true); // If it is TRUE and the current user is the meeting host, the meeting ends directly.
-        if(callIgnoredHandler!=null)
+        if(callIgnoredHandler!=null) {
             callIgnoredHandler.removeCallbacksAndMessages(null);
+        }
+        startMainActivity();
+    }
+
+    public void startMainActivity() {
+        String activityToStart = cordova.getActivity().getPackageName() + ".MainActivity";
+        Timber.d("activity to start " + activityToStart);
+        try {
+            Class<?> c = Class.forName(activityToStart);
+            Intent intent = new Intent(cordova.getContext(), c);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            cordova.getActivity().startActivity(intent);
+        } catch (ClassNotFoundException ignored) {
+            Timber.e("unable to start " + ignored);
+        }
     }
 
     @Override

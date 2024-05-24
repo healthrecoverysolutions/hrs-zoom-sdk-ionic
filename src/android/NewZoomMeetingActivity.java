@@ -97,7 +97,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     }
 
     private void minimizeZoomCall() {
-        startMainActivity();
+        Zoom.getInstance().startMainActivity();
         ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
         ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
         zoomUIService.showMiniMeetingWindow();
@@ -106,21 +106,8 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     private void endMeetingAndMoveToActivity() {
         Timber.d("end zoom call and start main activity");
         Zoom.getInstance().leaveMeeting();
-        startMainActivity();
     }
-
-    private void startMainActivity() {
-        String activityToStart = appResourcesPackage + ".MainActivity";
-        Timber.d("activity to start " + activityToStart);
-        try {
-            Class<?> c = Class.forName(activityToStart);
-            Intent intent = new Intent(this, c);
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            startActivity(intent);
-        } catch (ClassNotFoundException ignored) {
-            Timber.e("unable to start " + ignored);
-        }
-    }
+}
 
 }
 
