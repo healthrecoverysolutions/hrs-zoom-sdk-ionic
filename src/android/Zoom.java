@@ -1740,7 +1740,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                         Timber.e("Couldnt show the zoom message dialog as activity is null or not active");
                     }
 
-                    int correctedAutoDismissTimeInMillis = autoDismissTimeInMillis + 1; // countdown timer's onTick callback provides millisUntilFinished, it almost passes few millis until we get the callback and we need to display the start value value
+                    int correctedAutoDismissTimeInMillis = autoDismissTimeInMillis + 1000; // countdown timer's onTick callback provides millisUntilFinished, it almost passes few millis until we get the callback and we need to display the start value value
 
                     new CountDownTimer(correctedAutoDismissTimeInMillis, 1000) { // show the countdown on the dialog
                         public void onTick(long millisUntilFinished) {
