@@ -1,6 +1,5 @@
 package cordova.plugin.zoom;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -109,6 +108,5 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     }
 }
 
-}
 
 
