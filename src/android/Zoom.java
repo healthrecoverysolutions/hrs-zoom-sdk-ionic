@@ -225,6 +225,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private final Handler callIgnoredHandler = new Handler();
     private static Zoom mInstance = null;
 
+    private static final int CALL_IGNORED_DIALOG_SHOW_AFTER_MILLIS = 90000; // Duration in millis after which we show the call ignored/missed dialog
+    private static final int CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS = 8000; // Duration for which we show the call ignored/missed dialog
+
     public static Zoom getInstance() {
         return mInstance;
     }
@@ -361,7 +364,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     private void emitSharedJsEvent(String type, JSONObject data) {
         Timber.d("emitSharedJsEvent -> %s", type);
-        if(webView!=null) {
+        if (webView != null) {
             try {
                 if (sharedEventContext == null) {
                     return;
@@ -881,7 +884,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 public void run() {
                     // If meeting option is not provided, simply join meeting.
                     int response = meetingService.joinMeetingWithParams(
-                        cordova.getActivity().getApplicationContext(), params, null);
+                            cordova.getActivity().getApplicationContext(), params, null);
                     setZoomCustomMeetingUIAndPiP();
                     Zoom.this.onJoinMeetingResult(callbackContext, response);
                 }
@@ -1544,7 +1547,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     @Override
     public void onMeetingLeaveComplete(long l) {
         try {
-            if(webView!=null) {
+            if (webView != null) {
                 String event = String.format("javascript:cordova.plugins.Zoom.fireMeetingLeftEvent()");
                 webView.loadUrl(event);
             }
@@ -1562,7 +1565,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         emitSharedJsEvent(EVENT_TYPE_MEETING_LEAVE_COMPLETE, eventData);
-        if (webView!=null) {
+        if (webView != null) {
             startMainActivity(); // When user leaves the meeting, we start the main activity instance
          }
     }
@@ -1637,7 +1640,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     checkCallIgnoredByParticipant();
                 }
             };
-            callIgnoredHandler.postDelayed(runnable, 90000); // Show after 90 seconds as this is the ringing time at clinician/caregivers end
+            callIgnoredHandler.postDelayed(runnable, CALL_IGNORED_DIALOG_SHOW_AFTER_MILLIS); // Show after 90 seconds as this is the ringing time at clinician/caregivers end
         }
 
         NewZoomMeetingActivity.enableWaitingMessage((inMeetingUserListSize <= 1));
@@ -1663,7 +1666,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     List<Long> currentUserList = meetingService.getInMeetingUserList();
                     if (meetingService != null && currentUserList != null && currentUserList.size() <= 1) {
                         int resId = cordova.getActivity().getResources().getIdentifier("zoom_call_missed_message", "string", cordova.getActivity().getPackageName());
-                        showMessageDialog(cordova.getActivity().getResources().getString(resId), 9000); // inform user that call was ignored/missed by the other participant
+                        showMessageDialog(cordova.getActivity().getResources().getString(resId), CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS); // inform user that call was ignored/missed by the other participant
                     }
                 }
             });
@@ -1737,7 +1740,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                         Timber.e("Couldnt show the zoom message dialog as activity is null or not active");
                     }
 
-                    new CountDownTimer(autoDismissTimeInMillis, 1000) { // show the countdown on the dialog
+                    int correctedAutoDismissTimeInMillis = autoDismissTimeInMillis + 1; // countdown timer's onTick callback provides millisUntilFinished, it almost passes few millis until we get the callback and we need to display the start value value
+
+                    new CountDownTimer(correctedAutoDismissTimeInMillis, 1000) { // show the countdown on the dialog
                         public void onTick(long millisUntilFinished) {
                             if(messageDialog!=null && messageDialog.isShowing()) {
                                 int resId = cordova.getActivity().getResources().getIdentifier("zoom_call_missed_message", "string", cordova.getActivity().getPackageName());
