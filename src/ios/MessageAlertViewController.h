@@ -1,9 +1,3 @@
-//
-//  MessageAlertViewController.h
-//  PatientConnect Mobile
-//
-//  Created by Anubhav Saxena on 24/05/24.
-//
 
 #import <UIKit/UIKit.h>
 

@@ -12,6 +12,9 @@
 
 @implementation Zoom
 
+const CGFloat End_Call_Timer_Seconds = 90.0f;
+NSTimer *endCallTimer;
+MessageAlertViewController *messageAlertViewController;
 
 // This method has been deprecated. Now the authservice takes jwtToken at the place of appKey and appSecret.
 - (void)initialize:(CDVInvokedUrlCommand*)command
@@ -329,8 +332,9 @@
         MobileRTCSDKError unmuteResult = [ms muteMyVideo:NO];
         DDLogDebug(@"onMeetingReady unmuteResult: %d", unmuteResult);
         NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
-        if(meetingUserCount == 1){
-            [NSTimer scheduledTimerWithTimeInterval:90.0f
+        if(meetingUserCount == 1) {
+            /*An alert message will be shown to the user if no other participant joins in 90 seconds for ending the call*/
+            [NSTimer scheduledTimerWithTimeInterval:End_Call_Timer_Seconds
             target:self selector:@selector(startEndMeetingTimer:) userInfo:nil repeats:NO];
 
         }
@@ -343,14 +347,14 @@
     [timer invalidate];
     NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
 
-    if(meetingUserCount <= 1){
+    if(meetingUserCount <= 1) {
         MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
-        MessageAlertViewController *messageAlertViewController = [[MessageAlertViewController alloc] initWithNibName:@"MessageAlertViewController" bundle:nil];
+        messageAlertViewController = [[MessageAlertViewController alloc] initWithNibName:@"MessageAlertViewController" bundle:nil];
         messageAlertViewController.delegate = self;
-        __block int secondsLeft= 90;
-        [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+        __block int secondsLeft= 8;
+        endCallTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
             secondsLeft = secondsLeft - 1;
-            NSString *alertMessage = [NSString stringWithFormat:@"Call Missed. The other participants couldn't answer. Please try again later. Ending this call in %d seconds.", secondsLeft];
+            NSString *alertMessage = [NSString stringWithFormat:@"Call Missed. The other participants couldn't answer. Please try again later. \nEnding this call in %d seconds.", secondsLeft];
             [messageAlertViewController setAlertMessage:alertMessage];
             if(secondsLeft == 0){
                 [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
@@ -360,14 +364,14 @@
         }];
         [[[MobileRTC sharedRTC] getMeetingSettings] setTopBarHidden:YES];
         [[[MobileRTC sharedRTC] getMeetingSettings] setBottomBarHidden:YES];
-        if(ms.meetingView){
+        if(ms.meetingView) {
             [ms.meetingView addSubview:messageAlertViewController.view];
             [messageAlertViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
             [[messageAlertViewController.view.leadingAnchor constraintEqualToAnchor:ms.meetingView.leadingAnchor] setActive:YES];
             [[messageAlertViewController.view.trailingAnchor constraintEqualToAnchor:ms.meetingView.trailingAnchor] setActive:YES];
             [[messageAlertViewController.view.topAnchor constraintEqualToAnchor:ms.meetingView.topAnchor] setActive:YES];
             [[messageAlertViewController.view.bottomAnchor constraintEqualToAnchor:ms.meetingView.bottomAnchor] setActive:YES];
-        }else{
+        } else {
             UIWindow *window = [[UIApplication sharedApplication] delegate].window;
             messageAlertViewController.view.frame = window.bounds;
             [window addSubview:messageAlertViewController.view];
@@ -999,6 +1003,16 @@
         });
     }else{
         // Added one second delay in view switching to get the UI opearations done when new user joins the call
+        if([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 1) {
+            if(endCallTimer) {
+                [endCallTimer invalidate];
+                if(messageAlertViewController && messageAlertViewController.view.superview) {
+                    [messageAlertViewController.view removeFromSuperview];
+                }
+                [[[MobileRTC sharedRTC] getMeetingSettings] setTopBarHidden:NO];
+                [[[MobileRTC sharedRTC] getMeetingSettings] setBottomBarHidden:NO];
+            }
+        }
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             [[[MobileRTC sharedRTC] getMeetingService] switchToActiveSpeaker];
         });
