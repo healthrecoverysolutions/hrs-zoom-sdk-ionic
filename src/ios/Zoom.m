@@ -6,7 +6,6 @@
  */
 #import "Zoom.h"
 #import <CocoaLumberjack/CocoaLumberjack.h>
-
 #define ddLogLevel DDLogLevelAll
 #define kSDKDomain  @"https://zoom.us"
 #define DEBUG   YES
@@ -316,8 +315,6 @@
             params.userName = displayName;
             params.customerKey = participantID;
             [ms joinMeetingWithJoinParam:params];
-            
-
         }
     });
 }
@@ -331,7 +328,58 @@
         //Return type of muteMyVideo has been replaced with MobileRTCSDKError from MobileRTCVideoError in latest SDK 5.14
         MobileRTCSDKError unmuteResult = [ms muteMyVideo:NO];
         DDLogDebug(@"onMeetingReady unmuteResult: %d", unmuteResult);
+        NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
+        if(meetingUserCount == 1){
+            [NSTimer scheduledTimerWithTimeInterval:90.0f
+            target:self selector:@selector(startEndMeetingTimer:) userInfo:nil repeats:NO];
+
+        }
     }
+}
+
+// This method will end meeting if other participants doesn't join in 90 seconds
+- (void) startEndMeetingTimer:(NSTimer *)timer
+{
+    [timer invalidate];
+    NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
+
+    if(meetingUserCount <= 1){
+        MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
+        MessageAlertViewController *messageAlertViewController = [[MessageAlertViewController alloc] initWithNibName:@"MessageAlertViewController" bundle:nil];
+        messageAlertViewController.delegate = self;
+        __block int secondsLeft= 90;
+        [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+            secondsLeft = secondsLeft - 1;
+            NSString *alertMessage = [NSString stringWithFormat:@"Call Missed. The other participants couldn't answer. Please try again later. Ending this call in %d seconds.", secondsLeft];
+            [messageAlertViewController setAlertMessage:alertMessage];
+            if(secondsLeft == 0){
+                [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
+                [messageAlertViewController.view removeFromSuperview];
+                [timer invalidate];
+            }
+        }];
+        [[[MobileRTC sharedRTC] getMeetingSettings] setTopBarHidden:YES];
+        [[[MobileRTC sharedRTC] getMeetingSettings] setBottomBarHidden:YES];
+        if(ms.meetingView){
+            [ms.meetingView addSubview:messageAlertViewController.view];
+            [messageAlertViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
+            [[messageAlertViewController.view.leadingAnchor constraintEqualToAnchor:ms.meetingView.leadingAnchor] setActive:YES];
+            [[messageAlertViewController.view.trailingAnchor constraintEqualToAnchor:ms.meetingView.trailingAnchor] setActive:YES];
+            [[messageAlertViewController.view.topAnchor constraintEqualToAnchor:ms.meetingView.topAnchor] setActive:YES];
+            [[messageAlertViewController.view.bottomAnchor constraintEqualToAnchor:ms.meetingView.bottomAnchor] setActive:YES];
+        }else{
+            UIWindow *window = [[UIApplication sharedApplication] delegate].window;
+            messageAlertViewController.view.frame = window.bounds;
+            [window addSubview:messageAlertViewController.view];
+        }
+        return;
+    }
+}
+
+// ZoomCallHandlerDelegate method for ending current zoom call
+- (void)endMeeting {
+    MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
+    [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
 }
 
 - (void)startMeeting:(CDVInvokedUrlCommand*)command
