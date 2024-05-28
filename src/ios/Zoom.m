@@ -356,7 +356,7 @@ MessageAlertViewController *messageAlertViewController;
             secondsLeft = secondsLeft - 1;
             NSString *alertMessage = [NSString stringWithFormat:@"Call Missed. The other participants couldn't answer. Please try again later. \nEnding this call in %d seconds.", secondsLeft];
             [messageAlertViewController setAlertMessage:alertMessage];
-            if(secondsLeft == 0){
+            if(secondsLeft == 0) {
                 [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
                 [messageAlertViewController.view removeFromSuperview];
                 [timer invalidate];
