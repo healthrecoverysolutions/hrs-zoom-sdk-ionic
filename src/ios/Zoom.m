@@ -364,6 +364,7 @@ MessageAlertViewController *messageAlertViewController;
         }];
         [[[MobileRTC sharedRTC] getMeetingSettings] setTopBarHidden:YES];
         [[[MobileRTC sharedRTC] getMeetingSettings] setBottomBarHidden:YES];
+        /*If meeting view is available or zoom call is not minimized, adding message alert view to zoom meeting view else adding it to UIApplication window*/
         if(ms.meetingView) {
             [ms.meetingView addSubview:messageAlertViewController.view];
             [messageAlertViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
