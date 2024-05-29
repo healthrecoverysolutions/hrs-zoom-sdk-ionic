@@ -1,5 +1,7 @@
 package cordova.plugin.zoom;
 
+import android.app.ActivityOptions;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,7 +10,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.core.app.ActivityCompat;
+
 import us.zoom.sdk.CustomizedMiniMeetingViewSize;
+import us.zoom.sdk.MeetingService;
 import us.zoom.sdk.NewMeetingActivity;
 import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomUIService;
@@ -96,7 +101,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     }
 
     private void minimizeZoomCall() {
-        Zoom.getInstance().startMainActivity();
+        startMainActivity();
         ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
         ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
         zoomUIService.showMiniMeetingWindow();
@@ -104,7 +109,31 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
 
     private void endMeetingAndMoveToActivity() {
         Timber.d("end zoom call and start main activity");
-        Zoom.getInstance().leaveMeeting();
+        if (Zoom.getInstance() != null) {
+            Zoom.getInstance().leaveMeeting();
+        }
+        else { // app was minimised and app instance is no more thus handling this within this instance and re-launching the main activity
+            Timber.d("Started new activity instance as app instance was not found");
+            ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
+            zoomUIService.hideMiniMeetingWindow();
+            MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
+            meetingService.leaveCurrentMeeting(true);
+            startMainActivity();
+        }
+    }
+
+    private void startMainActivity() {
+        String activityToStart = getPackageName() + ".MainActivity";
+        Timber.d("activity to start " + activityToStart);
+        try {
+            Class<?> c = Class.forName(activityToStart);
+            Intent intent = new Intent(this, c);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            Bundle bundleAnim =  ActivityOptions.makeCustomAnimation(this, android.R.anim.slide_in_left, android.R.anim.slide_out_right).toBundle();
+            ActivityCompat.startActivity(this, intent, bundleAnim);
+        } catch (ClassNotFoundException ignored) {
+            Timber.e("unable to start " + ignored);
+        }
     }
 }
 

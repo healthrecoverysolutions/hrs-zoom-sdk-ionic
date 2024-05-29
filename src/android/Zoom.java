@@ -31,6 +31,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.zipow.videobox.conference.ui.ZmConfPipActivity;
+
 import us.zoom.sdk.ChatMessageDeleteType;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
 import us.zoom.sdk.IRequestLocalRecordingPrivilegeHandler;
@@ -1701,9 +1703,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             new Runnable() {
                 public void run() {
                     Context context = NewZoomMeetingActivity.getFrontActivity(); // maximised
-                    if (context == null) {
+                    if (context == null || context instanceof ZmConfPipActivity) { // we didnt get a maximised zoom call then launch dialog on main activity
                         context = cordova.getActivity();
                     }
+                    Timber.d("Zoom launch call info dialog on " + context);
                     AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Dialog_MinWidth);
                     builder.setMessage(message)
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
