@@ -787,6 +787,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         // to switch to gallery view automatically when user count threshold reaches
         msHelper.setSwitchVideoLayoutUserCountThreshold(2);
         msHelper.setSwitchVideoLayoutAccordingToUserCountEnabled(true);
+        msHelper.disableClearWebKitCache(true);
 
         JoinMeetingParams params = new JoinMeetingParams();
 
