@@ -14,6 +14,7 @@
 
 const CGFloat End_Call_Timer_Seconds = 90.0f;
 NSTimer *endCallTimer;
+NSTimer *alertMessageTimer;
 MessageAlertViewController *messageAlertViewController;
 
 // This method has been deprecated. Now the authservice takes jwtToken at the place of appKey and appSecret.
@@ -334,7 +335,7 @@ MessageAlertViewController *messageAlertViewController;
         NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
         if(meetingUserCount == 1) {
             /*An alert message will be shown to the user if no other participant joins in 90 seconds for ending the call*/
-            [NSTimer scheduledTimerWithTimeInterval:End_Call_Timer_Seconds
+            endCallTimer = [NSTimer scheduledTimerWithTimeInterval:End_Call_Timer_Seconds
             target:self selector:@selector(startEndMeetingTimer:) userInfo:nil repeats:NO];
 
         }
@@ -347,12 +348,12 @@ MessageAlertViewController *messageAlertViewController;
     [timer invalidate];
     NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
 
-    if(meetingUserCount <= 1) {
+    if(meetingUserCount == 1) {
         MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
         messageAlertViewController = [[MessageAlertViewController alloc] initWithNibName:@"MessageAlertViewController" bundle:nil];
         messageAlertViewController.delegate = self;
         __block int secondsLeft= 8;
-        endCallTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+        alertMessageTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
             secondsLeft = secondsLeft - 1;
             NSString *alertMessage = [NSString stringWithFormat:@"Call Missed. The other participants couldn't answer. Please try again later. \nEnding this call in %d seconds.", secondsLeft];
             [messageAlertViewController setAlertMessage:alertMessage];
@@ -993,6 +994,9 @@ MessageAlertViewController *messageAlertViewController;
     if (reason == 0) {
         [self.commandDelegate evalJs:@"cordova.plugins.Zoom.fireMeetingLeftEvent()"];
     }
+    // Invalided if any timer is running
+    if(alertMessageTimer)[alertMessageTimer invalidate];
+    if(endCallTimer)[endCallTimer invalidate];
 }
 
 // Delegate method of MobileRTCUserServiceDelegate to observe when new user joins the meeting
@@ -1005,8 +1009,8 @@ MessageAlertViewController *messageAlertViewController;
     }else{
         // Added one second delay in view switching to get the UI opearations done when new user joins the call
         if([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 1) {
-            if(endCallTimer) {
-                [endCallTimer invalidate];
+            if(alertMessageTimer) {
+                [alertMessageTimer invalidate];
                 if(messageAlertViewController && messageAlertViewController.view.superview) {
                     [messageAlertViewController.view removeFromSuperview];
                 }
