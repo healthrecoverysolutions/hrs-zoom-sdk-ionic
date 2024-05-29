@@ -359,7 +359,7 @@ CustomMessageComponent *customMessageComponent;
         __block int secondsLeft= 8;
         alertMessageTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
             secondsLeft = secondsLeft - 1;
-            NSString *alertMessage = [NSString stringWithFormat:@"Call Missed. The other participants couldn't answer. Please try again later. \nEnding this call in %d seconds.", secondsLeft];
+            NSString *alertMessage = [NSString stringWithFormat:NSLocalizedString(@"zoom_call_missed_message", @""), secondsLeft];
             [messageAlertViewController setAlertMessage:alertMessage];
             if(secondsLeft == 0) {
                 [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
@@ -370,6 +370,7 @@ CustomMessageComponent *customMessageComponent;
         [[[MobileRTC sharedRTC] getMeetingSettings] setTopBarHidden:YES];
         [[[MobileRTC sharedRTC] getMeetingSettings] setBottomBarHidden:YES];
         /*If meeting view is available or zoom call is not minimized, adding message alert view to zoom meeting view else adding it to UIApplication window*/
+        [self hideWaitingForParticipateMessage];
         if(ms.meetingView) {
             [ms.meetingView addSubview:messageAlertViewController.view];
             [messageAlertViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
