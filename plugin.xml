@@ -14,7 +14,7 @@
         <string name="zm_msg_meeting_permission">For the best meeting experience, Zoom may ask to access to your microphone, camera, nearby devices and storage.</string>
         <string name="zoom_waiting_message">Waiting for other participants to join...</string>
         <string name="zoom_call_missed_message">Call Missed. The other participant couldn\'t answer. Please try again later.\n\nEnding this call in %s seconds.</string>
-        <string name="zoom_call_declined_message">Call Declined. The other participant couldn\'t answer. Please try again later.<\n\nEnding this call in %s seconds./string>
+        <string name="zoom_call_declined_message">Call Declined. The other participant couldn\'t answer. Please try again later.\n\nEnding this call in %s seconds.</string>
        </config-file> 
         <config-file parent="/*" target="AndroidManifest.xml">
             <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
