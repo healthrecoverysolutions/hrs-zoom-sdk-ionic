@@ -13,6 +13,10 @@
 
 @implementation Zoom
 
+const CGFloat End_Call_Timer_Seconds = 90.0f;
+NSTimer *endCallTimer;
+NSTimer *alertMessageTimer;
+MessageAlertViewController *messageAlertViewController;
 CustomMessageComponent *customMessageComponent;
 
 // This method has been deprecated. Now the authservice takes jwtToken at the place of appKey and appSecret.
@@ -332,10 +336,61 @@ CustomMessageComponent *customMessageComponent;
         MobileRTCSDKError unmuteResult = [ms muteMyVideo:NO];
         DDLogDebug(@"onMeetingReady unmuteResult: %d", unmuteResult);
         NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
-        if(meetingUserCount == 1){
+        if(meetingUserCount == 1) {
             [self addWaitingForParticipantsMessage];
+            /*An alert message will be shown to the user if no other participant joins in 90 seconds for ending the call*/
+            endCallTimer = [NSTimer scheduledTimerWithTimeInterval:End_Call_Timer_Seconds
+            target:self selector:@selector(startEndMeetingTimer:) userInfo:nil repeats:NO];
+
         }
     }
+}
+
+// This method will end meeting if other participants doesn't join in 90 seconds
+- (void) startEndMeetingTimer:(NSTimer *)timer
+{
+    [timer invalidate];
+    NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
+
+    if(meetingUserCount == 1) {
+        MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
+        messageAlertViewController = [[MessageAlertViewController alloc] initWithNibName:@"MessageAlertViewController" bundle:nil];
+        messageAlertViewController.delegate = self;
+        __block int secondsLeft= 8;
+        alertMessageTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+            secondsLeft = secondsLeft - 1;
+            NSString *alertMessage = [NSString stringWithFormat:NSLocalizedString(@"zoom_call_missed_message", @""), secondsLeft];
+            [messageAlertViewController setAlertMessage:alertMessage];
+            if(secondsLeft == 0) {
+                [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
+                [messageAlertViewController.view removeFromSuperview];
+                [timer invalidate];
+            }
+        }];
+        [[[MobileRTC sharedRTC] getMeetingSettings] setTopBarHidden:YES];
+        [[[MobileRTC sharedRTC] getMeetingSettings] setBottomBarHidden:YES];
+        [self hideWaitingForParticipateMessage];
+        /*If meeting view is available or zoom call is not minimized, adding message alert view to zoom meeting view else adding it to UIApplication window*/
+        if(ms.meetingView) {
+            [ms.meetingView addSubview:messageAlertViewController.view];
+            [messageAlertViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
+            [[messageAlertViewController.view.leadingAnchor constraintEqualToAnchor:ms.meetingView.leadingAnchor] setActive:YES];
+            [[messageAlertViewController.view.trailingAnchor constraintEqualToAnchor:ms.meetingView.trailingAnchor] setActive:YES];
+            [[messageAlertViewController.view.topAnchor constraintEqualToAnchor:ms.meetingView.topAnchor] setActive:YES];
+            [[messageAlertViewController.view.bottomAnchor constraintEqualToAnchor:ms.meetingView.bottomAnchor] setActive:YES];
+        } else {
+            UIWindow *window = [[UIApplication sharedApplication] delegate].window;
+            messageAlertViewController.view.frame = window.bounds;
+            [window addSubview:messageAlertViewController.view];
+        }
+        return;
+    }
+}
+
+// ZoomCallHandlerDelegate method for ending current zoom call
+- (void)endMeeting {
+    MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
+    [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
 }
 
 - (void)startMeeting:(CDVInvokedUrlCommand*)command
@@ -944,6 +999,9 @@ CustomMessageComponent *customMessageComponent;
     if (reason == 0) {
         [self.commandDelegate evalJs:@"cordova.plugins.Zoom.fireMeetingLeftEvent()"];
     }
+    // Invalided if any timer is running
+    if(alertMessageTimer)[alertMessageTimer invalidate];
+    if(endCallTimer)[endCallTimer invalidate];
 }
 
 // Delegate method of MobileRTCUserServiceDelegate to observe when new user joins the meeting
@@ -957,6 +1015,16 @@ CustomMessageComponent *customMessageComponent;
         });
     }else{
         // Added one second delay in view switching to get the UI opearations done when new user joins the call
+        if([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 1) {
+            if(alertMessageTimer) {
+                [alertMessageTimer invalidate];
+                if(messageAlertViewController && messageAlertViewController.view.superview) {
+                    [messageAlertViewController.view removeFromSuperview];
+                }
+                [[[MobileRTC sharedRTC] getMeetingSettings] setTopBarHidden:NO];
+                [[[MobileRTC sharedRTC] getMeetingSettings] setBottomBarHidden:NO];
+            }
+        }
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             [[[MobileRTC sharedRTC] getMeetingService] switchToActiveSpeaker];
             if(meetingUserCount > 1){
