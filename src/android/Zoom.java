@@ -205,9 +205,34 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String ACTION_START_INSTANT_MEETING = "startInstantMeeting";
     private static final String ACTION_SET_LOCALE = "setLocale";
     private static final String ACTION_SET_SHARED_EVENT_LISTENER = "setSharedEventListener";
+    private static final String ACTION_NOTIFY_CALL_STATUS = "notifyCallStatus";
 
     private CallbackContext callbackContext;
     private CallbackContext sharedEventContext;
+    private final Handler callIgnoredHandler = new Handler();
+    private static Zoom mInstance = null;
+
+    private static final int CALL_IGNORED_DIALOG_SHOW_AFTER_MILLIS = 90000; // Duration in millis after which we show the call ignored/missed dialog
+    private static final int CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS = 8000; // Duration for which we show the call ignored/missed dialog
+    private static final String CALL_STATUS_DECLINED = "CALL_DECLINED";
+
+    public static Zoom getInstance() {
+        return mInstance;
+    }
+
+
+    @Override
+    protected void pluginInitialize() {
+        super.pluginInitialize();
+        mInstance = this;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mInstance = null;
+        webView = null;
+    }
 
     /**
      * execute
@@ -308,11 +333,29 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             case ACTION_SET_SHARED_EVENT_LISTENER:
                 setSharedEventListener(callbackContext);
                 break;
+            case ACTION_NOTIFY_CALL_STATUS:
+                String callStatus = args.getString(0);
+                handleCallStatusUpdate(callStatus);
+                break;
 
             default:
                 return false;
         }
         return true;
+    }
+
+    private handleCallStatusUpdate(String callStatus) {
+        if (callStatus!=null && callStatus.equals(CALL_STATUS_DECLINED)) {
+                int resId = cordova.getActivity().getResources().getIdentifier("zoom_call_declined_message", "string", cordova.getActivity().getPackageName());
+                showMessageDialog(cordova.getActivity().getResources().getString(resId), CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS);
+        }
+    }
+
+    private void setZoomCustomMeetingUIAndPiP() {
+        ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
+        zoomUIService.enableMinimizeMeeting(true);
+        zoomUIService.disablePIPMode(false);
+        zoomUIService.setNewMeetingUI(NewZoomMeetingActivity.class);
     }
 
     private void setSharedEventListener(CallbackContext callbackContext) {
