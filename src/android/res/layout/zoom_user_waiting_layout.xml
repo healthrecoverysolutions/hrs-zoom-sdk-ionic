@@ -19,7 +19,7 @@
         android:alpha="0.8"
         android:gravity="center_horizontal"
         android:padding="10dp"
-        android:text="Waiting for other participants to join..."
+        android:text="@string/zoom_waiting_message"
         android:textColor="@color/white"
         android:textStyle="bold"
         android:textSize="@dimen/zm_ui_kit_text_size_20sp" />

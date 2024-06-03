@@ -13,9 +13,25 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Button;
+import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
+import com.zipow.videobox.conference.ui.ZmConfPipActivity;
 
 import us.zoom.sdk.ChatMessageDeleteType;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
@@ -303,10 +319,6 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     new Runnable() {
                         public void run() {
                             Timber.d("Applying an overridden meeting activity instance to extend some behaviour");
-                            ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
-                            zoomUIService.setNewMeetingUI(NewZoomMeetingActivity.class);
-                            zoomUIService.enableMinimizeMeeting(true);
-                            zoomUIService.disablePIPMode(false);
                             joinMeeting(meetingNo, meetingPassword, displayNameJ, optionsJ, callbackContext);
                         }
                     });
@@ -367,21 +379,23 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     private void emitSharedJsEvent(String type, JSONObject data) {
         Timber.d("emitSharedJsEvent -> %s", type);
-        try {
-            if (sharedEventContext == null) {
-                return;
+        if (webView != null) {
+            try {
+                if (sharedEventContext == null) {
+                    return;
+                }
+                if (data == null) {
+                    data = JSON_OBJECT_EMPTY;
+                }
+                JSONObject payload = new JSONObject()
+                    .put(KEY_TYPE, type)
+                    .put(KEY_DATA, data);
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, payload);
+                pluginResult.setKeepCallback(true);
+                sharedEventContext.sendPluginResult(pluginResult);
+            } catch (JSONException e) {
+                Timber.e("emitSharedJsEvent failed! -> %s", e.getMessage());
             }
-            if (data == null) {
-                data = JSON_OBJECT_EMPTY;
-            }
-            JSONObject payload = new JSONObject()
-                .put(KEY_TYPE, type)
-                .put(KEY_DATA, data);
-            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, payload);
-            pluginResult.setKeepCallback(true);
-            sharedEventContext.sendPluginResult(pluginResult);
-        } catch (JSONException e) {
-            Timber.e("emitSharedJsEvent failed! -> %s", e.getMessage());
         }
     }
 
@@ -786,6 +800,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         // to switch to gallery view automatically when user count threshold reaches
         msHelper.setSwitchVideoLayoutUserCountThreshold(2);
         msHelper.setSwitchVideoLayoutAccordingToUserCountEnabled(true);
+        msHelper.disableClearWebKitCache(true);
 
         JoinMeetingParams params = new JoinMeetingParams();
 
@@ -875,6 +890,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 public void run() {
                     int response = meetingService.joinMeetingWithParams(
                             cordova.getActivity().getApplicationContext(),params, opts);
+                    setZoomCustomMeetingUIAndPiP();
                     Zoom.this.onJoinMeetingResult(callbackContext, response);
                 }
             });
@@ -885,6 +901,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     // If meeting option is not provided, simply join meeting.
                     int response = meetingService.joinMeetingWithParams(
                             cordova.getActivity().getApplicationContext(), params, null);
+                    setZoomCustomMeetingUIAndPiP();
                     Zoom.this.onJoinMeetingResult(callbackContext, response);
                 }
             });
@@ -1546,8 +1563,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     @Override
     public void onMeetingLeaveComplete(long l) {
         try {
-            String event = String.format("javascript:cordova.plugins.Zoom.fireMeetingLeftEvent()");
-            webView.loadUrl(event);
+            if (webView != null) {
+                String event = String.format("javascript:cordova.plugins.Zoom.fireMeetingLeftEvent()");
+                webView.loadUrl(event);
+            }
             InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
             // Unregister Event Listener for this call
             inMeetingService.removeListener(this);
@@ -1562,6 +1581,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
 
         emitSharedJsEvent(EVENT_TYPE_MEETING_LEAVE_COMPLETE, eventData);
+        if (webView != null) {
+            startMainActivity(); // When user leaves the meeting, we start the main activity instance
+         }
     }
 
     @Override
@@ -1619,15 +1641,29 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
         InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
         List<Long> currentUserList = meetingService.getInMeetingUserList();
-
+        int inMeetingUserListSize = currentUserList.size();
         if (currentUserList != null && currentUserList.size() >= ZOOM_UI_AUTO_CHANGE_FROM_USER_COUNT) {
             zoomUIService.switchToVideoWall(); // gallery view
         } else {
             zoomUIService.switchToActiveSpeaker(); // switch to speaker view
         }
 
-        int inMeetingUserListSize = meetingService.getInMeetingUserList().size();
+        // Schedule a task to run after a specified duration and check the number of participants to identify call missed/ignored use case
+        if (inMeetingUserListSize == 1) { // patient is the only one who has joined
+            final Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    checkCallIgnoredByParticipant();
+                }
+            };
+            callIgnoredHandler.postDelayed(runnable, CALL_IGNORED_DIALOG_SHOW_AFTER_MILLIS); // Show after 90 seconds as this is the ringing time at clinician/caregivers end
+        }
+
         NewZoomMeetingActivity.enableWaitingMessage((inMeetingUserListSize <= 1));
+        if(inMeetingUserListSize > 1) {
+            if(callIgnoredHandler!=null)
+                callIgnoredHandler.removeCallbacksAndMessages(null); // clear the scheduler as other participant has joined and now we wont need to cancel the call after 90 seconds
+        }
 
         JSONObject eventData = new JSONObject();
         try {
@@ -1636,6 +1672,20 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         } catch (JSONException ignored) {
         }
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_JOIN, eventData);
+    }
+
+    private void checkCallIgnoredByParticipant() {
+        cordova.getActivity().runOnUiThread(
+            new Runnable() {
+                public void run() {
+                    InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
+                    List<Long> currentUserList = meetingService.getInMeetingUserList();
+                    if (meetingService != null && currentUserList != null && currentUserList.size() <= 1) {
+                        int resId = cordova.getActivity().getResources().getIdentifier("zoom_call_missed_message", "string", cordova.getActivity().getPackageName());
+                        showMessageDialog(cordova.getActivity().getResources().getString(resId), CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS); // inform user that call was ignored/missed by the other participant
+                    }
+                }
+            });
     }
 
     @Override
@@ -1658,8 +1708,108 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_LEAVE, eventData);
         if (currentUserList !=null && currentUserList.size() == 1) {
-            MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
-            meetingService.leaveCurrentMeeting(true); // If it is TRUE and the current user is the meeting host, the meeting ends directly.
+            leaveMeeting();
+        }
+    }
+
+    public void showMessageDialog(String message, int autoDismissTimeInMillis) {
+        cordova.getActivity().runOnUiThread(
+            new Runnable() {
+                public void run() {
+                    Context context = NewZoomMeetingActivity.getFrontActivity(); // maximised
+                    if (context == null || context instanceof ZmConfPipActivity) { // we didnt get a maximised zoom call then launch dialog on main activity
+                        context = cordova.getActivity();
+                    }
+                    Timber.d("Zoom launch call info dialog on " + context);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Dialog_MinWidth);
+                    builder.setMessage(message)
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                                Handler mainHandler = new Handler(Looper.getMainLooper());
+                                // Send a task to the MessageQueue of the main thread
+                                mainHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        // Code will be executed on the main thread
+                                        leaveMeeting(); // As per Zoom, leave meeting should be done from main thread
+                                    }
+                                });
+                            }
+                        });
+
+                    AlertDialog messageDialog = builder.create();
+                    messageDialog.setCanceledOnTouchOutside(false);
+                    messageDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                        @Override
+                        public void onShow(DialogInterface dialog) {
+                            Button btnPositive = messageDialog.getButton(Dialog.BUTTON_POSITIVE);
+                            btnPositive.setTextSize(20);
+                            btnPositive.setTextColor(Color.WHITE);
+                            btnPositive.setBackgroundColor(Color.DKGRAY);
+                        }
+                    });
+                    if(context != null && (context instanceof Activity && !((AppCompatActivity) context).isFinishing())){
+                        messageDialog.show();
+                        TextView textView = (TextView) messageDialog.findViewById(android.R.id.message);
+                        textView.setTextSize(20);
+                    } else {
+                        Timber.e("Couldnt show the zoom message dialog as activity is null or not active");
+                    }
+
+                    int correctedAutoDismissTimeInMillis = autoDismissTimeInMillis + 1000; // countdown timer's onTick callback provides millisUntilFinished, it almost passes few millis until we get the callback and we need to display the start value value
+
+                    new CountDownTimer(correctedAutoDismissTimeInMillis, 1000) { // show the countdown on the dialog
+                        public void onTick(long millisUntilFinished) {
+                            if(messageDialog!=null && messageDialog.isShowing()) {
+                                int resId = cordova.getActivity().getResources().getIdentifier("zoom_call_missed_message", "string", cordova.getActivity().getPackageName());
+                                String message = cordova.getActivity().getString(resId, String.valueOf(millisUntilFinished / 1000));
+                                messageDialog.setMessage(message);
+                            }
+                        }
+
+                        public void onFinish() {
+                            // Create a handler that associated with Looper of the main thread
+                            Handler mainHandler = new Handler(Looper.getMainLooper());
+                            mainHandler.post(new Runnable() { // Send a task to the MessageQueue of the main thread
+                                @Override
+                                public void run() {
+                                    if(messageDialog!=null && messageDialog.isShowing()) {
+                                        messageDialog.dismiss();
+                                    }
+                                    leaveMeeting();
+                                    if (webView == null) { // Start activity if web view was destroyed, mainly when app in bg and the call is ended
+                                        startMainActivity();
+                                    }
+                                }
+                            });
+                        }
+                    }.start();
+                }
+            });
+    }
+
+    public void leaveMeeting() {
+        ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
+        zoomUIService.hideMiniMeetingWindow();
+        MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
+        meetingService.leaveCurrentMeeting(true); // If it is TRUE and the current user is the meeting host, the meeting ends directly.
+        if(callIgnoredHandler!=null) {
+            callIgnoredHandler.removeCallbacksAndMessages(null);
+        }
+    }
+
+    public void startMainActivity() {
+        String activityToStart = cordova.getActivity().getPackageName() + ".MainActivity";
+        Timber.d("activity to start " + activityToStart);
+        try {
+            Class<?> c = Class.forName(activityToStart);
+            Intent intent = new Intent(cordova.getContext(), c);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            Bundle bundleAnim =  ActivityOptions.makeCustomAnimation(cordova.getActivity(), android.R.anim.slide_in_left, android.R.anim.slide_out_right).toBundle();
+            ActivityCompat.startActivity(cordova.getContext(), intent, bundleAnim);
+        } catch (ClassNotFoundException ignored) {
+            Timber.e("unable to start " + ignored);
         }
     }
 
