@@ -11,7 +11,6 @@
 #define kSDKDomain  @"https://zoom.us"
 #define DEBUG   YES
 #define kCallDeclined @"call_declined"
-#define kCallUnanswered @"call_unanswered"
 
 @implementation Zoom
 
@@ -166,7 +165,7 @@ CustomMessageComponent *customMessageComponent;
 // This method will be called with zoom call is declined by other participants
 -(void) notifyCallStatus :(CDVInvokedUrlCommand*)command {
     NSString *callStatus = [command.arguments objectAtIndex:0];
-    if(callStatus != nil && ([callStatus isEqualToString: kCallDeclined] || [callStatus isEqualToString:kCallUnanswered])) {
+    if(callStatus != nil && ([callStatus isEqualToString: kCallDeclined])) {
         MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
         [self showEndingCallPopup:NSLocalizedString(@"zoom_call_declined_message", @"")];
         if(ms.meetingView == nil) {
@@ -1060,38 +1059,39 @@ CustomMessageComponent *customMessageComponent;
 
 // Show ending zoom meeting popup if call is not answered or declined by other participants
 - (void) showEndingCallPopup: (NSString*) endingCallMessage {
-    MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
-    messageAlertViewController = [[MessageAlertViewController alloc] initWithNibName:@"MessageAlertViewController" bundle:nil];
-    messageAlertViewController.delegate = self;
-    int totalSecondsLeft = 8;
-    __block int secondsLeft= totalSecondsLeft;
-    alertMessageTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
-        secondsLeft = secondsLeft - 1;
+    if(![alertMessageTimer isValid]){
+        MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
+        messageAlertViewController = [[MessageAlertViewController alloc] initWithNibName:@"MessageAlertViewController" bundle:nil];
+        messageAlertViewController.delegate = self;
+        __block int secondsLeft= 8;
+        alertMessageTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+            secondsLeft = secondsLeft - 1;
+            NSString *alertMessage = [NSString stringWithFormat:endingCallMessage, secondsLeft];
+            [messageAlertViewController setAlertMessage:alertMessage];
+            if(secondsLeft == 0) {
+                [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
+                [messageAlertViewController.view removeFromSuperview];
+                [timer invalidate];
+            }
+        }];
+        [[[MobileRTC sharedRTC] getMeetingSettings] setTopBarHidden:YES];
+        [[[MobileRTC sharedRTC] getMeetingSettings] setBottomBarHidden:YES];
+        /*If meeting view is available or zoom call is not minimized, adding message alert view to zoom meeting view else adding it to UIApplication window*/
+        if(ms.meetingView) {
+            [ms.meetingView addSubview:messageAlertViewController.view];
+            [messageAlertViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
+            [[messageAlertViewController.view.leadingAnchor constraintEqualToAnchor:ms.meetingView.leadingAnchor] setActive:YES];
+            [[messageAlertViewController.view.trailingAnchor constraintEqualToAnchor:ms.meetingView.trailingAnchor] setActive:YES];
+            [[messageAlertViewController.view.topAnchor constraintEqualToAnchor:ms.meetingView.topAnchor] setActive:YES];
+            [[messageAlertViewController.view.bottomAnchor constraintEqualToAnchor:ms.meetingView.bottomAnchor] setActive:YES];
+        } else {
+            UIWindow *window = [[UIApplication sharedApplication] delegate].window;
+            messageAlertViewController.view.frame = window.bounds;
+            [window addSubview:messageAlertViewController.view];
+        }
         NSString *alertMessage = [NSString stringWithFormat:endingCallMessage, secondsLeft];
         [messageAlertViewController setAlertMessage:alertMessage];
-        if(secondsLeft == 0) {
-            [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
-            [messageAlertViewController.view removeFromSuperview];
-            [timer invalidate];
-        }
-    }];
-    [[[MobileRTC sharedRTC] getMeetingSettings] setTopBarHidden:YES];
-    [[[MobileRTC sharedRTC] getMeetingSettings] setBottomBarHidden:YES];
-    /*If meeting view is available or zoom call is not minimized, adding message alert view to zoom meeting view else adding it to UIApplication window*/
-    if(ms.meetingView) {
-        [ms.meetingView addSubview:messageAlertViewController.view];
-        [messageAlertViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
-        [[messageAlertViewController.view.leadingAnchor constraintEqualToAnchor:ms.meetingView.leadingAnchor] setActive:YES];
-        [[messageAlertViewController.view.trailingAnchor constraintEqualToAnchor:ms.meetingView.trailingAnchor] setActive:YES];
-        [[messageAlertViewController.view.topAnchor constraintEqualToAnchor:ms.meetingView.topAnchor] setActive:YES];
-        [[messageAlertViewController.view.bottomAnchor constraintEqualToAnchor:ms.meetingView.bottomAnchor] setActive:YES];
-    } else {
-        UIWindow *window = [[UIApplication sharedApplication] delegate].window;
-        messageAlertViewController.view.frame = window.bounds;
-        [window addSubview:messageAlertViewController.view];
     }
-    NSString *alertMessage = [NSString stringWithFormat:endingCallMessage, totalSecondsLeft];
-    [messageAlertViewController setAlertMessage:alertMessage];
 }
 
 @end
