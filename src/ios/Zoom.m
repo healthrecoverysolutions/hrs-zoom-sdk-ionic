@@ -162,9 +162,11 @@ CustomMessageComponent *customMessageComponent;
         }
     });
 }
--(void) notifyCallStatus :(CDVInvokedUrlCommand*)command{
+
+// This method will be called with zoom call is declined by other participants
+-(void) notifyCallStatus :(CDVInvokedUrlCommand*)command {
     NSString *callStatus = [command.arguments objectAtIndex:0];
-    if(callStatus != nil && ([callStatus isEqualToString: kCallDeclined] || [callStatus isEqualToString:kCallUnanswered])){
+    if(callStatus != nil && ([callStatus isEqualToString: kCallDeclined] || [callStatus isEqualToString:kCallUnanswered])) {
         MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
         [self showEndingCallPopup:NSLocalizedString(@"zoom_call_declined_message", @"")];
         if(ms.meetingView == nil) {
@@ -172,6 +174,7 @@ CustomMessageComponent *customMessageComponent;
         }
     }
 }
+
 - (void)joinMeeting:(CDVInvokedUrlCommand*)command
 {
     pluginResult = nil;
