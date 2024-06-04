@@ -15,7 +15,7 @@
 
 @implementation Zoom
 
-const CGFloat End_Call_Timer_Seconds = 10.0f;
+const CGFloat End_Call_Timer_Seconds = 90.0f;
 NSTimer *endCallTimer;
 NSTimer *alertMessageTimer;
 MessageAlertViewController *messageAlertViewController;
