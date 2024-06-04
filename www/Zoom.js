@@ -91,6 +91,10 @@ var zoom = {
 
     setSharedEventListener: function(listener, error) {
         return callNativeFunction('setSharedEventListener', [], listener, error);
+    },
+
+    notifyCallStatus: function(callStatus, success, error) {
+        callNativeFunction('notifyCallStatus', [callStatus], success, error);
     }
 };
 
