@@ -17,6 +17,8 @@
 const CGFloat End_Call_Timer_Seconds = 90.0f;
 NSTimer *endCallTimer;
 NSTimer *alertMessageTimer;
+NSString *meetingNumber;
+NSString *previousMeetingNumber;
 MessageAlertViewController *messageAlertViewController;
 CustomMessageComponent *customMessageComponent;
 
@@ -165,11 +167,12 @@ CustomMessageComponent *customMessageComponent;
 // This method will be called with zoom call is declined by other participants
 -(void) notifyCallStatus :(CDVInvokedUrlCommand*)command {
     NSString *callStatus = [command.arguments objectAtIndex:0];
+    NSString *meetingNumber = [command.arguments objectAtIndex:1];
+    
     if(callStatus != nil && ([callStatus isEqualToString: kCallDeclined])) {
-        MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
-        [self showEndingCallPopup:NSLocalizedString(@"zoom_call_declined_message", @"")];
-        if(ms.meetingView == nil) {
-            [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
+        /* Ending meeting if meeting has not been ended previously by comparing current meeting number with previous meeting number */
+        if(previousMeetingNumber == nil || ![previousMeetingNumber isEqualToString:meetingNumber]){
+            [self continueEndingMeeting];
         }
     }
 }
@@ -183,7 +186,7 @@ CustomMessageComponent *customMessageComponent;
     NSString* meetingPassword = [command.arguments objectAtIndex:1];
     NSString* displayName = [command.arguments objectAtIndex:2];
     NSDictionary* options = [command.arguments objectAtIndex:3];
-
+    meetingNumber = meetingNo;
     if (DEBUG) {
         DDLogDebug(@"========meeting number======= %@", meetingNo);
         DDLogDebug(@"========display name======= %@", displayName);
@@ -372,8 +375,15 @@ CustomMessageComponent *customMessageComponent;
 
 // ZoomCallHandlerDelegate method for ending current zoom call
 - (void)endMeeting {
+    [self leaveExistingMeeting];
+}
+
+// Method for leaving from exising zoom meeting
+-(void) leaveExistingMeeting {
     MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
     [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
+    previousMeetingNumber = meetingNumber;
+    meetingNumber = nil;
 }
 
 - (void)startMeeting:(CDVInvokedUrlCommand*)command
@@ -1027,8 +1037,7 @@ CustomMessageComponent *customMessageComponent;
     }else{
         // Added one second delay in view switching to get the UI opearations done when user leaves the call
         if(meetingUserCount <= 1){
-            MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
-            [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
+            [self leaveExistingMeeting];
             return;
         }
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
@@ -1057,6 +1066,17 @@ CustomMessageComponent *customMessageComponent;
     }
 }
 
+// Method for ending existing zoom meeting when declined by other participants
+-(void) continueEndingMeeting {
+    MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
+    [self showEndingCallPopup:NSLocalizedString(@"zoom_call_declined_message", @"")];
+    if(ms.meetingView == nil) {
+        [self leaveExistingMeeting];
+    }
+}
+
+
+
 // Show ending zoom meeting popup if call is not answered or declined by other participants
 - (void) showEndingCallPopup: (NSString*) endingCallMessage {
     if(![alertMessageTimer isValid]){
@@ -1069,7 +1089,7 @@ CustomMessageComponent *customMessageComponent;
             NSString *alertMessage = [NSString stringWithFormat:endingCallMessage, secondsLeft];
             [messageAlertViewController setAlertMessage:alertMessage];
             if(secondsLeft == 0) {
-                [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
+                [self leaveExistingMeeting];
                 [messageAlertViewController.view removeFromSuperview];
                 [timer invalidate];
             }
