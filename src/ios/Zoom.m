@@ -992,7 +992,7 @@ CustomMessageComponent *customMessageComponent;
     if (reason == 0) {
         [self.commandDelegate evalJs:@"cordova.plugins.Zoom.fireMeetingLeftEvent()"];
     }
-    // Invalided if endCallTimer is running
+    // Cancelling if endCallTimer is running
     if(endCallTimer)[endCallTimer invalidate];
 }
 
