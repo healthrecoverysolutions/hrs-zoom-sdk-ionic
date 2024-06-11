@@ -166,12 +166,14 @@ CustomMessageComponent *customMessageComponent;
 
 // This method will be called with zoom call is declined by other participants
 -(void) notifyCallStatus :(CDVInvokedUrlCommand*)command {
+    DDLogDebug(@"Zoom call is declined by other participant");
     NSString *callStatus = [command.arguments objectAtIndex:0];
     NSString *meetingNumber = [command.arguments objectAtIndex:1];
     
     if(callStatus != nil && ([callStatus isEqualToString: kCallDeclined])) {
         /* Ending meeting if meeting has not been ended previously by comparing current meeting number with previous meeting number */
         if(previousMeetingNumber == nil || ![previousMeetingNumber isEqualToString:meetingNumber]){
+            DDLogDebug(@"Call declined: proceed to end the call");
             [self continueEndingMeeting];
         }
     }
@@ -369,6 +371,7 @@ CustomMessageComponent *customMessageComponent;
     NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
 
     if(meetingUserCount == 1) {
+        DDLogDebug(@"Call missed: show ending call popup");
         [self showEndingCallPopup:NSLocalizedString(@"zoom_call_missed_message", @"")];
     }
 }
@@ -380,6 +383,7 @@ CustomMessageComponent *customMessageComponent;
 
 // Method for leaving from exising zoom meeting
 -(void) leaveExistingMeeting {
+    DDLogDebug(@"Ending zoom call");
     MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
     [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
     previousMeetingNumber = meetingNumber;
@@ -1035,11 +1039,12 @@ CustomMessageComponent *customMessageComponent;
         [[[MobileRTC sharedRTC] getMeetingService] switchToVideoWall];
         });
     }else{
-        // Added one second delay in view switching to get the UI opearations done when user leaves the call
         if(meetingUserCount <= 1){
+            DDLogDebug(@"Other participant left: proceed to end the call");
             [self leaveExistingMeeting];
             return;
         }
+        // Added one second delay in view switching to get the UI opearations done when user leaves the call
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             [[[MobileRTC sharedRTC] getMeetingService] switchToActiveSpeaker];
         });
@@ -1068,6 +1073,7 @@ CustomMessageComponent *customMessageComponent;
 
 // Method for ending existing zoom meeting when declined by other participants
 -(void) continueEndingMeeting {
+    DDLogDebug(@"Call declined: show ending call popup");
     MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
     [self showEndingCallPopup:NSLocalizedString(@"zoom_call_declined_message", @"")];
     if(ms.meetingView == nil) {
@@ -1080,6 +1086,7 @@ CustomMessageComponent *customMessageComponent;
 // Show ending zoom meeting popup if call is not answered or declined by other participants
 - (void) showEndingCallPopup: (NSString*) endingCallMessage {
     if(![alertMessageTimer isValid]){
+        DDLogDebug(@"Showing ending call popup with timer");
         MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
         messageAlertViewController = [[MessageAlertViewController alloc] initWithNibName:@"MessageAlertViewController" bundle:nil];
         messageAlertViewController.delegate = self;
