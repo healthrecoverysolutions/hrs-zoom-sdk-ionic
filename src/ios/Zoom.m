@@ -6,13 +6,14 @@
  */
 #import "Zoom.h"
 #import <CocoaLumberjack/CocoaLumberjack.h>
-
+#import "CustomMessageComponent.h"
 #define ddLogLevel DDLogLevelAll
 #define kSDKDomain  @"https://zoom.us"
 #define DEBUG   YES
 
 @implementation Zoom
 
+CustomMessageComponent *customMessageComponent;
 
 // This method has been deprecated. Now the authservice takes jwtToken at the place of appKey and appSecret.
 - (void)initialize:(CDVInvokedUrlCommand*)command
@@ -63,6 +64,7 @@
 
 //Added new method to set jwtToken in MobileRTCAuthService
 - (void)initializeWithJWT:(CDVInvokedUrlCommand*)command{
+    DDLogDebug(@"initializeWithJWT");
     pluginResult = nil;
     callbackId = command.callbackId;
     // Get variables.
@@ -316,8 +318,6 @@
             params.userName = displayName;
             params.customerKey = participantID;
             [ms joinMeetingWithJoinParam:params];
-            
-
         }
     });
 }
@@ -331,6 +331,10 @@
         //Return type of muteMyVideo has been replaced with MobileRTCSDKError from MobileRTCVideoError in latest SDK 5.14
         MobileRTCSDKError unmuteResult = [ms muteMyVideo:NO];
         DDLogDebug(@"onMeetingReady unmuteResult: %d", unmuteResult);
+        NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
+        if(meetingUserCount == 1){
+            [self addWaitingForParticipantsMessage];
+        }
     }
 }
 
@@ -783,7 +787,7 @@
 - (void)onMeetingError:(MobileRTCMeetError)error message:(NSString*)message
 {
     if (DEBUG) {
-        DDLogDebug(@"onMeetingError:%zd, message:%@", error, message);
+     DDLogDebug(@"onMeetingError:%zd, message:%@", error, message);
     }
     if (error != MobileRTCMeetError_Success) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[self getMeetErrorMessage:error]];
@@ -944,32 +948,62 @@
 
 // Delegate method of MobileRTCUserServiceDelegate to observe when new user joins the meeting
 - (void)onSinkMeetingUserJoin:(NSUInteger)userID{
-    if ([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 2){
+    NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
+    if (meetingUserCount > 2){
         // Added one second delay in view switching to get the UI opearations done when new user joins the call
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        [[[MobileRTC sharedRTC] getMeetingService] switchToVideoWall];
+            [[[MobileRTC sharedRTC] getMeetingService] switchToVideoWall];
+            [self hideWaitingForParticipateMessage];
         });
     }else{
         // Added one second delay in view switching to get the UI opearations done when new user joins the call
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             [[[MobileRTC sharedRTC] getMeetingService] switchToActiveSpeaker];
+            if(meetingUserCount > 1){
+                [self hideWaitingForParticipateMessage];
+            }
         });
     }
 }
 
 // Delegate method of MobileRTCUserServiceDelegate to observe whe user leaves the meeting
 - (void)onSinkMeetingUserLeft:(NSUInteger)userID{
-    if ([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 2){
+    NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
+    if (meetingUserCount > 2){
         // Added one second delay in view switching to get the UI opearations done when user leaves the call
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         [[[MobileRTC sharedRTC] getMeetingService] switchToVideoWall];
         });
     }else{
         // Added one second delay in view switching to get the UI opearations done when user leaves the call
+        if(meetingUserCount <= 1){
+            MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
+            [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
+            return;
+        }
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             [[[MobileRTC sharedRTC] getMeetingService] switchToActiveSpeaker];
         });
     }
 }
 
+// Method for adding "Waiting for others to join.." message if there is only one user in meeting.
+-(void) addWaitingForParticipantsMessage{
+    UIView *meetingView = [[MobileRTC sharedRTC] getMeetingService].meetingView;
+    customMessageComponent = [[CustomMessageComponent alloc] initWithFrame:CGRectMake(meetingView.frame.origin.x, meetingView.frame.origin.y, meetingView.frame.size.width, meetingView.frame.size.height)];
+    [meetingView addSubview:customMessageComponent];
+    [customMessageComponent setMessageLabelText: NSLocalizedString(@"zoom_waiting_message", @"")];
+    [customMessageComponent setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [[customMessageComponent.widthAnchor constraintEqualToConstant:meetingView.frame.size.width] setActive:YES];
+    [[customMessageComponent.heightAnchor constraintEqualToConstant:meetingView.frame.size.height] setActive:YES];
+    [[customMessageComponent.leadingAnchor constraintEqualToAnchor:meetingView.leadingAnchor] setActive:YES];
+    [[customMessageComponent.trailingAnchor constraintEqualToAnchor:meetingView.trailingAnchor constant:0] setActive:YES];
+}
+
+// Method for hiding "Waiting for others to join.." message when others have joined the meeting.
+-(void) hideWaitingForParticipateMessage{
+    if(customMessageComponent){
+        [customMessageComponent setHidden:YES];
+    }
+}
 @end
