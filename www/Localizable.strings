@@ -2,5 +2,6 @@
   Localizable.strings  
 */
 "zoom_waiting_message" = "Waiting for others to join…";
-"zoom_call_missed_message" = "Call Missed. The other participants couldn't answer. Please try again later. \nEnding this call in %d seconds.";
+"zoom_call_missed_message" = "Call Missed. The other participants couldn't answer. Please try again later. \n\nEnding this call in %d seconds.";
+"zoom_call_declined_message" = "Call Declined. The other participant couldn't answer. Please try again later. \n\nEnding this call in %d seconds.";
 
