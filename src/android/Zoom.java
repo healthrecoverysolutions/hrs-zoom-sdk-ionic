@@ -228,6 +228,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private final Handler callIgnoredHandler = new Handler();
     private static Zoom mInstance = null;
 
+    public AlertDialog messageDialog;
     private static final int CALL_IGNORED_DIALOG_SHOW_AFTER_MILLIS = 90000; // Duration in millis after which we show the call ignored/missed dialog
     private static final int CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS = 8000; // Duration for which we show the call ignored/missed dialog
     private static final String CALL_STATUS_DECLINED = "call_declined";
@@ -1743,7 +1744,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                             }
                         });
 
-                    AlertDialog messageDialog = builder.create();
+                    messageDialog = builder.create();
                     messageDialog.setCanceledOnTouchOutside(false);
                     messageDialog.setOnShowListener(new DialogInterface.OnShowListener() {
                         @Override
@@ -1779,9 +1780,6 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                             mainHandler.post(new Runnable() { // Send a task to the MessageQueue of the main thread
                                 @Override
                                 public void run() {
-                                    if(messageDialog!=null && messageDialog.isShowing()) {
-                                        messageDialog.dismiss();
-                                    }
                                     leaveMeeting();
                                     if (webView == null) { // Start activity if web view was destroyed, mainly when app in bg and the call is ended
                                         startMainActivity();
@@ -1799,6 +1797,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
             if (zoomUIService!=null) {
                 zoomUIService.hideMiniMeetingWindow();
+            }
+            if(messageDialog!=null && messageDialog.isShowing()) {
+                messageDialog.dismiss();
             }
             MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
             if (meetingService!=null) {
