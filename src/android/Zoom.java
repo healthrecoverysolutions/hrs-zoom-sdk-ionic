@@ -1800,6 +1800,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             }
             if(messageDialog!=null && messageDialog.isShowing()) {
                 messageDialog.dismiss();
+                messageDialog = null;
             }
             MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
             if (meetingService!=null) {
