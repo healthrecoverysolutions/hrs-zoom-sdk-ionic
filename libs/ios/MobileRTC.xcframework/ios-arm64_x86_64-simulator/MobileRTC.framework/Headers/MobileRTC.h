@@ -31,6 +31,7 @@
 #import <MobileRTC/MobileRTCMeetingService+RawArchiving.h>
 #import <MobileRTC/MobileRTCMeetingService+Phone.h>
 #import <MobileRTC/MobileRTCMeetingService+SmartSummary.h>
+#import <MobileRTC/MobileRTCMeetingService+AICompanion.h>
 #import <MobileRTC/MobileRTCMeetingService+Whiteboard.h>
 #import <MobileRTC/MobileRTCMeetingService+Polling.h>
 #import <MobileRTC/MobileRTCMeetingService+Encryption.h>
@@ -42,6 +43,7 @@
 #import <MobileRTC/MobileRTCMeetingActionItem.h>
 #import <MobileRTC/MobileRTCAnnotationService.h>
 #import <MobileRTC/MobileRTCRemoteControlService.h>
+#import <MobileRTC/MobileRTCCameraControlService.h>
 #import <MobileRTC/MobileRTCWaitingRoomService.h>
 #import <MobileRTC/MobileRTCRenderer.h>
 #import <MobileRTC/MobileRTCAudioRawDataHelper.h>
@@ -222,6 +224,18 @@
  @return The preconfigured remote control service. 
  */
 - (MobileRTCRemoteControlService * _Nullable)getRemoteControlService;
+
+/*!
+ @brief Get the default MobileRTC camera control service.
+ @return The preconfigured camera control service.
+ */
+- (MobileRTCCameraControlService * _Nullable)getCameraControlService:(NSInteger)userId;
+
+/*!
+ @brief Revoke camera control privilege.
+ @return If the function succeeds, the return value is MobileRTCSDKError_Success.
+ */
+- (MobileRTCSDKError)revokeCameraControlPrivilege;
 
 /*!
  @brief Get the default MobileRTC waiting room service.

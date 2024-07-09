@@ -18,13 +18,13 @@ typedef void (^MobileRTCMeetingInviteActionItemBlock)(void);
 /*!
  @brief The title of the custom invitation items.
  */
-@property (nonatomic, retain, readwrite) NSString * _Nonnull actionTitle;
+@property (nonatomic, retain, readwrite) NSString * _Nullable actionTitle;
 /*!
  @brief Callback event of clicking the invitation item.
  */
-@property (nonatomic, copy, readwrite) MobileRTCMeetingInviteActionItemBlock _Nonnull actionHandler;
+@property (nonatomic, copy, readwrite) MobileRTCMeetingInviteActionItemBlock _Nullable actionHandler;
 
-+(id _Nonnull )itemWithTitle:(NSString * _Nonnull )inTitle Action:(MobileRTCMeetingInviteActionItemBlock _Nonnull )actionHandler;
++(id _Nonnull )itemWithTitle:(NSString * _Nullable )inTitle Action:(MobileRTCMeetingInviteActionItemBlock _Nullable )actionHandler;
 
 @end
 

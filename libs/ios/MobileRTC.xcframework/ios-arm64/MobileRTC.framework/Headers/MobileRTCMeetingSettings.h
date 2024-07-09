@@ -183,17 +183,17 @@
 /*!
  @brief hide feedback button on cloud whiteboard.
  */
-@property (assign, nonatomic) BOOL hideFeedbackButtonOnCloudWhiteboard;
+@property (assign, nonatomic) BOOL hideFeedbackButtonOnCloudWhiteboard DEPRECATED_MSG_ATTRIBUTE("Use hideFeedbackButtonOnCloudWhiteboard: in MeetingService instead");
 
 /*!
  @brief hide share button on cloud whiteboard.
  */
-@property (assign, nonatomic) BOOL hideShareButtonOnCloudWhiteboard;
+@property (assign, nonatomic) BOOL hideShareButtonOnCloudWhiteboard DEPRECATED_MSG_ATTRIBUTE("Use hideShareButtonOnCloudWhiteboard: in MeetingService instead");
 
 /*!
  @brief About button’s visibility on the cloud whiteboard. Default is displaying.
  */
-@property (assign, nonatomic) BOOL hideAboutButtonOnCloudWhiteboard;
+@property (assign, nonatomic) BOOL hideAboutButtonOnCloudWhiteboard DEPRECATED_MSG_ATTRIBUTE("Use hideAboutButtonOnCloudWhiteboard: in MeetingService instead");
 
 /*!
  @brief Query if the user joins meeting with audio device. 
@@ -288,7 +288,7 @@
  @param disabled YES means disabled, otherwise not.
  @warning The function only for Zoom UI.
  */
-- (void)disableCloudWhiteboard:(BOOL)disabled;
+- (void)disableCloudWhiteboard:(BOOL)disabled DEPRECATED_MSG_ATTRIBUTE("Use disableCloudWhiteboard: in MeetingService instead");
 
 /*!
  @brief Query if it is disabled to call in.
@@ -443,6 +443,20 @@
 - (BOOL)hideRegisterWebinarInfoWindow;
 
 /*!
+@brief Set the webinar username input dialog to hide or display. if hide webinar user name input dialog, should handle
+{@link - (void)onWebinarNeedInputScreenName:(MobileRTCWebinarInputScreenNameHandler*_Nullable)handler;}
+{@link  MobileRTCWebinarInputScreenNameHandler#- (MobileRTCSDKError)inputName:(NSString *_Nonnull)name;}
+@param hide true  means hide the dialog. Otherwise, do not hide the dialog.
+*/
+- (void)setHideWebinarNameInputWindow:(BOOL)hide;
+
+/*!
+@brief Get the webinar username input dialog to hide or display.
+@return value of the setting value.
+*/
+- (BOOL)isHideWebinarNameInputWindow;
+
+/*!
 @brief Set to disable confidential watermark.
 @param disable The option value.
 @return YES means confidential watermark is disable, otherwise not.
@@ -531,20 +545,39 @@
 - (void)enableVideoCallPictureInPicture:(BOOL)enable;
 
 /*!
+ @brief Set whether to close the current sharing of another user without prompt and directly beginning a new sharing content by the closer. Default value: FALSE(prompt).
+ @param enable YES indicates no prompt. FALSE not.
+ */
+- (void)enableGrabShareWithoutReminder:(BOOL)enable;
+
+/*!
+ @brief Set the meeting input user info dialog to hide or display.
+ @param hide YES means hide the dialog. Otherwise, do not hide the dialog.
+ */
+- (void)setHideMeetingInputUserInfoWindow:(BOOL)hide;
+
+/**
+ * @brief Get the meeting input user info dialog to hide or display.
+ * @return The value of the setting value.
+ */
+- (BOOL)isHideMeetingInputUserInfoWindow;
+
+/*!
  @brief Call this method to enable or disable the auto adjust input of mic.
  @param enable YES to enable auto adjust input or false to disable it.
  */
-- (void)enableAutoAdjustMic:(BOOL)enable;
+- (void)enableAutoAdjustMic:(BOOL)enable DEPRECATED_MSG_ATTRIBUTE("Not maintain anymore");
 
 /*!
  @brief Determine whether the original input of the microphone is enabled.
  @return YES if auto adjust input  is enabled, otherwise false.
  */
-- (BOOL)isAutoAdjustMicEnable;
+- (BOOL)isAutoAdjustMicEnable DEPRECATED_MSG_ATTRIBUTE("Not maintain anymore");
 
 /*!
  @brief Query if this device supports CenterStage Mode.
  @return YES means supported, otherwise not.
+ @warning only iPad of os version above 14.5 can using this feature.
  */
 - (BOOL)isCenterStageModeSupported;
 
@@ -575,7 +608,28 @@
 
 /**
  * @brief Determine if the meeting supports echo cancellation.
- * @return true means supported, otherwise not.
+ * @return true means supported, otherwise not. Only using this feature when enabled original sound called: "enableMicOriginalInput:".
  */
 - (BOOL)isSupportEchoCancellation;
+
+
+/**
+ * @brief Set the confirm start archive dialog to hide or display.
+ * @param hide true  means hide the dialog. Otherwise, do not hide the dialog.
+ * @warning if hide confirm start archive dialog when join meeting, should handle the 'MobileRTCArchiveConfrimHandle'.
+ */
+- (void)setHideConfirmStartArchiveDialog:(BOOL)hide;
+
+/**
+ * @brief Get the confirm start archive dialog whether hide or display.
+ * @return true means hide, false means display.
+ */
+- (BOOL)isHideConfirmStartArchiveDialog;
+
+/*!
+ @brief Whether to cancel the bandwidth limit, If YES is set, the network bandwidth is no longer limited, and better audio and video quality can be obtained. Bandwidth is not limited by default. If it is a wifi network, the bandwidth is not limited, and this setting is invalid.
+ @param enable a boolean flag to set up the behavoir.
+ */
+- (void)enable5GHighBandWidth:(BOOL)enable;
+
 @end

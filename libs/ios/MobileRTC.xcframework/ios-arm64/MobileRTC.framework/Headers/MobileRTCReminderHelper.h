@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @class MobileRTCReminderContent;
 @class MobileRTCReminderHandler;
@@ -56,6 +57,12 @@
  */
 @property (nonatomic, assign) MobileRTCReminderActionType actionType;
 
+/**
+ * Get a list of reminder’s type.
+ * @return List of the reminder’s type.
+ */
+- (NSArray<NSNumber*>*_Nonnull)getMultiReminderTypes;
+
 @end
 
 /**
@@ -65,17 +72,40 @@
 /**
  * accept the reminder.
  */
-- (void)accept;
+- (MobileRTCSDKError)accept;
 
 /**
  * declined the reminder.
  */
-- (void)declined;
+- (MobileRTCSDKError)declined;
 
 /**
  * ignore the reminder.
  */
-- (void)ignore;
+- (MobileRTCSDKError)ignore;
+
+/**
+ * Set not show the disclaimer in subsequent meetings.
+ * @return If the function succeeds, the return value is MobileRTCSDKError_Success. Otherwise the function fails. Fed, for more details, see {@link MobileRTCSDKError}.
+ */
+- (MobileRTCSDKError)setHideFeatureDisclaimers;
+
+@end
+
+
+/**
+ * @brief Config for the simplify dislciamer banner.
+
+ */
+@interface MobileRTCDisclaimerBannerConfig: NSObject
+/**
+ * Center of the simplify disclaimer banner.
+ */
+@property(nonatomic, assign) CGPoint center;
+/**
+ * Background of the simplify disclaimer banner.
+ */
+@property(nonatomic, strong) UIColor * _Nullable backgroundColor;
 
 @end
 
@@ -85,6 +115,11 @@
  * @brief Callback to receive reminder events.
  */
 @property (weak, nonatomic) id<MobileRTCReminderDelegate> _Nullable reminderDelegate;
+
+/**
+ * @brief Provide the simplify disclaimer banner UI's config for CustomUI.
+ */
+- (void)setDisclaimerBannerUIConfig:(MobileRTCDisclaimerBannerConfig *_Nonnull)config;
 
 @end
 
