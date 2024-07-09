@@ -106,7 +106,7 @@
 
 /*!
  @brief Get the size of user's video.
- @param userID The ID of user in the meeting
+ @param userID The ID of user in the meeting. userID should be 0 when not in meeting.
  @return The size of user's video.
  */
 - (CGSize)getUserVideoSize:(NSUInteger)userID;
@@ -220,14 +220,18 @@
 
 /*!
  @brief Determine if alpha channel mode can be enabled.
- @return YES means it can be enabled. Otherwise NO.
+ @return YES means it can be enabled. Otherwise NO.  Only for host call.
+ @warning Only host can enable alpha channel.
  */
 - (BOOL)canEnableAlphaChannelMode;
 
 /*!
  @brief Enable or disable alpha channel mode.
  @param enable YES indicates to enable alpha channel mode., Otherwise, disable it.
- @return If the function succeeds, the return value is SDKErr_Success. Otherwise failed. To get extended error information, see [MobileRTCSDKError] enum.
+ @return If the function succeeds, the return value is MobileRTCSDKError_Success. Otherwise failed.
+ @warning Only host can enable alpha channel.
+ @warning  This function will enable the meeting alpha channel, even if the current iOS device not support alpha channel.
+ @warning for iOS device should be iPhone 8/ 8 plus X or above or be iPad Pro 9.7 above, OS should be iOS 11 or above
  */
 - (MobileRTCSDKError)enableAlphaChannelMode:(BOOL)enable;
 

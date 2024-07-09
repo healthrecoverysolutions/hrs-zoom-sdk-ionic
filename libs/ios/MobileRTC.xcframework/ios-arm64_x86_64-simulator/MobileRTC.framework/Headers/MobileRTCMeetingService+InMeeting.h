@@ -276,26 +276,12 @@
 
 /*
  @brief Send a request to enable the SDK to start a raw live stream.
- @return If the function succeeds, the return value is MobileRTCSDKError_Success and the SDK will send the request.
- Otherwise it fail and the request will not be sent. To get extended error information, see [MobileRTCSDKError] enum.
- */
-- (MobileRTCSDKError)requestRawLiveStream:(nonnull NSString *)broadcastURL DEPRECATED_MSG_ATTRIBUTE("Use -requestRawLiveStreaming: broadcastName: instead");
-
-/*
- @brief Send a request to enable the SDK to start a raw live stream.
  @param broadcastURL The broadcast URL of the live-stream.
  @param broadcastName The broadcast name of the live-stream.
  @return If the function succeeds, the return value is MobileRTCSDKError_Success and the SDK will send the request.
  Otherwise it fail and the request will not be sent. To get extended error information, see [MobileRTCSDKError] enum.
  */
 - (MobileRTCSDKError)requestRawLiveStreaming:(nonnull NSString *)broadcastURL broadcastName:(NSString *_Nullable)broadcastName ;
-
-/*!
- @brief Start a rawData live stream.
- @param broadcastURL Everyone who uses this link can watch the live broadcast.
- @return If the function succeeds, it will return the MobileRTCSDKError_Success, otherwise failed.
- */
-- (MobileRTCSDKError)startRawLiveStream:(nonnull NSString *)broadcastURL DEPRECATED_MSG_ATTRIBUTE("Use -startRawLiveStreaming: broadcastName: instead");
 
 /*
  @brief Start a rawData live stream.
@@ -406,20 +392,6 @@
  */
 - (MobileRTCSDKError)hideDynamicNoticeForAICompanionPanel;
 
-#pragma mark - Q&A Related
-/*!
- @brief Query if Q&A is enabled.
- @return YES means that Q&A is enabled, otherwise not.
- */
-- (BOOL)isQAEnabled;
-
-/*!
- @brief Set to present Zoom original Q&A ViewController.
- @param parentVC which use to present ViewController
- @return YES means that the method is called successfully, otherwise not.
- */
-- (BOOL)presentQAViewController:(nonnull UIViewController*)parentVC;
-
 /*!
  @brief Get current meeting's password
  @return The current meeting's password
@@ -480,20 +452,6 @@
 */
 - (BOOL)isParticipantsStartVideoAllowed;
 
-/**
-* Allow participant to share white board
-*
-* @param allow YES: allow, NO: disallow
-* @return error {@link MobileRTCSDKError}
-*/
-- (MobileRTCSDKError)allowParticipantsToShareWhiteBoard:(BOOL)allow;
-
-/**
-* Query is allow   participant to share white board
-*
-* @return YES: allow, NO: disallow
-*/
--(BOOL)isParticipantsShareWhiteBoardAllowed;
 /*!
  @brief Is live transcript legal notice available.
  @return available or not.
