@@ -229,8 +229,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static Zoom mInstance = null;
 
     private AlertDialog messageDialog;
-    public static final int CALL_IGNORED_DIALOG_SHOW_AFTER_MILLIS = 90000; // Duration in millis after which we show the call ignored/missed dialog
-    public static final int CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS = 8000; // Duration for which we show the call ignored/missed dialog
+    private static final int CALL_IGNORED_DIALOG_SHOW_AFTER_MILLIS = 90000; // Duration in millis after which we show the call ignored/missed dialog
+    private static final int CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS = 8000; // Duration for which we show the call ignored/missed dialog
     private static final String CALL_STATUS_DECLINED = "call_declined";
     public final static int ACTION_CALL_IGNORED_BY_PARTICIPANT = 1;
     public final static int ACTION_CALL_DECLINED_BY_PARTICIPANT = 2;
@@ -1680,6 +1680,37 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_JOIN, eventData);
     }
 
+    private void reorderNewZoomActivity(int action) {
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        // Send a task to the MessageQueue of the main thread
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
+                if (inMeetingService.isMeetingConnected()) {
+                    String activityToStart = "cordova.plugin.zoom.NewZoomMeetingActivity";
+                    try {
+                        Class<?> c = Class.forName(activityToStart);
+                        Intent intent = new Intent(cordova.getActivity(), c);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        Timber.d("Putting next action as " + action);
+                        if(action!=REORDER_WITHOUT_ACTION) {
+                            intent.putExtra("NextAction", action);
+                        }
+                        Bundle bundleAnim =  ActivityOptions.makeCustomAnimation(cordova.getActivity(), android.R.anim.slide_in_left, android.R.anim.slide_out_right).toBundle();
+                        ActivityCompat.startActivity(cordova.getContext(), intent, bundleAnim);
+                    } catch (ClassNotFoundException ignored) {
+                        Timber.e("Unable to start " + ignored);
+                    }
+                }
+            }
+        });
+    }
+
+    private void reorderNewZoomActivity() {
+        reorderNewZoomActivity(REORDER_WITHOUT_ACTION);
+    }
+
     /**
      * If the call is ignored by other participant and no one joins it, we show the maximised call view and then a
      * dialog that will auto leave the call / or user can end it by pressing ok.
@@ -1807,37 +1838,6 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     }
                 }
             });
-    }
-
-    private void reorderNewZoomActivity(int action) {
-        Handler mainHandler = new Handler(Looper.getMainLooper());
-        // Send a task to the MessageQueue of the main thread
-        mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
-                if (inMeetingService.isMeetingConnected()) {
-                        String activityToStart = "cordova.plugin.zoom.NewZoomMeetingActivity";
-                        try {
-                            Class<?> c = Class.forName(activityToStart);
-                            Intent intent = new Intent(cordova.getActivity(), c);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                            Timber.d("Putting next action as " + action);
-                            if(action!=REORDER_WITHOUT_ACTION) {
-                                intent.putExtra("NextAction", action);
-                            }
-                            Bundle bundleAnim =  ActivityOptions.makeCustomAnimation(cordova.getActivity(), android.R.anim.slide_in_left, android.R.anim.slide_out_right).toBundle();
-                            ActivityCompat.startActivity(cordova.getContext(), intent, bundleAnim);
-                        } catch (ClassNotFoundException ignored) {
-                            Timber.e("Unable to start " + ignored);
-                        }
-                }
-            }
-        });
-    }
-
-    private void reorderNewZoomActivity() {
-        reorderNewZoomActivity(REORDER_WITHOUT_ACTION);
     }
 
     public void leaveMeeting() {
