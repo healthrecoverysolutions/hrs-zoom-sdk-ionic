@@ -1776,7 +1776,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                             btnPositive.setBackgroundColor(Color.DKGRAY);
                         }
                     });
-                    if (context != null && (context instanceof Activity && !((AppCompatActivity) context).isFinishing())) {
+                    if(context != null && (context instanceof Activity && !((AppCompatActivity) context).isFinishing())) {
                         messageDialog.show();
                         TextView textView = (TextView) messageDialog.findViewById(android.R.id.message);
                         textView.setTextSize(20);
@@ -1785,11 +1785,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     }
 
                     int correctedAutoDismissTimeInMillis = autoDismissTimeInMillis + 1000; // countdown timer's onTick callback provides millisUntilFinished, it almost passes few millis until we get the callback and we need to display the start value value
-                    String countdownMsgID = messageID;
                     new CountDownTimer(correctedAutoDismissTimeInMillis, 1000) { // show the countdown on the dialog
                         public void onTick(long millisUntilFinished) {
-                            if (messageDialog != null && messageDialog.isShowing()) {
-                                int resId = cordova.getActivity().getResources().getIdentifier(countdownMsgID, "string", cordova.getActivity().getPackageName());
+                            if(messageDialog != null && messageDialog.isShowing()) {
+                                int resId = cordova.getActivity().getResources().getIdentifier(messageID, "string", cordova.getActivity().getPackageName());
                                 String message = cordova.getActivity().getString(resId, String.valueOf(millisUntilFinished / 1000));
                                 messageDialog.setMessage(message);
                             }
