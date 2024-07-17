@@ -1714,9 +1714,6 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         }
     }
 
-    private void reorderNewZoomActivity() {
-        reorderNewZoomActivity(REORDER_WITHOUT_ACTION);
-    }
     private void reorderNewZoomActivity(int action) {
         Handler mainHandler = new Handler(Looper.getMainLooper());
         // Send a task to the MessageQueue of the main thread
@@ -1742,6 +1739,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 }
             }
         });
+    }
+
+    private void reorderNewZoomActivity() {
+        reorderNewZoomActivity(REORDER_WITHOUT_ACTION);
     }
 
     public void showMessageDialog(int action) {
