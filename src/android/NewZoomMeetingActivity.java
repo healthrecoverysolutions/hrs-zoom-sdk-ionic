@@ -1,6 +1,8 @@
 package cordova.plugin.zoom;
 
-import static cordova.plugin.zoom.Zoom.CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS;
+import static cordova.plugin.zoom.Zoom.ACTION_CALL_DECLINED_BY_PARTICIPANT;
+import static cordova.plugin.zoom.Zoom.ACTION_CALL_IGNORED_BY_PARTICIPANT;
+import static cordova.plugin.zoom.Zoom.ACTION_PARTICIPANTS_LEFT_THE_CALL;
 
 import android.app.Activity;
 import android.app.Application;
@@ -175,23 +177,27 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
                 public void run()    {
                     int nextAction = intent.getExtras().getInt("NextAction");
                     switch(nextAction) {
-                        case Zoom.ACTION_CALL_DECLINED_BY_PARTICIPANT:
+                        case ACTION_CALL_DECLINED_BY_PARTICIPANT:
                             Timber.d("Action -> Call declined by participant");
-                            Zoom.getInstance().showMessageDialog("zoom_call_declined_message", CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS);
+                            Zoom.getInstance().showMessageDialog(ACTION_CALL_DECLINED_BY_PARTICIPANT);
                             break;
 
-                        case Zoom.ACTION_CALL_IGNORED_BY_PARTICIPANT:
+                        case ACTION_CALL_IGNORED_BY_PARTICIPANT:
                             Timber.d("Action -> Call ignored by participant");
                             InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
                             List<Long> currentUserList = meetingService.getInMeetingUserList();
                             if (meetingService != null && currentUserList != null && currentUserList.size() <= 1) {
-                                Zoom.getInstance().showMessageDialog("zoom_call_missed_message", CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS); // inform user that call was ignored/missed by the other participant
+                                Zoom.getInstance().showMessageDialog(ACTION_CALL_IGNORED_BY_PARTICIPANT); // inform user that call was ignored/missed by the other participant
                             }
                             break;
 
-                        case Zoom.ACTION_PARTICIPANTS_LEFT_THE_CALL:
+                        case ACTION_PARTICIPANTS_LEFT_THE_CALL:
                             Timber.d("Action -> Participant left the call");
                             Zoom.getInstance().leaveMeeting();
+                            break;
+
+                        default:
+                            Timber.d("Default case onNewIntent Zoom");
                             break;
                     }
                 }
