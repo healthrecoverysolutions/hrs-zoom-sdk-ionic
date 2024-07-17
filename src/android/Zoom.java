@@ -1742,73 +1742,73 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         cordova.getActivity().runOnUiThread(
             new Runnable() {
                 public void run() {
-                        Context context = NewZoomMeetingActivity.getFrontActivity(); // maximised
-                        if (context == null || context instanceof ZmConfPipActivity) { // we didnt get a maximised zoom call then launch dialog on main activity
-                            context = cordova.getActivity();
-                        }
-                        Timber.d("Zoom launch call info dialog on " + context);
-                        AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Dialog_MinWidth);
-                        int resId = cordova.getActivity().getResources().getIdentifier(messageID, "string", cordova.getActivity().getPackageName());
-                        builder.setMessage(cordova.getActivity().getResources().getString(resId))
-                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
+                    Context context = NewZoomMeetingActivity.getFrontActivity(); // maximised
+                    if (context == null || context instanceof ZmConfPipActivity) { // we didnt get a maximised zoom call then launch dialog on main activity
+                        context = cordova.getActivity();
+                    }
+                    Timber.d("Zoom launch call info dialog on " + context);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Dialog_MinWidth);
+                    int resId = cordova.getActivity().getResources().getIdentifier(messageID, "string", cordova.getActivity().getPackageName());
+                    builder.setMessage(cordova.getActivity().getResources().getString(resId))
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
 
-                                    Handler mainHandler = new Handler(Looper.getMainLooper());
-                                    // Send a task to the MessageQueue of the main thread
-                                    mainHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            // Code will be executed on the main thread
-                                            leaveMeeting(); // As per Zoom, leave meeting should be done from main thread
-                                        }
-                                    });
-                                }
-                            });
-
-                        messageDialog = builder.create();
-                        messageDialog.setCanceledOnTouchOutside(false);
-                        messageDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                            @Override
-                            public void onShow(DialogInterface dialog) {
-                                Button btnPositive = messageDialog.getButton(Dialog.BUTTON_POSITIVE);
-                                btnPositive.setTextSize(20);
-                                btnPositive.setTextColor(Color.WHITE);
-                                btnPositive.setBackgroundColor(Color.DKGRAY);
-                            }
-                        });
-                        if (context != null && (context instanceof Activity && !((AppCompatActivity) context).isFinishing())) {
-                            messageDialog.show();
-                            TextView textView = (TextView) messageDialog.findViewById(android.R.id.message);
-                            textView.setTextSize(20);
-                        } else {
-                            Timber.e("Couldnt show the zoom message dialog as activity is null or not active");
-                        }
-
-                        int correctedAutoDismissTimeInMillis = autoDismissTimeInMillis + 1000; // countdown timer's onTick callback provides millisUntilFinished, it almost passes few millis until we get the callback and we need to display the start value value
-                        String countdownMsgID = messageID;
-                        new CountDownTimer(correctedAutoDismissTimeInMillis, 1000) { // show the countdown on the dialog
-                            public void onTick(long millisUntilFinished) {
-                                if (messageDialog != null && messageDialog.isShowing()) {
-                                    int resId = cordova.getActivity().getResources().getIdentifier(countdownMsgID, "string", cordova.getActivity().getPackageName());
-                                    String message = cordova.getActivity().getString(resId, String.valueOf(millisUntilFinished / 1000));
-                                    messageDialog.setMessage(message);
-                                }
-                            }
-
-                            public void onFinish() {
-                                // Create a handler that associated with Looper of the main thread
                                 Handler mainHandler = new Handler(Looper.getMainLooper());
-                                mainHandler.post(new Runnable() { // Send a task to the MessageQueue of the main thread
+                                // Send a task to the MessageQueue of the main thread
+                                mainHandler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        leaveMeeting();
-                                        if (webView == null) { // Start activity if web view was destroyed, mainly when app in bg and the call is ended
-                                            startMainActivity();
-                                        }
+                                        // Code will be executed on the main thread
+                                        leaveMeeting(); // As per Zoom, leave meeting should be done from main thread
                                     }
                                 });
                             }
-                        }.start();
+                        });
+
+                    messageDialog = builder.create();
+                    messageDialog.setCanceledOnTouchOutside(false);
+                    messageDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                        @Override
+                        public void onShow(DialogInterface dialog) {
+                            Button btnPositive = messageDialog.getButton(Dialog.BUTTON_POSITIVE);
+                            btnPositive.setTextSize(20);
+                            btnPositive.setTextColor(Color.WHITE);
+                            btnPositive.setBackgroundColor(Color.DKGRAY);
+                        }
+                    });
+                    if (context != null && (context instanceof Activity && !((AppCompatActivity) context).isFinishing())) {
+                        messageDialog.show();
+                        TextView textView = (TextView) messageDialog.findViewById(android.R.id.message);
+                        textView.setTextSize(20);
+                    } else {
+                        Timber.e("Couldnt show the zoom message dialog as activity is null or not active");
+                    }
+
+                    int correctedAutoDismissTimeInMillis = autoDismissTimeInMillis + 1000; // countdown timer's onTick callback provides millisUntilFinished, it almost passes few millis until we get the callback and we need to display the start value value
+                    String countdownMsgID = messageID;
+                    new CountDownTimer(correctedAutoDismissTimeInMillis, 1000) { // show the countdown on the dialog
+                        public void onTick(long millisUntilFinished) {
+                            if (messageDialog != null && messageDialog.isShowing()) {
+                                int resId = cordova.getActivity().getResources().getIdentifier(countdownMsgID, "string", cordova.getActivity().getPackageName());
+                                String message = cordova.getActivity().getString(resId, String.valueOf(millisUntilFinished / 1000));
+                                messageDialog.setMessage(message);
+                            }
+                        }
+
+                        public void onFinish() {
+                            // Create a handler that associated with Looper of the main thread
+                            Handler mainHandler = new Handler(Looper.getMainLooper());
+                            mainHandler.post(new Runnable() { // Send a task to the MessageQueue of the main thread
+                                @Override
+                                public void run() {
+                                    leaveMeeting();
+                                    if (webView == null) { // Start activity if web view was destroyed, mainly when app in bg and the call is ended
+                                        startMainActivity();
+                                    }
+                                }
+                            });
+                        }
+                    }.start();
                 }
             });
     }
