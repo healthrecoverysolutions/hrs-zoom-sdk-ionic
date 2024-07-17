@@ -1785,6 +1785,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     }
 
                     int correctedAutoDismissTimeInMillis = autoDismissTimeInMillis + 1000; // countdown timer's onTick callback provides millisUntilFinished, it almost passes few millis until we get the callback and we need to display the start value value
+
                     new CountDownTimer(correctedAutoDismissTimeInMillis, 1000) { // show the countdown on the dialog
                         public void onTick(long millisUntilFinished) {
                             if(messageDialog!=null && messageDialog.isShowing()) {
