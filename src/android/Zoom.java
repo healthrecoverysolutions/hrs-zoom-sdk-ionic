@@ -359,12 +359,25 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     private void handleCallStatusUpdate(String callStatus) {
         if (callStatus!=null && callStatus.equals(CALL_STATUS_DECLINED)) {
-            cordova.getActivity().runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        showMessageDialog("zoom_call_declined_message", CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS);
-                    }
-                });
+            // when call is declined, and call is on, show the NewZoomMeeting first and then launch the dialog
+
+            Handler mainHandler = new Handler(Looper.getMainLooper());
+            // Send a task to the MessageQueue of the main thread
+            mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Timber.d("OnGoing Zoom call received declined from other party, meeting in progress, show NewZoomMeetingActivity");
+                    reorderNewZoomActivity();
+                }
+            });
+
+            mainHandler.postDelayed(new Runnable()
+            {
+                @Override
+                public void run()    {
+                    showMessageDialog("zoom_call_declined_message", CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS);
+                }
+            }, 1000);
 
         }
     }
@@ -1680,17 +1693,33 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_JOIN, eventData);
     }
 
+    /**
+     * If the call is ignored by other participant and no one joins it, we show the maximised call view and then a
+     * dialog that will auto leave the call / or user can end it by pressing ok.
+     */
     private void checkCallIgnoredByParticipant() {
-        cordova.getActivity().runOnUiThread(
-            new Runnable() {
-                public void run() {
+
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        // Send a task to the MessageQueue of the main thread
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                    Timber.d("Call ignored by participant, meeting in progress, show NewZoomMeetingActivity");
+                    reorderNewZoomActivity();
+            }
+        });
+
+        mainHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
                     InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
                     List<Long> currentUserList = meetingService.getInMeetingUserList();
                     if (meetingService != null && currentUserList != null && currentUserList.size() <= 1) {
                         showMessageDialog("zoom_call_missed_message", CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS); // inform user that call was ignored/missed by the other participant
                     }
-                }
-            });
+            }
+        }, 1000);
+
     }
 
     @Override
@@ -1713,7 +1742,41 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_LEAVE, eventData);
         if (currentUserList !=null && currentUserList.size() == 1) {
-            leaveMeeting();
+            
+            Handler mainHandler = new Handler(Looper.getMainLooper());
+            // Send a task to the MessageQueue of the main thread
+            mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                        Timber.d("Call left by all other participants, meeting in progress, show NewZoomMeetingActivity");
+                        reorderNewZoomActivity();
+                }
+            });
+
+            // End the call as the user is the last participant left
+            mainHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    leaveMeeting();
+                }
+            }, 1000);
+
+        }
+    }
+
+    private void reorderNewZoomActivity() {
+        InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
+        if (inMeetingService.isMeetingConnected()) {
+            String activityToStart = "cordova.plugin.zoom.NewZoomMeetingActivity";
+            try {
+                Class<?> c = Class.forName(activityToStart);
+                Intent intent = new Intent(cordova.getActivity(), c);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                Bundle bundleAnim =  ActivityOptions.makeCustomAnimation(cordova.getActivity(), android.R.anim.slide_in_left, android.R.anim.slide_out_right).toBundle();
+                ActivityCompat.startActivity(cordova.getContext(), intent, bundleAnim);
+            } catch (ClassNotFoundException ignored) {
+                Timber.e("Unable to start " + ignored);
+            }
         }
     }
 
