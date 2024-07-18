@@ -232,6 +232,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final int CALL_IGNORED_DIALOG_SHOW_AFTER_MILLIS = 90000; // Duration in millis after which we show the call ignored/missed dialog
     private static final int CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS = 8000; // Duration for which we show the call ignored/missed dialog
     private static final String CALL_STATUS_DECLINED = "call_declined";
+    public final static int ACTION_CALL_IGNORED_BY_PARTICIPANT = 1;
+    public final static int ACTION_CALL_DECLINED_BY_PARTICIPANT = 2;
+    public final static int ACTION_PARTICIPANTS_LEFT_THE_CALL = 3;
+    public final static int REORDER_WITHOUT_ACTION = 0;
 
     public static Zoom getInstance() {
         return mInstance;
@@ -359,13 +363,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     private void handleCallStatusUpdate(String callStatus) {
         if (callStatus!=null && callStatus.equals(CALL_STATUS_DECLINED)) {
-            cordova.getActivity().runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        showMessageDialog("zoom_call_declined_message", CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS);
-                    }
-                });
-
+            // when call is declined, and call is on, show the NewZoomMeeting first and then launch the dialog
+            Timber.d("OnGoing Zoom call received declined from other party, meeting in progress, show NewZoomMeetingActivity");
+            reorderNewZoomActivity(ACTION_CALL_DECLINED_BY_PARTICIPANT);
         }
     }
 
@@ -1680,17 +1680,13 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_JOIN, eventData);
     }
 
+    /**
+     * If the call is ignored by other participant and no one joins it, we show the maximised call view and then a
+     * dialog that will auto leave the call / or user can end it by pressing ok.
+     */
     private void checkCallIgnoredByParticipant() {
-        cordova.getActivity().runOnUiThread(
-            new Runnable() {
-                public void run() {
-                    InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
-                    List<Long> currentUserList = meetingService.getInMeetingUserList();
-                    if (meetingService != null && currentUserList != null && currentUserList.size() <= 1) {
-                        showMessageDialog("zoom_call_missed_message", CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS); // inform user that call was ignored/missed by the other participant
-                    }
-                }
-            });
+        Timber.d("Call ignored by participant, meeting in progress, show NewZoomMeetingActivity");
+        reorderNewZoomActivity(ACTION_CALL_IGNORED_BY_PARTICIPANT);
     }
 
     @Override
@@ -1713,11 +1709,36 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_LEAVE, eventData);
         if (currentUserList !=null && currentUserList.size() == 1) {
-            leaveMeeting();
+            Timber.d("Call left by all other participants, meeting in progress, show NewZoomMeetingActivity");
+            reorderNewZoomActivity(ACTION_PARTICIPANTS_LEFT_THE_CALL);
         }
     }
 
-    public void showMessageDialog(String messageID, int autoDismissTimeInMillis) {
+    public void showMessageDialog(int action) {
+        String messageID = null;
+        int autoDismissTimeInMillis = 0;
+        switch (action) {
+            case ACTION_CALL_DECLINED_BY_PARTICIPANT:
+                messageID = "zoom_call_declined_message";
+                autoDismissTimeInMillis = CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS;
+                break;
+
+            case Zoom.ACTION_CALL_IGNORED_BY_PARTICIPANT:
+                messageID = "zoom_call_missed_message";
+                autoDismissTimeInMillis = CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS;
+                break;
+
+            default:
+                Timber.d("Default case: Show message dialog on zoom call");
+        }
+        if (!messageID.isEmpty()) {
+            showMessageDialog(messageID, autoDismissTimeInMillis);
+        } else {
+            Timber.e("No message to be shown on zoom alert dialog");
+        }
+    }
+
+    private void showMessageDialog(String messageID, int autoDismissTimeInMillis) {
         cordova.getActivity().runOnUiThread(
             new Runnable() {
                 public void run() {
@@ -1826,6 +1847,37 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         } catch (ClassNotFoundException ignored) {
             Timber.e("unable to start " + ignored);
         }
+    }
+
+    private void reorderNewZoomActivity(int action) {
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        // Send a task to the MessageQueue of the main thread
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
+                if (inMeetingService.isMeetingConnected()) {
+                    String activityToStart = "cordova.plugin.zoom.NewZoomMeetingActivity";
+                    try {
+                        Class<?> c = Class.forName(activityToStart);
+                        Intent intent = new Intent(cordova.getActivity(), c);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        Timber.d("Putting next action as " + action);
+                        if(action!=REORDER_WITHOUT_ACTION) {
+                            intent.putExtra("NextAction", action);
+                        }
+                        Bundle bundleAnim =  ActivityOptions.makeCustomAnimation(cordova.getActivity(), android.R.anim.slide_in_left, android.R.anim.slide_out_right).toBundle();
+                        ActivityCompat.startActivity(cordova.getContext(), intent, bundleAnim);
+                    } catch (ClassNotFoundException ignored) {
+                        Timber.e("Unable to start " + ignored);
+                    }
+                }
+            }
+        });
+    }
+
+    private void reorderNewZoomActivity() {
+        reorderNewZoomActivity(REORDER_WITHOUT_ACTION);
     }
 
     @Override
