@@ -1,10 +1,16 @@
 package cordova.plugin.zoom;
 
+import static cordova.plugin.zoom.Zoom.ACTION_CALL_DECLINED_BY_PARTICIPANT;
+import static cordova.plugin.zoom.Zoom.ACTION_CALL_IGNORED_BY_PARTICIPANT;
+import static cordova.plugin.zoom.Zoom.ACTION_PARTICIPANTS_LEFT_THE_CALL;
+
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +18,8 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
+import java.util.List;
 
 import timber.log.Timber;
 import us.zoom.sdk.CustomizedMiniMeetingViewSize;
@@ -154,6 +162,47 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     protected void onResume() {
         Timber.d("Zoom on resume " + this);
         super.onResume();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Timber.d("NewZoomMeetingActivity onNewIntent");
+        if(intent!=null && intent.getExtras()!=null) {
+            Timber.d("Intent NextAction: " + intent.getExtras().get("NextAction"));
+            Handler mainHandler = new Handler(Looper.getMainLooper());
+            mainHandler.post(new Runnable()
+            {
+                @Override
+                public void run()    {
+                    int nextAction = intent.getExtras().getInt("NextAction");
+                    switch(nextAction) {
+                        case ACTION_CALL_DECLINED_BY_PARTICIPANT:
+                            Timber.d("Action -> Call declined by participant");
+                            Zoom.getInstance().showMessageDialog(ACTION_CALL_DECLINED_BY_PARTICIPANT);
+                            break;
+
+                        case ACTION_CALL_IGNORED_BY_PARTICIPANT:
+                            Timber.d("Action -> Call ignored by participant");
+                            InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
+                            List<Long> currentUserList = meetingService.getInMeetingUserList();
+                            if (meetingService != null && currentUserList != null && currentUserList.size() <= 1) {
+                                Zoom.getInstance().showMessageDialog(ACTION_CALL_IGNORED_BY_PARTICIPANT); // inform user that call was ignored/missed by the other participant
+                            }
+                            break;
+
+                        case ACTION_PARTICIPANTS_LEFT_THE_CALL:
+                            Timber.d("Action -> Participant left the call");
+                            Zoom.getInstance().leaveMeeting();
+                            break;
+
+                        default:
+                            Timber.d("Default case onNewIntent Zoom");
+                            break;
+                    }
+                }
+            });
+        }
     }
 
     @Override
