@@ -10,6 +10,13 @@
 #import <MobileRTC/MobileRTCQAItem.h>
 
 @interface MobileRTCMeetingService (QA)
+
+/*!
+ @brief Query if Q&A is support of this meeting.
+ @return YES means that Q&A is enabled, otherwise not.
+ */
+- (BOOL)isQAEnabled;
+
 /*!
  @brief Set to enable/disable meeting QA.
  @param enable YES means enabled, NO disabled.
