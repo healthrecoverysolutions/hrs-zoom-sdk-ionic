@@ -117,6 +117,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String EVENT_TYPE_MEETING_LEAVE_COMPLETE = "meetingLeaveComplete";
     private static final String EVENT_TYPE_MEETING_NEEDS_PASSWORD_OR_DISPLAY_NAME = "meetingNeedsPasswordOrDisplayName";
     private static final String EVENT_TYPE_WEBINAR_NEEDS_REGISTER = "webinarNeedsRegister";
+    private static final String EVENT_TYPE_USER_INFO_ON_JOIN_MEETING = "userInfoOnJoinMeeting";
+    private static final String EVENT_TYPE_WEBINAR_NEEDS_INPUT_SCREEN_NAME = "webinarNeedsInputScreenName";
     private static final String EVENT_TYPE_WEBINAR_NEEDS_USER_NAME_AND_EMAIL = "webinarNeedsUserNameAndEmail";
     private static final String EVENT_TYPE_MEETING_NEEDS_TO_CLOSE_OTHER_MEETING = "meetingNeedsToCloseOtherMeeting";
     private static final String EVENT_TYPE_MEETING_FAIL = "meetingFail";
@@ -178,6 +180,13 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String EVENT_TYPE_FOCUS_MODE_SHARE_TYPE_CHANGED = "focusModeShareTypeChanged";
     private static final String EVENT_TYPE_VIDEO_ALPHA_CHANNEL_STATUS_CHANGED = "videoAlphaChannelStatusChanged";
     private static final String EVENT_TYPE_ALLOW_PARTICIPANT_REQUEST_CLOUD_RECORDING= "allowParticipantRequestCloudRecording";
+    private static final String EVENT_TYPE_ON_SINK_JOIN_THIRD_PARTY_TELEPHONY_AUDIO = "onSinkJoinThirdPartyAudio";
+    private static final String EVENT_TYPE_USER_CONFIRM_TO_START_ARCHIVE = "userConfirmToStartArchive";
+    private  static final String EVENT_TYPE_CAMERA_CONTROL_REQUEST_RECEIVED = "onCameraControlRequestReceived";
+    private static final String EVENT_TYPE_CAMERA_CONTROL_REQUEST_RESULT = "onCameraControlRequestResult";
+    private  static  final String EVENT_TYPE_FILE_SEND_START = "onFileSendStart";
+    private  static  final String EVENT_TYPE_FILE_RECEIVED= "onFileReceived";
+    private  static  final String EVENT_TYPE_FILE_TRANSFER_IN_PROGRESS = "fileTransferInProgress";
     private static final String EVENT_TYPE_NOTIFICATION_SERVICE_STATUS = "notificationServiceStatus";
 
     private static final String DATA_KEY_VALUE = "value";
@@ -218,7 +227,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String DATA_KEY_LOCKED = "locked";
     private static final String DATA_KEY_UVC_CAMERA_STATUS = "uvcCameraStatus";
     private static final String DATA_KEY_FOCUS_MODE_SHARE_TYPE = "focusModeShareType";
-
+    private  static  final String DATA_KEY_CAMERA_CONTROL_REQUEST_TYPE = "cameraControlRequestType";
+    private static  final String DATA_KEY_FILE_SEND_START = "fileSendStart";
+    private static  final String DATA_KEY_FILE_RECEIVED = "fileReceived";
+    private static  final String DATA_KEY_FILE_TRANSFER_IN_PROGRESS = "fileTransferInProgress";
     private static final String ACTION_INITIALIZE = "initialize";
     private static final String ACTION_INITIALIZE_WITH_JWT = "initializeWithJWT";
     private static final String ACTION_LOGIN = "login";
@@ -1615,7 +1627,12 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     @Override
     public void onJoinMeetingNeedUserInfo(IMeetingInputUserInfoHandler iMeetingInputUserInfoHandler) {
-
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_VALUE, iMeetingInputUserInfoHandler.getDefaultDisplayName());
+        } catch (JSONException ignored) {
+        }
+        emitSharedJsEvent(EVENT_TYPE_USER_INFO_ON_JOIN_MEETING, eventData);
     }
 
     //@Override
@@ -1628,7 +1645,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     @Override
     public void onWebinarNeedInputScreenName(InMeetingEventHandler inMeetingEventHandler) {
-
+        emitSharedJsEvent(EVENT_TYPE_WEBINAR_NEEDS_INPUT_SCREEN_NAME, null);
     }
 
     @Override
@@ -2477,42 +2494,80 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     @Override
     public void onSinkJoin3rdPartyTelephonyAudio(String s) {
-
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_VALUE, s);
+        } catch (JSONException ignored) {
+        }
+        emitSharedJsEvent(EVENT_TYPE_ON_SINK_JOIN_THIRD_PARTY_TELEPHONY_AUDIO , eventData);
     }
 
     @Override
     public void onUserConfirmToStartArchive(IMeetingArchiveConfirmHandler iMeetingArchiveConfirmHandler) {
-
+        emitSharedJsEvent(EVENT_TYPE_USER_CONFIRM_TO_START_ARCHIVE, null);
     }
 
     @Override
     public void onCameraControlRequestReceived(long l, CameraControlRequestType cameraControlRequestType, ICameraControlRequestHandler iCameraControlRequestHandler) {
-
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_VALUE, l);
+            eventData.put(DATA_KEY_CAMERA_CONTROL_REQUEST_TYPE, cameraControlRequestType.toString());
+        } catch (JSONException ignored) {
+        }
+        emitSharedJsEvent(EVENT_TYPE_CAMERA_CONTROL_REQUEST_RECEIVED, eventData);
     }
 
     @Override
     public void onCameraControlRequestResult(long l, boolean b) {
-
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+            eventData.put(DATA_KEY_RESULT, b);
+        } catch (JSONException ignored) {
+        }
+        emitSharedJsEvent(EVENT_TYPE_CAMERA_CONTROL_REQUEST_RESULT, eventData);
     }
 
     @Override
     public void onCameraControlRequestResult(long l, CameraControlRequestResult cameraControlRequestResult) {
-
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_USER_ID, l);
+            eventData.put(DATA_KEY_RESULT, cameraControlRequestResult.toString());
+        } catch (JSONException ignored) {
+        }
+        emitSharedJsEvent(EVENT_TYPE_CAMERA_CONTROL_REQUEST_RESULT, eventData);
     }
 
     @Override
     public void onFileSendStart(ZoomSDKFileSender zoomSDKFileSender) {
-
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_FILE_SEND_START, zoomSDKFileSender.toString());
+        } catch (JSONException ignored) {
+        }
+        emitSharedJsEvent(EVENT_TYPE_FILE_SEND_START, eventData);
     }
 
     @Override
     public void onFileReceived(ZoomSDKFileReceiver zoomSDKFileReceiver) {
-
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_FILE_RECEIVED, zoomSDKFileReceiver.toString());
+        } catch (JSONException ignored) {
+        }
+        emitSharedJsEvent(EVENT_TYPE_FILE_RECEIVED, eventData);
     }
 
     @Override
     public void onFileTransferProgress(ZoomSDKFileTransferInfo zoomSDKFileTransferInfo) {
-
+        JSONObject eventData = new JSONObject();
+        try {
+            eventData.put(DATA_KEY_FILE_TRANSFER_IN_PROGRESS, zoomSDKFileTransferInfo.toString());
+        } catch (JSONException ignored) {
+        }
+        emitSharedJsEvent(EVENT_TYPE_FILE_TRANSFER_IN_PROGRESS, eventData);
     }
 
     @Override
