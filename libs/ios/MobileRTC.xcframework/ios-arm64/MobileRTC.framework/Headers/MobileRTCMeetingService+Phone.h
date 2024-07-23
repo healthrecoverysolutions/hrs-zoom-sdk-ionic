@@ -12,6 +12,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MobileRTCMeetingService (Phone)
 
+/**
+ * @brief Determine if the user account supports calling out.
+ * @return YES means that the client supports the phone call-out feature. otherwise, phone call-out is not supported.
+ */
+-(BOOL)isSupportPhone;
+
 /*!
  @brief Query if user can dial out in the meeting.
  @return YES means able, No disable.
