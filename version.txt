@@ -2,4 +2,4 @@ v6.1
 
 Base SDKs:
 Android: v6.1.1.22760
-iOS: v5.17.11.14222
+iOS: v6.1.0.16235
