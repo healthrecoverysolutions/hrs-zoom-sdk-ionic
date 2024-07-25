@@ -1,6 +1,6 @@
 {
   "name": "cordova.plugin.zoom-auto-audio-and-video",
-  "version": "6.1",
+  "version": "6.1.1",
   "description": "A Cordova Plugin for Zoom Video Conferencing",
   "cordova": {
     "id": "cordova.plugin.zoom",
