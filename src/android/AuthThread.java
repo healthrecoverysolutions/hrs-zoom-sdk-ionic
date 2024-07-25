@@ -29,7 +29,7 @@ import timber.log.Timber;
  * This thread is required since Zoom SDK needs to run on main thread.
  *
  * @author Zoom Video Communications, Inc.
- * @version v5.17.11
+ * @version v6.1.1
  *
  */
 public class AuthThread implements Callable<Boolean>, ZoomSDKInitializeListener {
