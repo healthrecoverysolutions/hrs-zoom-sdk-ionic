@@ -86,7 +86,7 @@ import timber.log.Timber;
  * A Cordova Plugin to use Zoom Video Conferencing services on Cordova applications.
  *
  * @author  Zoom Video Communications, Inc.
- * @version v6.1
+ * @version v6.1.1
  */
 public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener, MeetingServiceListener, InMeetingServiceListener {
     /* Debug variables */
