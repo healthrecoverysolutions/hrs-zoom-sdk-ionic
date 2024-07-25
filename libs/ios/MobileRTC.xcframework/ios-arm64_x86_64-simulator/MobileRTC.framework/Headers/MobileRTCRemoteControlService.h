@@ -30,7 +30,7 @@ typedef enum
 /*!
  @brief Callback event of receiving remote control. 
  */
-@property (assign, nonatomic) id<MobileRTCRemoteControlDelegate> _Nonnull delegate;
+@property (weak, nonatomic) id<MobileRTCRemoteControlDelegate> _Nullable delegate;
 
 /*!
  @brief Query if current user have control privilege. You can have this right after be assigned to the remote control.

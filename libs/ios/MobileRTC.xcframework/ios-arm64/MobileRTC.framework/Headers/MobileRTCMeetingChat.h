@@ -9,6 +9,59 @@
 #import <Foundation/Foundation.h>
 #import <MobileRTC/MobileRTCConstants.h>
 
+@interface MobileRTCFileTransferInfo : NSObject
+@property(nonatomic, copy, nullable)    NSString *messageId;    /// the message identify of transfer file.
+@property(nonatomic, assign)            MobileRTCFileTransferStatus transStatus; /// The status of the file transfer
+@property(nonatomic, strong, nullable)  NSDate *timeStamp;      /// The time stamp of the file.
+@property(nonatomic, assign)            BOOL isSendToAll;       /// Is the file send to all user in meeting?
+@property(nonatomic, assign)            NSUInteger fileSize;    /// The bytes of transfer file size.
+@property(nonatomic, copy, nullable)    NSString *fileName;     /// the file name of transfer file.
+@property(nonatomic, assign)            NSUInteger completePercentage; /// The ratio of the file transfer completed
+@property(nonatomic, assign)            NSUInteger completeSize;/// The size of the file transferred so far in bytes
+@property(nonatomic, assign)            NSUInteger bitPerSecond;/// The speed of the file transfer in bits per second
+@end
+
+
+@interface MobileRTCFileSender : NSObject
+@property(nonatomic, strong, nullable) MobileRTCFileTransferInfo *transferInfo; /// the basic information of transfer file.
+
+/*!
+ @brief Get file receiver's user id.
+ @return The receiver user ID. -1 specify the internel error of get user ID. 0 specify the file send to all.
+ */
+- (NSInteger)getReceiverUserId;
+
+/*!
+ @brief Cancel the file send.
+ @return The error type of the cancel action, For more details, see {@link MobileRTCSDKError}.
+ */
+- (MobileRTCSDKError)cancelSend;
+@end
+
+@interface MobileRTCFileReceiver : NSObject
+@property(nonatomic, strong, nullable) MobileRTCFileTransferInfo *transferInfo; /// the basic information of transfer file.
+
+/*!
+ @brief Get file sender's user id .
+ @return The sender user ID. -1 specify the internel error of get user ID.
+ */
+- (NSInteger)getSenderUserId;
+
+/*!
+ @brief Cancel the file receive.
+ @return The error type of the cancel action. For more details, see {@link MobileRTCSDKError}.
+ */
+- (MobileRTCSDKError)cancelReceive;
+
+/*!
+ @brief Start receive the file.
+ @param path The path to receive the file.
+ @return The error type of the cancel action, For more details, see {@link MobileRTCSDKError}.
+ */
+- (MobileRTCSDKError)startReceive:(NSString * _Nullable)path;
+@end
+
+
 @class MobileRTCMeetingChat;
 /*!
  @brief Chat message builder to create ChatMsgInfo objects.
