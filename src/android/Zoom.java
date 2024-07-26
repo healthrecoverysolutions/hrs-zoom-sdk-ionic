@@ -1855,22 +1855,32 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
-                if (inMeetingService.isMeetingConnected()) {
-                    String activityToStart = "cordova.plugin.zoom.NewZoomMeetingActivity";
-                    try {
-                        Class<?> c = Class.forName(activityToStart);
-                        Intent intent = new Intent(cordova.getActivity(), c);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                        Timber.d("Putting next action as " + action);
-                        if(action!=REORDER_WITHOUT_ACTION) {
-                            intent.putExtra("NextAction", action);
+                try {
+                    if(ZoomSDK.getInstance()!=null) {
+                        InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
+                        if (inMeetingService!=null && inMeetingService.isMeetingConnected()) {
+                            String activityToStart = "cordova.plugin.zoom.NewZoomMeetingActivity";
+                            try {
+                                Class<?> c = Class.forName(activityToStart);
+                                Intent intent = new Intent(cordova.getActivity(), c);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                Timber.d("Putting next action as " + action);
+                                if (action != REORDER_WITHOUT_ACTION) {
+                                    intent.putExtra("NextAction", action);
+                                }
+                                Bundle bundleAnim = ActivityOptions.makeCustomAnimation(cordova.getActivity(), android.R.anim.slide_in_left, android.R.anim.slide_out_right).toBundle();
+                                ActivityCompat.startActivity(cordova.getContext(), intent, bundleAnim);
+                            } catch (ClassNotFoundException ignored) {
+                                Timber.e("Unable to start " + ignored);
+                            }
+                        } else {
+                            Timber.e("InMeetingService was null");
                         }
-                        Bundle bundleAnim =  ActivityOptions.makeCustomAnimation(cordova.getActivity(), android.R.anim.slide_in_left, android.R.anim.slide_out_right).toBundle();
-                        ActivityCompat.startActivity(cordova.getContext(), intent, bundleAnim);
-                    } catch (ClassNotFoundException ignored) {
-                        Timber.e("Unable to start " + ignored);
+                    } else {
+                        Timber.e("Zoom instance was null");
                     }
+                } catch (NullPointerException e) {
+                    Timber.e("Exception while re-ordering NewZoomActivity " + e);
                 }
             }
         });
