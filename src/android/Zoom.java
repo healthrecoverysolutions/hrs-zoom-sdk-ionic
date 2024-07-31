@@ -1660,20 +1660,31 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
         // Schedule a task to run after a specified duration and check the number of participants to identify call missed/ignored use case
         if (inMeetingUserListSize == 1) { // patient is the only one who has joined
-            final Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    // Check whether the call was declined before the user could join
-                    if (declinedCallId != null) {
+            if (declinedCallId != null) {  // Check whether the call was declined before the user could join
+                Handler mainHandler = new Handler(Looper.getMainLooper());
+                // Send a task to the MessageQueue of the main thread
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
                         Timber.d("Processing call declined after zoom join");
-                        Zoom.getInstance().showMessageDialog(ACTION_CALL_DECLINED_BY_PARTICIPANT);
-                    } else {
+                        if (messageDialog == null) {
+                            Zoom.getInstance().showMessageDialog(ACTION_CALL_DECLINED_BY_PARTICIPANT);
+                            declinedCallId = null;
+                        } else {
+                            Timber.d("Declined message shown already");
+                        }
+                    }
+                });
+            } else {
+                final Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
                         Timber.d("Scheduling check for call ignored");
                         checkCallIgnoredByParticipant();
                     }
-                }
-            };
-            callIgnoredHandler.postDelayed(runnable, CALL_IGNORED_DIALOG_SHOW_AFTER_MILLIS); // Show after 90 seconds as this is the ringing time at clinician/caregivers end
+                };
+                callIgnoredHandler.postDelayed(runnable, CALL_IGNORED_DIALOG_SHOW_AFTER_MILLIS); // Show after 90 seconds as this is the ringing time at clinician/caregivers end
+            }
         }
 
         NewZoomMeetingActivity.enableWaitingMessage((inMeetingUserListSize <= 1));
@@ -1794,7 +1805,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                         TextView textView = (TextView) messageDialog.findViewById(android.R.id.message);
                         textView.setTextSize(20);
                     } else {
-                        Timber.e("Couldnt show the zoom message dialog as activity is null or not active");
+                        Timber.e("Couldnt show the zoom message dialog as activity is null or not active " + context);
                     }
 
                     int correctedAutoDismissTimeInMillis = autoDismissTimeInMillis + 1000; // countdown timer's onTick callback provides millisUntilFinished, it almost passes few millis until we get the callback and we need to display the start value value
@@ -1892,6 +1903,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                             if (action == ACTION_CALL_DECLINED_BY_PARTICIPANT) {
                                 Timber.d("Action -> Call declined by participant");
                                 Zoom.getInstance().showMessageDialog(ACTION_CALL_DECLINED_BY_PARTICIPANT);
+                                declinedCallId = null;
                             }
 
                         }
