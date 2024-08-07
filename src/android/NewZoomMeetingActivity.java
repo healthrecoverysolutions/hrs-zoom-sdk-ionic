@@ -180,6 +180,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
                         case ACTION_CALL_DECLINED_BY_PARTICIPANT:
                             Timber.d("Action -> Call declined by participant");
                             Zoom.getInstance().showMessageDialog(ACTION_CALL_DECLINED_BY_PARTICIPANT);
+                            Zoom.getInstance().declinedCallId = null; // handled the call declined notification
                             break;
 
                         case ACTION_CALL_IGNORED_BY_PARTICIPANT:
