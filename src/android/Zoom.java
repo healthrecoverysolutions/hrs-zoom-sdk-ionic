@@ -373,8 +373,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 break;
             case ACTION_NOTIFY_CALL_STATUS:
                 String callStatus = args.getString(0);
-                declinedCallId = args.getString(1);
-                Timber.d("Decline call id: " + declinedCallId);
+                if(callStatus.equals(CALL_STATUS_DECLINED)){
+                    declinedCallId = args.getString(1);
+                    Timber.d("Decline call id: " + declinedCallId);
+                }
                 handleCallStatusUpdate(callStatus);
                 break;
 
