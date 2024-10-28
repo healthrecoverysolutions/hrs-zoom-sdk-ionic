@@ -272,7 +272,12 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mInstance = null;
+        if (this == mInstance) {
+            Timber.d("onDestroy clearing static mInstance");
+            mInstance = null;
+        } else {
+            Timber.d("onDestroy Not clearing static mInstance");
+        }
         webView = null;
     }
 
@@ -484,7 +489,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         if (DEBUG) {
             Timber.d("********** Zoom's initialize called **********");
         }
-
+        if (mInstance == null) {
+            Timber.d("#### Zoom's mInstance null thus re-init it ####");
+            mInstance = this;
+        }
         ZoomSDK mZoomSDK = ZoomSDK.getInstance();
 
         // Note: When "null" is pass from JS to Android, it is transferred as a word "null".
