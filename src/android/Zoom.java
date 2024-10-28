@@ -259,6 +259,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     public static String declinedCallId;
 
     public static Zoom getInstance() {
+        Timber.d("ZOOM PLUGIN: getInstance " + mInstance);
         return mInstance;
     }
 
@@ -267,12 +268,21 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     protected void pluginInitialize() {
         super.pluginInitialize();
         mInstance = this;
+        Timber.d("ZOOM PLUGIN: PLUGIN INITIALIZE " + this);
+        Timber.d("ZOOM PLUGIN: PLUGIN INITIALIZE MINSTANCE " + mInstance);
     }
 
     @Override
     public void onDestroy() {
+        Timber.d("ZOOM PLUGIN: ON DESTROY " + this);
+        Timber.d("ZOOM PLUGIN: ON DESTROY mInstance " + mInstance);
         super.onDestroy();
-        mInstance = null;
+        if (this == mInstance) {
+            Timber.d("onDestroy clearing static mInstance");
+            mInstance = null;
+        } else {
+            Timber.d("onDestroy Not clearing static mInstance");
+        }
         webView = null;
     }
 
@@ -337,6 +347,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 this.isLoggedIn(callbackContext);
                 break;
             case ACTION_JOIN_MEETING:
+                Timber.d("ZOOM PLUGIN: Execute JoinMeeting " + mInstance);
                 String meetingNo = args.getString(0);
                 String meetingPassword = args.getString(1);
                 String displayNameJ = args.getString(2);
@@ -484,7 +495,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         if (DEBUG) {
             Timber.d("********** Zoom's initialize called **********");
         }
-
+        if (mInstance == null) {
+            Timber.d("#### Zoom's mInstance null thus re-init it ####");
+            mInstance = this;
+        }
         ZoomSDK mZoomSDK = ZoomSDK.getInstance();
 
         // Note: When "null" is pass from JS to Android, it is transferred as a word "null".
