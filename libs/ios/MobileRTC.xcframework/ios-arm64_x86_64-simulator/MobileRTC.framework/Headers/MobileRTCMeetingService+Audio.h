@@ -2,8 +2,8 @@
 //  MobileRTCMeetingService+Audio.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 2018/6/6.
-//  Copyright © 2019 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 2018/6/6.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <MobileRTC/MobileRTC.h>
@@ -49,17 +49,25 @@
 - (BOOL)canUnmuteMyAudio;
 
 /*!
+@brief Check if the host/cohost can enable mute on entry.
+@return YES  indicates that the host/cohost can enable mute on entry. Otherwise not.
+@remarks Valid for both ZOOM style and user custom interface mode.
+*/
+- (BOOL)canEnableMuteOnEntry;
+/*!
+@brief Mute or umute the user after joining the meeting.
+@param bEnable YES  indicates to mute the user after joining the meeting.
+@param allowUnmuteBySelf YES means allow to mute self
+@return If the function succeeds, the return value is MobileRTCSDKError_Success. Otherwise failed. To get extended error information, see \link MobileRTCSDKError \endlink enum.
+@remarks Valid for both ZOOM style and user custom interface mode.
+ */
+- (MobileRTCSDKError)enableMuteOnEntry:(BOOL)bEnable allowUnmuteBySelf:(BOOL)allowUnmuteBySelf;
+
+/*!
  @brief Query if is enabled to mute attendees when they join the meeting. 
  @return YES means enabled, otherwise not.
  */
 - (BOOL)isMuteOnEntryOn;
-
-/*!
- @brief Set if attendees join the meeting with audio muted. 
- @return YES means muted, otherwise not.
- @warning Only meeting host/co-host can run the function.
- */
-- (BOOL)muteOnEntry:(BOOL)on;
 
 /*!
  @brief Query if the user's audio is muted.
