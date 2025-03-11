@@ -10,7 +10,7 @@
 		</data>
 		<key>ios-arm64/zoomcml.framework/Info.plist</key>
 		<data>
-		fhc8afPlLlJZS6EnVGyK1PZzKQs=
+		5tplcA80lB2tlHy3zLZEwLQZVCo=
 		</data>
 		<key>ios-arm64/zoomcml.framework/afn_iOS_hori.mlmodelc/analytics/coremldata.bin</key>
 		<data>
@@ -59,54 +59,6 @@
 		<key>ios-arm64/zoomcml.framework/afn_iOS_vert.mlmodelc/neural_network_optionals/coremldata.bin</key>
 		<data>
 		uA3l0Th1hUHF8FJlrRRKufqG0ds=
-		</data>
-		<key>ios-arm64/zoomcml.framework/avatar_beardall.mlmodelc/analytics/coremldata.bin</key>
-		<data>
-		n2H+SztoLLoVOh3CSS+RiiDJNzM=
-		</data>
-		<key>ios-arm64/zoomcml.framework/avatar_beardall.mlmodelc/coremldata.bin</key>
-		<data>
-		QFT4PYVuhhEvFWYvJ7x8ipVljnQ=
-		</data>
-		<key>ios-arm64/zoomcml.framework/avatar_beardall.mlmodelc/metadata.json</key>
-		<data>
-		SVGwoMsYzew1PVaw4uHHaM3bGqw=
-		</data>
-		<key>ios-arm64/zoomcml.framework/avatar_beardall.mlmodelc/model.espresso.weights</key>
-		<data>
-		JcHvRTaJlDvmvSwc4Y70fcKdnMc=
-		</data>
-		<key>ios-arm64/zoomcml.framework/avatar_beardall.mlmodelc/model/coremldata.bin</key>
-		<data>
-		96qx+hsg/KmPREzNXdnSj6vRz1w=
-		</data>
-		<key>ios-arm64/zoomcml.framework/avatar_beardall.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<data>
-		uA3l0Th1hUHF8FJlrRRKufqG0ds=
-		</data>
-		<key>ios-arm64/zoomcml.framework/avatar_glassesall.mlmodelc/analytics/coremldata.bin</key>
-		<data>
-		EI47hoIyqJWtGCdXY6ZMmJVxuO4=
-		</data>
-		<key>ios-arm64/zoomcml.framework/avatar_glassesall.mlmodelc/coremldata.bin</key>
-		<data>
-		Lp866JvMlU5pl1SVeEZxhviAUP4=
-		</data>
-		<key>ios-arm64/zoomcml.framework/avatar_glassesall.mlmodelc/metadata.json</key>
-		<data>
-		LpJg9sMOBRPPkxA5q7mWZOtYhMA=
-		</data>
-		<key>ios-arm64/zoomcml.framework/avatar_glassesall.mlmodelc/model.espresso.weights</key>
-		<data>
-		tjNd+3dPpmCwJ6v4gMtsMW+cYwI=
-		</data>
-		<key>ios-arm64/zoomcml.framework/avatar_glassesall.mlmodelc/model/coremldata.bin</key>
-		<data>
-		96qx+hsg/KmPREzNXdnSj6vRz1w=
-		</data>
-		<key>ios-arm64/zoomcml.framework/avatar_glassesall.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<data>
-		tkgF5pxT7RlO+9uypQti9obolyA=
 		</data>
 		<key>ios-arm64/zoomcml.framework/bgr_iOS_hori.mlmodelc/analytics/coremldata.bin</key>
 		<data>
@@ -158,51 +110,27 @@
 		</data>
 		<key>ios-arm64/zoomcml.framework/flm.mlmodelc/analytics/coremldata.bin</key>
 		<data>
-		nx3DYbZ57UO8XK7p6LlzFNZ0ioM=
+		I3BmYAF2cmDpTeUZSSwMCZd9css=
 		</data>
 		<key>ios-arm64/zoomcml.framework/flm.mlmodelc/coremldata.bin</key>
 		<data>
-		fxp4hbm3tnA21x5ishqn3ErqzOQ=
+		Au/biZLs7gWS8KcIoUELyyFqiyc=
 		</data>
 		<key>ios-arm64/zoomcml.framework/flm.mlmodelc/metadata.json</key>
 		<data>
-		ZquhNbR2SArsXAUZShNLFjgrS5g=
+		eNBwAIAP1D4MNXHpGRI4aS+oxoM=
 		</data>
 		<key>ios-arm64/zoomcml.framework/flm.mlmodelc/model.espresso.weights</key>
 		<data>
-		b5I9z9WPPW88aqneccr9SF8v0RI=
+		WVs6A6z3Zf7N1aeHLO6FD5grhEc=
 		</data>
 		<key>ios-arm64/zoomcml.framework/flm.mlmodelc/model/coremldata.bin</key>
 		<data>
-		sAilHvVxCPam2pSz/l8ae9uYGG4=
+		/ipnj+6sTUIP60uko8yhcl+XyTU=
 		</data>
 		<key>ios-arm64/zoomcml.framework/flm.mlmodelc/neural_network_optionals/coremldata.bin</key>
 		<data>
-		uA3l0Th1hUHF8FJlrRRKufqG0ds=
-		</data>
-		<key>ios-arm64/zoomcml.framework/hair_seg.mlmodelc/analytics/coremldata.bin</key>
-		<data>
-		QIm0gpvBW8X0beAlfzBYZftA0j4=
-		</data>
-		<key>ios-arm64/zoomcml.framework/hair_seg.mlmodelc/coremldata.bin</key>
-		<data>
-		eGUT+UfcrQO/TLMGc5NLA/i8OHI=
-		</data>
-		<key>ios-arm64/zoomcml.framework/hair_seg.mlmodelc/metadata.json</key>
-		<data>
-		1VhO8wr/bvaAqZxW7Ivc7MXm2Lk=
-		</data>
-		<key>ios-arm64/zoomcml.framework/hair_seg.mlmodelc/model.espresso.weights</key>
-		<data>
-		Q0/jHwwI+cwY68QIgjbgaeh6v98=
-		</data>
-		<key>ios-arm64/zoomcml.framework/hair_seg.mlmodelc/model/coremldata.bin</key>
-		<data>
-		CunO+xmBog0UtaIyLShgOlzDs2c=
-		</data>
-		<key>ios-arm64/zoomcml.framework/hair_seg.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<data>
-		uA3l0Th1hUHF8FJlrRRKufqG0ds=
+		tkgF5pxT7RlO+9uypQti9obolyA=
 		</data>
 		<key>ios-arm64/zoomcml.framework/hd.mlmodelc/analytics/coremldata.bin</key>
 		<data>
@@ -276,33 +204,9 @@
 		<data>
 		uA3l0Th1hUHF8FJlrRRKufqG0ds=
 		</data>
-		<key>ios-arm64/zoomcml.framework/modelNet.mlmodelc/analytics/coremldata.bin</key>
-		<data>
-		QxRMmuhpa7gEK8DGMS1gZt9lENQ=
-		</data>
-		<key>ios-arm64/zoomcml.framework/modelNet.mlmodelc/coremldata.bin</key>
-		<data>
-		+OvvlrfYhty53Y89dYsiWNt9u1w=
-		</data>
-		<key>ios-arm64/zoomcml.framework/modelNet.mlmodelc/metadata.json</key>
-		<data>
-		X5DpdYw+PmQXfSTnKX/tRx+LXmU=
-		</data>
-		<key>ios-arm64/zoomcml.framework/modelNet.mlmodelc/model.espresso.weights</key>
-		<data>
-		H83NHF07VPaIrZ1OqLr4YhrB+xM=
-		</data>
-		<key>ios-arm64/zoomcml.framework/modelNet.mlmodelc/model/coremldata.bin</key>
-		<data>
-		BAcGz5nP3d6p5ZJBOTSb+iF6Wa0=
-		</data>
-		<key>ios-arm64/zoomcml.framework/modelNet.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<data>
-		tkgF5pxT7RlO+9uypQti9obolyA=
-		</data>
 		<key>ios-arm64/zoomcml.framework/zoomcml</key>
 		<data>
-		mi4H7ZIIsby+orLkYY3Zyng2R1I=
+		5lMTBNEftLuohJccYaMfPhh9olk=
 		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/Headers/zoomcml_interface.h</key>
 		<data>
@@ -310,11 +214,11 @@
 		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/Info.plist</key>
 		<data>
-		vu08CsRC9aSOaBRrkhH5a6NixQI=
+		jIQyqTGRe5gd7KICKk9Z053xx1k=
 		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/_CodeSignature/CodeResources</key>
 		<data>
-		k0I3PL3WphzKTmQxuLbNlf1BrJY=
+		PQauOIHpXoj5Ni6xZGn6ordBwT8=
 		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/afn_iOS_hori.mlmodelc/analytics/coremldata.bin</key>
 		<data>
@@ -363,54 +267,6 @@
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/afn_iOS_vert.mlmodelc/neural_network_optionals/coremldata.bin</key>
 		<data>
 		uA3l0Th1hUHF8FJlrRRKufqG0ds=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_beardall.mlmodelc/analytics/coremldata.bin</key>
-		<data>
-		n2H+SztoLLoVOh3CSS+RiiDJNzM=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_beardall.mlmodelc/coremldata.bin</key>
-		<data>
-		QFT4PYVuhhEvFWYvJ7x8ipVljnQ=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_beardall.mlmodelc/metadata.json</key>
-		<data>
-		SVGwoMsYzew1PVaw4uHHaM3bGqw=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_beardall.mlmodelc/model.espresso.weights</key>
-		<data>
-		JcHvRTaJlDvmvSwc4Y70fcKdnMc=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_beardall.mlmodelc/model/coremldata.bin</key>
-		<data>
-		96qx+hsg/KmPREzNXdnSj6vRz1w=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_beardall.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<data>
-		uA3l0Th1hUHF8FJlrRRKufqG0ds=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_glassesall.mlmodelc/analytics/coremldata.bin</key>
-		<data>
-		EI47hoIyqJWtGCdXY6ZMmJVxuO4=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_glassesall.mlmodelc/coremldata.bin</key>
-		<data>
-		Lp866JvMlU5pl1SVeEZxhviAUP4=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_glassesall.mlmodelc/metadata.json</key>
-		<data>
-		LpJg9sMOBRPPkxA5q7mWZOtYhMA=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_glassesall.mlmodelc/model.espresso.weights</key>
-		<data>
-		tjNd+3dPpmCwJ6v4gMtsMW+cYwI=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_glassesall.mlmodelc/model/coremldata.bin</key>
-		<data>
-		96qx+hsg/KmPREzNXdnSj6vRz1w=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_glassesall.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<data>
-		tkgF5pxT7RlO+9uypQti9obolyA=
 		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/bgr_iOS_hori.mlmodelc/analytics/coremldata.bin</key>
 		<data>
@@ -462,51 +318,27 @@
 		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/flm.mlmodelc/analytics/coremldata.bin</key>
 		<data>
-		nx3DYbZ57UO8XK7p6LlzFNZ0ioM=
+		I3BmYAF2cmDpTeUZSSwMCZd9css=
 		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/flm.mlmodelc/coremldata.bin</key>
 		<data>
-		fxp4hbm3tnA21x5ishqn3ErqzOQ=
+		Au/biZLs7gWS8KcIoUELyyFqiyc=
 		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/flm.mlmodelc/metadata.json</key>
 		<data>
-		ZquhNbR2SArsXAUZShNLFjgrS5g=
+		eNBwAIAP1D4MNXHpGRI4aS+oxoM=
 		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/flm.mlmodelc/model.espresso.weights</key>
 		<data>
-		b5I9z9WPPW88aqneccr9SF8v0RI=
+		WVs6A6z3Zf7N1aeHLO6FD5grhEc=
 		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/flm.mlmodelc/model/coremldata.bin</key>
 		<data>
-		sAilHvVxCPam2pSz/l8ae9uYGG4=
+		/ipnj+6sTUIP60uko8yhcl+XyTU=
 		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/flm.mlmodelc/neural_network_optionals/coremldata.bin</key>
 		<data>
-		uA3l0Th1hUHF8FJlrRRKufqG0ds=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hair_seg.mlmodelc/analytics/coremldata.bin</key>
-		<data>
-		QIm0gpvBW8X0beAlfzBYZftA0j4=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hair_seg.mlmodelc/coremldata.bin</key>
-		<data>
-		eGUT+UfcrQO/TLMGc5NLA/i8OHI=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hair_seg.mlmodelc/metadata.json</key>
-		<data>
-		1VhO8wr/bvaAqZxW7Ivc7MXm2Lk=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hair_seg.mlmodelc/model.espresso.weights</key>
-		<data>
-		Q0/jHwwI+cwY68QIgjbgaeh6v98=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hair_seg.mlmodelc/model/coremldata.bin</key>
-		<data>
-		CunO+xmBog0UtaIyLShgOlzDs2c=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hair_seg.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<data>
-		uA3l0Th1hUHF8FJlrRRKufqG0ds=
+		tkgF5pxT7RlO+9uypQti9obolyA=
 		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hd.mlmodelc/analytics/coremldata.bin</key>
 		<data>
@@ -580,33 +412,9 @@
 		<data>
 		uA3l0Th1hUHF8FJlrRRKufqG0ds=
 		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/modelNet.mlmodelc/analytics/coremldata.bin</key>
-		<data>
-		QxRMmuhpa7gEK8DGMS1gZt9lENQ=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/modelNet.mlmodelc/coremldata.bin</key>
-		<data>
-		+OvvlrfYhty53Y89dYsiWNt9u1w=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/modelNet.mlmodelc/metadata.json</key>
-		<data>
-		X5DpdYw+PmQXfSTnKX/tRx+LXmU=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/modelNet.mlmodelc/model.espresso.weights</key>
-		<data>
-		H83NHF07VPaIrZ1OqLr4YhrB+xM=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/modelNet.mlmodelc/model/coremldata.bin</key>
-		<data>
-		BAcGz5nP3d6p5ZJBOTSb+iF6Wa0=
-		</data>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/modelNet.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<data>
-		tkgF5pxT7RlO+9uypQti9obolyA=
-		</data>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/zoomcml</key>
 		<data>
-		/gmc89nqasSqkF63j6oPJ17idss=
+		eF/GljuAu8g2Tu/3JPpAv3RBNKY=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -626,11 +434,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			fhc8afPlLlJZS6EnVGyK1PZzKQs=
+			5tplcA80lB2tlHy3zLZEwLQZVCo=
 			</data>
 			<key>hash2</key>
 			<data>
-			E/wN1Sh/VWAu+m3TS2I5ijvZxLYcgR+4d0L0+zLaVP0=
+			ShFoa+K7rtjbeZfK8VEAoNBxWE7xDcvbdZmLFXNP3BE=
 			</data>
 		</dict>
 		<key>ios-arm64/zoomcml.framework/afn_iOS_hori.mlmodelc/analytics/coremldata.bin</key>
@@ -763,138 +571,6 @@
 			<key>hash2</key>
 			<data>
 			LDTOHfI7g4xavyp/ZDfMo9MGftUJ/yXxHfaxG1grUes=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/avatar_beardall.mlmodelc/analytics/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			n2H+SztoLLoVOh3CSS+RiiDJNzM=
-			</data>
-			<key>hash2</key>
-			<data>
-			Nxj706Cq1GS8qQPD3Wyvb9x1rHlX1CH/IjR1ZBEwiJw=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/avatar_beardall.mlmodelc/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			QFT4PYVuhhEvFWYvJ7x8ipVljnQ=
-			</data>
-			<key>hash2</key>
-			<data>
-			N8SsyFqCm3F8uOY79VzbytzP+Dq2LH2A4wOpvBbMS1Q=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/avatar_beardall.mlmodelc/metadata.json</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			SVGwoMsYzew1PVaw4uHHaM3bGqw=
-			</data>
-			<key>hash2</key>
-			<data>
-			wNbFLhpbIrbEW79RicmxpuU6fhn5917YBL89EhLfyRA=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/avatar_beardall.mlmodelc/model.espresso.weights</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			JcHvRTaJlDvmvSwc4Y70fcKdnMc=
-			</data>
-			<key>hash2</key>
-			<data>
-			b3DDk7vapJNKM5sdgeA1lKpYwT2lkNafULOVOEbT9n4=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/avatar_beardall.mlmodelc/model/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			96qx+hsg/KmPREzNXdnSj6vRz1w=
-			</data>
-			<key>hash2</key>
-			<data>
-			zSt3jGhCcfXUGWvU7K0QFRCm0NIkGKXNfok8ZH1Iugo=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/avatar_beardall.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			uA3l0Th1hUHF8FJlrRRKufqG0ds=
-			</data>
-			<key>hash2</key>
-			<data>
-			LDTOHfI7g4xavyp/ZDfMo9MGftUJ/yXxHfaxG1grUes=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/avatar_glassesall.mlmodelc/analytics/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			EI47hoIyqJWtGCdXY6ZMmJVxuO4=
-			</data>
-			<key>hash2</key>
-			<data>
-			rt4wyvWPjNRdpfl49U+R9XKs2P9sKPZrtJGmKzldXZY=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/avatar_glassesall.mlmodelc/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			Lp866JvMlU5pl1SVeEZxhviAUP4=
-			</data>
-			<key>hash2</key>
-			<data>
-			FnbEPX+MPQ2FnZ/btJvTcWMp2zrURWitowcvsgyfPFQ=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/avatar_glassesall.mlmodelc/metadata.json</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			LpJg9sMOBRPPkxA5q7mWZOtYhMA=
-			</data>
-			<key>hash2</key>
-			<data>
-			p8q+0z47RtDEiMyEGvoSysGeCI2qBRy8M4nKs96eI0I=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/avatar_glassesall.mlmodelc/model.espresso.weights</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			tjNd+3dPpmCwJ6v4gMtsMW+cYwI=
-			</data>
-			<key>hash2</key>
-			<data>
-			uJ8yj/C4+v5lJkwWUK0F2dxBocJm6abPn86QLhJs4VM=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/avatar_glassesall.mlmodelc/model/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			96qx+hsg/KmPREzNXdnSj6vRz1w=
-			</data>
-			<key>hash2</key>
-			<data>
-			zSt3jGhCcfXUGWvU7K0QFRCm0NIkGKXNfok8ZH1Iugo=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/avatar_glassesall.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			tkgF5pxT7RlO+9uypQti9obolyA=
-			</data>
-			<key>hash2</key>
-			<data>
-			WTG9U2xFUClKISxvyNPBvuddqBeYC6C2cchgPa+zYjg=
 			</data>
 		</dict>
 		<key>ios-arm64/zoomcml.framework/bgr_iOS_hori.mlmodelc/analytics/coremldata.bin</key>
@@ -1033,132 +709,66 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			nx3DYbZ57UO8XK7p6LlzFNZ0ioM=
+			I3BmYAF2cmDpTeUZSSwMCZd9css=
 			</data>
 			<key>hash2</key>
 			<data>
-			lsUJvh1v4BPVO4kNP7Dyv2Xyn4qzW9OeRUreYoSVIb4=
+			tVlKN7CtssQFl4OrTuyHYo07ybEq3suBOKi7SlrCWoY=
 			</data>
 		</dict>
 		<key>ios-arm64/zoomcml.framework/flm.mlmodelc/coremldata.bin</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			fxp4hbm3tnA21x5ishqn3ErqzOQ=
+			Au/biZLs7gWS8KcIoUELyyFqiyc=
 			</data>
 			<key>hash2</key>
 			<data>
-			e3kUczjX+NXhLYeNRTGDQFyS9I+HR/p4rK/T61f4yik=
+			1XBGQ/Cjj2ZuD/7bMdWDGksPMxkJCq86+v8vxpvMkMs=
 			</data>
 		</dict>
 		<key>ios-arm64/zoomcml.framework/flm.mlmodelc/metadata.json</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			ZquhNbR2SArsXAUZShNLFjgrS5g=
+			eNBwAIAP1D4MNXHpGRI4aS+oxoM=
 			</data>
 			<key>hash2</key>
 			<data>
-			Z5aW++Wv4G134PLethws/D7LB4EUxt8XuA/hDj/3OLE=
+			BAvFjQxatRNoxymMObjradtXZTlOkgdP3eV+zQIYV/c=
 			</data>
 		</dict>
 		<key>ios-arm64/zoomcml.framework/flm.mlmodelc/model.espresso.weights</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			b5I9z9WPPW88aqneccr9SF8v0RI=
+			WVs6A6z3Zf7N1aeHLO6FD5grhEc=
 			</data>
 			<key>hash2</key>
 			<data>
-			Rciyt2L4izKV0kCTR5JilA2AB3aM/60+JiGSl/BClgE=
+			dPVCvBLPban7DtA6iqWraqpETBFHg+/a+6xHFbwFNmo=
 			</data>
 		</dict>
 		<key>ios-arm64/zoomcml.framework/flm.mlmodelc/model/coremldata.bin</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			sAilHvVxCPam2pSz/l8ae9uYGG4=
+			/ipnj+6sTUIP60uko8yhcl+XyTU=
 			</data>
 			<key>hash2</key>
 			<data>
-			UVkIvdgrGVUYi/wprJkauBSI5CsljIVSHFvZVZacuTs=
+			ON/mPuCjg0afFrYxbfZq2jeFcA+PSZ5kqfDgpQlT07Q=
 			</data>
 		</dict>
 		<key>ios-arm64/zoomcml.framework/flm.mlmodelc/neural_network_optionals/coremldata.bin</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			uA3l0Th1hUHF8FJlrRRKufqG0ds=
+			tkgF5pxT7RlO+9uypQti9obolyA=
 			</data>
 			<key>hash2</key>
 			<data>
-			LDTOHfI7g4xavyp/ZDfMo9MGftUJ/yXxHfaxG1grUes=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/hair_seg.mlmodelc/analytics/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			QIm0gpvBW8X0beAlfzBYZftA0j4=
-			</data>
-			<key>hash2</key>
-			<data>
-			KvTosgIoFDJlwrKulAdFstBUuC6LGAEsXdKn2OKkZ9Q=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/hair_seg.mlmodelc/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			eGUT+UfcrQO/TLMGc5NLA/i8OHI=
-			</data>
-			<key>hash2</key>
-			<data>
-			1kAKxFNApxYIVFR8w5yr+/ZYFXgeZ3FFb3at33NxYcY=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/hair_seg.mlmodelc/metadata.json</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			1VhO8wr/bvaAqZxW7Ivc7MXm2Lk=
-			</data>
-			<key>hash2</key>
-			<data>
-			hdOroNbrqIz7+5dH01R1WmEeLV7+MKrBixfsMMIj0vA=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/hair_seg.mlmodelc/model.espresso.weights</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			Q0/jHwwI+cwY68QIgjbgaeh6v98=
-			</data>
-			<key>hash2</key>
-			<data>
-			AU4Vgih6hjsYWmJ+cu2kfNQKK9lyeSs+ylKxVZmixWk=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/hair_seg.mlmodelc/model/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			CunO+xmBog0UtaIyLShgOlzDs2c=
-			</data>
-			<key>hash2</key>
-			<data>
-			qAA5TguZhLD1Kwwz3IwU4w4AMwn2OwJjQEh1VMTG2kk=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/hair_seg.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			uA3l0Th1hUHF8FJlrRRKufqG0ds=
-			</data>
-			<key>hash2</key>
-			<data>
-			LDTOHfI7g4xavyp/ZDfMo9MGftUJ/yXxHfaxG1grUes=
+			WTG9U2xFUClKISxvyNPBvuddqBeYC6C2cchgPa+zYjg=
 			</data>
 		</dict>
 		<key>ios-arm64/zoomcml.framework/hd.mlmodelc/analytics/coremldata.bin</key>
@@ -1359,81 +969,15 @@
 			LDTOHfI7g4xavyp/ZDfMo9MGftUJ/yXxHfaxG1grUes=
 			</data>
 		</dict>
-		<key>ios-arm64/zoomcml.framework/modelNet.mlmodelc/analytics/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			QxRMmuhpa7gEK8DGMS1gZt9lENQ=
-			</data>
-			<key>hash2</key>
-			<data>
-			Cg2aDXbtErMrk+npy1lYyX2MDGuRUSw1vTm0LzrtUM8=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/modelNet.mlmodelc/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			+OvvlrfYhty53Y89dYsiWNt9u1w=
-			</data>
-			<key>hash2</key>
-			<data>
-			NAHx8iPN6j1tTxxr93xmJrtPZ8052SWosOt1focXTd8=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/modelNet.mlmodelc/metadata.json</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			X5DpdYw+PmQXfSTnKX/tRx+LXmU=
-			</data>
-			<key>hash2</key>
-			<data>
-			EVBY0pRIvo7dCPeeFXJ47h89Eq2IoDMQXQ5kwyj76UI=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/modelNet.mlmodelc/model.espresso.weights</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			H83NHF07VPaIrZ1OqLr4YhrB+xM=
-			</data>
-			<key>hash2</key>
-			<data>
-			8OUgQP/1Y9xQytw0e8ZOpd7vUj/apqKUjhhtutGxE2c=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/modelNet.mlmodelc/model/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			BAcGz5nP3d6p5ZJBOTSb+iF6Wa0=
-			</data>
-			<key>hash2</key>
-			<data>
-			8h7KONKYEx+DqOLQr00ATInPArA1kULynzXM/tcXx/A=
-			</data>
-		</dict>
-		<key>ios-arm64/zoomcml.framework/modelNet.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			tkgF5pxT7RlO+9uypQti9obolyA=
-			</data>
-			<key>hash2</key>
-			<data>
-			WTG9U2xFUClKISxvyNPBvuddqBeYC6C2cchgPa+zYjg=
-			</data>
-		</dict>
 		<key>ios-arm64/zoomcml.framework/zoomcml</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			mi4H7ZIIsby+orLkYY3Zyng2R1I=
+			5lMTBNEftLuohJccYaMfPhh9olk=
 			</data>
 			<key>hash2</key>
 			<data>
-			axW2YNbH3yBFPGs/bvLNJ/djpP/9uS87A2QPJrWVfq8=
+			MAZcybhHC5D8F8Wq0HcIiUBH7U0K9BrpeGPj88en8ew=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/Headers/zoomcml_interface.h</key>
@@ -1451,22 +995,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			vu08CsRC9aSOaBRrkhH5a6NixQI=
+			jIQyqTGRe5gd7KICKk9Z053xx1k=
 			</data>
 			<key>hash2</key>
 			<data>
-			4gHoD2yyADoGx/EOSFaMbq0/qE7D8Ucc2TJnaomMnyo=
+			uBBp1iNm2d8u2bsN3LkcCSJ5CpZjwdbNg7NgZDJoW1A=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/_CodeSignature/CodeResources</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			k0I3PL3WphzKTmQxuLbNlf1BrJY=
+			PQauOIHpXoj5Ni6xZGn6ordBwT8=
 			</data>
 			<key>hash2</key>
 			<data>
-			WszSNaK7kMj2M4fpzK4plLmC/110v46HUOiaYbhEzQ0=
+			dxIgFvtsylZgtTnnEFVuhshZ4Up8WP/0mpn6XWPdVdo=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/afn_iOS_hori.mlmodelc/analytics/coremldata.bin</key>
@@ -1599,138 +1143,6 @@
 			<key>hash2</key>
 			<data>
 			LDTOHfI7g4xavyp/ZDfMo9MGftUJ/yXxHfaxG1grUes=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_beardall.mlmodelc/analytics/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			n2H+SztoLLoVOh3CSS+RiiDJNzM=
-			</data>
-			<key>hash2</key>
-			<data>
-			Nxj706Cq1GS8qQPD3Wyvb9x1rHlX1CH/IjR1ZBEwiJw=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_beardall.mlmodelc/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			QFT4PYVuhhEvFWYvJ7x8ipVljnQ=
-			</data>
-			<key>hash2</key>
-			<data>
-			N8SsyFqCm3F8uOY79VzbytzP+Dq2LH2A4wOpvBbMS1Q=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_beardall.mlmodelc/metadata.json</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			SVGwoMsYzew1PVaw4uHHaM3bGqw=
-			</data>
-			<key>hash2</key>
-			<data>
-			wNbFLhpbIrbEW79RicmxpuU6fhn5917YBL89EhLfyRA=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_beardall.mlmodelc/model.espresso.weights</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			JcHvRTaJlDvmvSwc4Y70fcKdnMc=
-			</data>
-			<key>hash2</key>
-			<data>
-			b3DDk7vapJNKM5sdgeA1lKpYwT2lkNafULOVOEbT9n4=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_beardall.mlmodelc/model/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			96qx+hsg/KmPREzNXdnSj6vRz1w=
-			</data>
-			<key>hash2</key>
-			<data>
-			zSt3jGhCcfXUGWvU7K0QFRCm0NIkGKXNfok8ZH1Iugo=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_beardall.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			uA3l0Th1hUHF8FJlrRRKufqG0ds=
-			</data>
-			<key>hash2</key>
-			<data>
-			LDTOHfI7g4xavyp/ZDfMo9MGftUJ/yXxHfaxG1grUes=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_glassesall.mlmodelc/analytics/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			EI47hoIyqJWtGCdXY6ZMmJVxuO4=
-			</data>
-			<key>hash2</key>
-			<data>
-			rt4wyvWPjNRdpfl49U+R9XKs2P9sKPZrtJGmKzldXZY=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_glassesall.mlmodelc/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			Lp866JvMlU5pl1SVeEZxhviAUP4=
-			</data>
-			<key>hash2</key>
-			<data>
-			FnbEPX+MPQ2FnZ/btJvTcWMp2zrURWitowcvsgyfPFQ=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_glassesall.mlmodelc/metadata.json</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			LpJg9sMOBRPPkxA5q7mWZOtYhMA=
-			</data>
-			<key>hash2</key>
-			<data>
-			p8q+0z47RtDEiMyEGvoSysGeCI2qBRy8M4nKs96eI0I=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_glassesall.mlmodelc/model.espresso.weights</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			tjNd+3dPpmCwJ6v4gMtsMW+cYwI=
-			</data>
-			<key>hash2</key>
-			<data>
-			uJ8yj/C4+v5lJkwWUK0F2dxBocJm6abPn86QLhJs4VM=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_glassesall.mlmodelc/model/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			96qx+hsg/KmPREzNXdnSj6vRz1w=
-			</data>
-			<key>hash2</key>
-			<data>
-			zSt3jGhCcfXUGWvU7K0QFRCm0NIkGKXNfok8ZH1Iugo=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/avatar_glassesall.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			tkgF5pxT7RlO+9uypQti9obolyA=
-			</data>
-			<key>hash2</key>
-			<data>
-			WTG9U2xFUClKISxvyNPBvuddqBeYC6C2cchgPa+zYjg=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/bgr_iOS_hori.mlmodelc/analytics/coremldata.bin</key>
@@ -1869,132 +1281,66 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			nx3DYbZ57UO8XK7p6LlzFNZ0ioM=
+			I3BmYAF2cmDpTeUZSSwMCZd9css=
 			</data>
 			<key>hash2</key>
 			<data>
-			lsUJvh1v4BPVO4kNP7Dyv2Xyn4qzW9OeRUreYoSVIb4=
+			tVlKN7CtssQFl4OrTuyHYo07ybEq3suBOKi7SlrCWoY=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/flm.mlmodelc/coremldata.bin</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			fxp4hbm3tnA21x5ishqn3ErqzOQ=
+			Au/biZLs7gWS8KcIoUELyyFqiyc=
 			</data>
 			<key>hash2</key>
 			<data>
-			e3kUczjX+NXhLYeNRTGDQFyS9I+HR/p4rK/T61f4yik=
+			1XBGQ/Cjj2ZuD/7bMdWDGksPMxkJCq86+v8vxpvMkMs=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/flm.mlmodelc/metadata.json</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			ZquhNbR2SArsXAUZShNLFjgrS5g=
+			eNBwAIAP1D4MNXHpGRI4aS+oxoM=
 			</data>
 			<key>hash2</key>
 			<data>
-			Z5aW++Wv4G134PLethws/D7LB4EUxt8XuA/hDj/3OLE=
+			BAvFjQxatRNoxymMObjradtXZTlOkgdP3eV+zQIYV/c=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/flm.mlmodelc/model.espresso.weights</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			b5I9z9WPPW88aqneccr9SF8v0RI=
+			WVs6A6z3Zf7N1aeHLO6FD5grhEc=
 			</data>
 			<key>hash2</key>
 			<data>
-			Rciyt2L4izKV0kCTR5JilA2AB3aM/60+JiGSl/BClgE=
+			dPVCvBLPban7DtA6iqWraqpETBFHg+/a+6xHFbwFNmo=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/flm.mlmodelc/model/coremldata.bin</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			sAilHvVxCPam2pSz/l8ae9uYGG4=
+			/ipnj+6sTUIP60uko8yhcl+XyTU=
 			</data>
 			<key>hash2</key>
 			<data>
-			UVkIvdgrGVUYi/wprJkauBSI5CsljIVSHFvZVZacuTs=
+			ON/mPuCjg0afFrYxbfZq2jeFcA+PSZ5kqfDgpQlT07Q=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/flm.mlmodelc/neural_network_optionals/coremldata.bin</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			uA3l0Th1hUHF8FJlrRRKufqG0ds=
+			tkgF5pxT7RlO+9uypQti9obolyA=
 			</data>
 			<key>hash2</key>
 			<data>
-			LDTOHfI7g4xavyp/ZDfMo9MGftUJ/yXxHfaxG1grUes=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hair_seg.mlmodelc/analytics/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			QIm0gpvBW8X0beAlfzBYZftA0j4=
-			</data>
-			<key>hash2</key>
-			<data>
-			KvTosgIoFDJlwrKulAdFstBUuC6LGAEsXdKn2OKkZ9Q=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hair_seg.mlmodelc/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			eGUT+UfcrQO/TLMGc5NLA/i8OHI=
-			</data>
-			<key>hash2</key>
-			<data>
-			1kAKxFNApxYIVFR8w5yr+/ZYFXgeZ3FFb3at33NxYcY=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hair_seg.mlmodelc/metadata.json</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			1VhO8wr/bvaAqZxW7Ivc7MXm2Lk=
-			</data>
-			<key>hash2</key>
-			<data>
-			hdOroNbrqIz7+5dH01R1WmEeLV7+MKrBixfsMMIj0vA=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hair_seg.mlmodelc/model.espresso.weights</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			Q0/jHwwI+cwY68QIgjbgaeh6v98=
-			</data>
-			<key>hash2</key>
-			<data>
-			AU4Vgih6hjsYWmJ+cu2kfNQKK9lyeSs+ylKxVZmixWk=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hair_seg.mlmodelc/model/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			CunO+xmBog0UtaIyLShgOlzDs2c=
-			</data>
-			<key>hash2</key>
-			<data>
-			qAA5TguZhLD1Kwwz3IwU4w4AMwn2OwJjQEh1VMTG2kk=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hair_seg.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			uA3l0Th1hUHF8FJlrRRKufqG0ds=
-			</data>
-			<key>hash2</key>
-			<data>
-			LDTOHfI7g4xavyp/ZDfMo9MGftUJ/yXxHfaxG1grUes=
+			WTG9U2xFUClKISxvyNPBvuddqBeYC6C2cchgPa+zYjg=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/hd.mlmodelc/analytics/coremldata.bin</key>
@@ -2195,81 +1541,15 @@
 			LDTOHfI7g4xavyp/ZDfMo9MGftUJ/yXxHfaxG1grUes=
 			</data>
 		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/modelNet.mlmodelc/analytics/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			QxRMmuhpa7gEK8DGMS1gZt9lENQ=
-			</data>
-			<key>hash2</key>
-			<data>
-			Cg2aDXbtErMrk+npy1lYyX2MDGuRUSw1vTm0LzrtUM8=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/modelNet.mlmodelc/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			+OvvlrfYhty53Y89dYsiWNt9u1w=
-			</data>
-			<key>hash2</key>
-			<data>
-			NAHx8iPN6j1tTxxr93xmJrtPZ8052SWosOt1focXTd8=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/modelNet.mlmodelc/metadata.json</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			X5DpdYw+PmQXfSTnKX/tRx+LXmU=
-			</data>
-			<key>hash2</key>
-			<data>
-			EVBY0pRIvo7dCPeeFXJ47h89Eq2IoDMQXQ5kwyj76UI=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/modelNet.mlmodelc/model.espresso.weights</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			H83NHF07VPaIrZ1OqLr4YhrB+xM=
-			</data>
-			<key>hash2</key>
-			<data>
-			8OUgQP/1Y9xQytw0e8ZOpd7vUj/apqKUjhhtutGxE2c=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/modelNet.mlmodelc/model/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			BAcGz5nP3d6p5ZJBOTSb+iF6Wa0=
-			</data>
-			<key>hash2</key>
-			<data>
-			8h7KONKYEx+DqOLQr00ATInPArA1kULynzXM/tcXx/A=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/zoomcml.framework/modelNet.mlmodelc/neural_network_optionals/coremldata.bin</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			tkgF5pxT7RlO+9uypQti9obolyA=
-			</data>
-			<key>hash2</key>
-			<data>
-			WTG9U2xFUClKISxvyNPBvuddqBeYC6C2cchgPa+zYjg=
-			</data>
-		</dict>
 		<key>ios-arm64_x86_64-simulator/zoomcml.framework/zoomcml</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			/gmc89nqasSqkF63j6oPJ17idss=
+			eF/GljuAu8g2Tu/3JPpAv3RBNKY=
 			</data>
 			<key>hash2</key>
 			<data>
-			SzqUxQQiWVF+wREdib5DTYkIFXdyOU/uM8RCluJhUAc=
+			sJYMGy55VsK99SQUM91TRVWvqLbeAUxVi6gLkY+9Vtg=
 			</data>
 		</dict>
 	</dict>

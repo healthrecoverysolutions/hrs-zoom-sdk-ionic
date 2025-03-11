@@ -2,8 +2,8 @@
 //  MobileRTCConstants.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 8/7/14.
-//  Copyright (c) 2019 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 8/7/14.
+//  Copyright (c) Zoom Communications, Inc. All rights reserved.
 //
 
 /*!
@@ -146,7 +146,7 @@ typedef NS_ENUM(NSUInteger, MobileRTCMeetError) {
     MobileRTCMeetError_MeetingNotStart                  = 7,
     ///The meeting does not exist.
     MobileRTCMeetError_MeetingNotExist                  = 8,
-    ///The amount of attendees reaches the upper limit.
+    ///The amount of attendees reaches the upper limit, For users that can' t join the meeting.they can go to watch live stream with the interface {@link onMeetingFullToWatchLiveStream) ,if the host has started.
     MobileRTCMeetError_MeetingUserFull                  = 9,
     ///The MobileRTC version is incompatible.
     MobileRTCMeetError_MeetingClientIncompatible        = 10,
@@ -248,6 +248,14 @@ typedef NS_ENUM(NSUInteger, MobileRTCMeetingState) {
     MobileRTCMeetingState_WebinarDePromote,///<Downgrade the attendees from the panelist.
     MobileRTCMeetingState_JoinBO,///<Join the breakout room.
     MobileRTCMeetingState_LeaveBO,///<Leave the breakout room.
+};
+
+/*!
+ @brief The sampling rate of raw audio data. Here are more detailed structural descriptions.
+*/
+typedef NS_ENUM(NSUInteger, MobileRTCAudioRawdataSamplingRate) {
+    MobileRTCAudioRawdataSamplingRate_32K, ///<The sampling rate of the acquired raw audio data is 32K.
+    MobileRTCAudioRawdataSamplingRate_48K, ///<The sampling rate of the acquired raw audio data is 48K.
 };
 
 /*!
@@ -790,7 +798,7 @@ typedef NS_ENUM(NSUInteger,MobileRTCRawDataError)
     MobileRTCRawData_Invalid_Param,
     MobileRTCRawData_Not_In_Meeting,
     MobileRTCRawData_No_License,
-    MobileRTCRawData_Unknow,
+    MobileRTCRawData_Unknown,
     
     MobileRTCRawData_Video_Module_Not_Ready,
     MobileRTCRawData_Video_Module_Error,
@@ -1026,6 +1034,36 @@ typedef NS_ENUM(NSUInteger, MobileRTCRequestStartCloudRecordingStatus)
     //the request cloud recording timed out.
     MobileRTCRequestStartCloudRecording_TimedOut,
 };
+/**
+ * @brief Enumeration of types of shared content.
+ */
+typedef NS_ENUM(NSUInteger, MobileRTCShareContentType)
+{
+    //Type unknown.
+    MobileRTCShareContentType_UNKNOWN,
+    //Type of sharing the application.
+    MobileRTCShareContentType_AS,
+    //Type of sharing the desktop.
+    MobileRTCShareContentType_DS,
+    //Type of sharing the white-board.
+    MobileRTCShareContentType_WB,
+    //Type of sharing data from the device connected WIFI.
+    MobileRTCShareContentType_AIRHOST,
+    //Type of sharing the camera.
+    MobileRTCShareContentType_CAMERA,
+    //Type of sharing the data.
+    MobileRTCShareContentType_DATA,
+    //Wired device, connect Mac and iPhone.
+    MobileRTCShareContentType_WIRED_DEVICE,
+    //Share a portion of screen in the frame.
+    MobileRTCShareContentType_FRAME,
+    //Share a document.
+    MobileRTCShareContentType_DOCUMENT,
+    //Share only the audio sound of computer.
+    MobileRTCShareContentType_COMPUTER_AUDIO,
+    //Type of sharing video file.
+    MobileRTCShareContentType_VIDEO_FILE
+};
 
 /*!
  @brief Enumeration of sharing status.
@@ -1182,7 +1220,7 @@ typedef NS_ENUM(NSInteger, MobileRTCNotificationServiceStatus) {
 typedef NS_ENUM(NSInteger, MobileRTCNotificationServiceError)
 {
     MobileRTCNotificationServiceError_Success = 0,
-    MobileRTCNotificationServiceError_Unknow, //Unknown error.
+    MobileRTCNotificationServiceError_Unknown, //Unknown error.
     MobileRTCNotificationServiceError_Internal_Error, //Internal error, need retry.
     MobileRTCNotificationServiceError_Invalid_Token, //Invalid token.
     MobileRTCNotificationServiceError_Multi_Connect, //Use same user login again, the previous device will receive it.
@@ -1255,11 +1293,16 @@ typedef NS_ENUM(NSUInteger, MobileRTCReminderType) {
     /// Reminder type of joining a meeting with private mode.
     MobileRTCReminderType_JoinPrivateModeMeetingReminder,
     /// Reminder type of AICompanionPlus disclaimer.
-    MobileRTCReminderType_AICompanionPlusDisclaimer,
+    MobileRTCReminderType_AICompanionPlusDisclaimer DEPRECATED_ATTRIBUTE,
     /// Reminder type of Closed Caption disclaimer.
     MobileRTCReminderTypeClosedCaptionDisclaimer,
     /// Reminder type of disclaimers combination.
-    MobileRTCReminderType_MultiDisclaimer
+    MobileRTCReminderType_MultiDisclaimer,
+    /// Reminder type of join meeting Connector with guest mode.
+    MobileRTCReminderType_JoinMeetingConnectorAsGuestReminder,
+    /// Reminder type of common disclaimer.
+    MobileRTCReminderType_CommonDisclaimer,
+    
 };
 
 typedef NS_ENUM(NSInteger, MobileRTCInviteMeetingStatus) {
@@ -1427,4 +1470,9 @@ typedef NS_ENUM(NSInteger, MobileRTCFileTransferStatus) {
     FileTransferState_Transfering,      /// The file transfer is in progress
     FileTransferState_TransferFailed,   /// The file transfer failed
     FileTransferState_TransferDone,     /// The file transfer completed successfully
+};
+
+typedef NS_ENUM(NSInteger, MobileRTCUVCCameraStatus) {
+    MobileRTCUVCCameraStatus_Attached = 0,        /// UVC camera attached
+    MobileRTCUVCCameraStatus_Detached             /// UVC camera detached.
 };

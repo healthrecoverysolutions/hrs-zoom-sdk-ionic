@@ -2,8 +2,8 @@
 //  MobileRTCMeetingSettings.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 7/2/15.
-//  Copyright (c) 2019 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 7/2/15.
+//  Copyright (c) Zoom Communications, Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -561,18 +561,6 @@
  * @return The value of the setting value.
  */
 - (BOOL)isHideMeetingInputUserInfoWindow;
-
-/*!
- @brief Call this method to enable or disable the auto adjust input of mic.
- @param enable YES to enable auto adjust input or false to disable it.
- */
-- (void)enableAutoAdjustMic:(BOOL)enable DEPRECATED_MSG_ATTRIBUTE("Not maintain anymore");
-
-/*!
- @brief Determine whether the original input of the microphone is enabled.
- @return YES if auto adjust input  is enabled, otherwise false.
- */
-- (BOOL)isAutoAdjustMicEnable DEPRECATED_MSG_ATTRIBUTE("Not maintain anymore");
 
 /*!
  @brief Query if this device supports CenterStage Mode.
