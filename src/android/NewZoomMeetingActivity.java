@@ -14,6 +14,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -137,6 +139,15 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
 
     public static void enableWaitingMessage(boolean show) {
         if (show) {
+        /*
+            was sometimes getting this error here
+            'The specified child already has a parent. You must call removeView() on the child's parent first.'
+            possibly causing app crash? checking parent before adding to view
+         */
+            if (userWaitingLayout.getParent() != null) {
+                ViewParent parent = userWaitingLayout.getParent();
+                ((ViewGroup) parent).removeView(userWaitingLayout);
+            }
             containerInConf.addView(userWaitingLayout);
         } else {
             containerInConf.removeView(userWaitingLayout);
