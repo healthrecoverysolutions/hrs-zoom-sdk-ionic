@@ -23,7 +23,7 @@ var zoom = {
     initialize: function(appKey, appSecret, success, error) {
         callNativeFunction('initialize', [appKey, appSecret], success, error);
     },
-    
+
     initializeWithJWT: function(jwtToken) {
         return execAsPromise('initializeWithJWT', [jwtToken]);
     },
@@ -95,7 +95,11 @@ var zoom = {
 
     notifyCallStatus: function(callStatus, meetingNumber, success, error) {
         callNativeFunction('notifyCallStatus', [callStatus, meetingNumber], success, error);
-    }
+    },
+
+    getMeetingStatus: function() {
+        return execAsPromise('getMeetingStatus', []);
+    },
 };
 
 module.exports = zoom;

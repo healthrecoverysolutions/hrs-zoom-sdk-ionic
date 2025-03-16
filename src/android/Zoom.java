@@ -242,6 +242,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String ACTION_SET_LOCALE = "setLocale";
     private static final String ACTION_SET_SHARED_EVENT_LISTENER = "setSharedEventListener";
     private static final String ACTION_NOTIFY_CALL_STATUS = "notifyCallStatus";
+    private static final String ACTION_GET_MEETING_STATUS = "getMeetingStatus";
 
     private CallbackContext callbackContext;
     private CallbackContext sharedEventContext;
@@ -384,11 +385,29 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 }
                 handleCallStatusUpdate(callStatus);
                 break;
-
+            case ACTION_GET_MEETING_STATUS:
+                getMeetingStatus(callbackContext);
             default:
                 return false;
         }
         return true;
+    }
+
+    private void getMeetingStatus(CallbackContext callbackContext) {
+        ZoomSDK zoomSDK = ZoomSDK.getInstance();
+
+        if (!zoomSDK.isInitialized()) {
+            callbackContext.error("Zoom SDK is not initialized");
+            return;
+        }
+
+        MeetingStatus status = zoomSDK.getMeetingService().getMeetingStatus();
+
+        if (status != null) {
+            callbackContext.success(status.name()); // Return the status as a string
+        } else {
+            callbackContext.error("Could not retrieve meeting status");
+        }
     }
 
     private void handleCallStatusUpdate(String callStatus) {
