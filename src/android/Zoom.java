@@ -386,7 +386,12 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 handleCallStatusUpdate(callStatus);
                 break;
             case ACTION_GET_MEETING_STATUS:
-                getMeetingStatus(callbackContext);
+                cordova.getActivity().runOnUiThread(
+                    new Runnable() {
+                        public void run() {
+                           getMeetingStatus(callbackContext);
+                        }
+                    });
             default:
                 return false;
         }
