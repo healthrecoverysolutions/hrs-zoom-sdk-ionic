@@ -410,7 +410,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         MeetingStatus status = zoomSDK.getMeetingService().getMeetingStatus();
 
         if (status != null) {
-            callbackContext.success(status.name()); // Return the status as a string
+            callbackContext.success(status.ordinal());
         } else {
             callbackContext.error("Could not retrieve meeting status");
         }
