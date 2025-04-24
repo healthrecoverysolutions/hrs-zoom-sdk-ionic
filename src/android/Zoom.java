@@ -430,11 +430,11 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private void setZoomCustomMeetingUIAndPiP() {
         ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
         Boolean isKnoxManage = (Boolean) getBuildConfigValue(cordova.getContext(), "KNOXMANAGE");
+        zoomUIService.enableMinimizeMeeting(true);
         if (Boolean.FALSE.equals(isKnoxManage)) {
             zoomUIService.disablePIPMode(false);
         }
-        zoomUIService.enableMinimizeMeeting(true);
-        zoomUIService.setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 180, 240));
+        zoomUIService.setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
         zoomUIService.setNewMeetingUI(NewZoomMeetingActivity.class);
     }
 
