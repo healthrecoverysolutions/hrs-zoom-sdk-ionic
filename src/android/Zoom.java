@@ -1,5 +1,7 @@
 package cordova.plugin.zoom;
 
+import static org.apache.cordova.BuildHelper.getBuildConfigValue;
+
 import java.util.Locale;
 import java.util.Locale.Builder;
 import java.util.IllformedLocaleException;
@@ -36,6 +38,7 @@ import com.zipow.videobox.conference.ui.ZmConfPipActivity;
 import us.zoom.sdk.CameraControlRequestResult;
 import us.zoom.sdk.CameraControlRequestType;
 import us.zoom.sdk.ChatMessageDeleteType;
+import us.zoom.sdk.CustomizedMiniMeetingViewSize;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
 import us.zoom.sdk.ICameraControlRequestHandler;
 import us.zoom.sdk.IMeetingArchiveConfirmHandler;
@@ -426,8 +429,12 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     private void setZoomCustomMeetingUIAndPiP() {
         ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
+        Boolean isKnoxManage = (Boolean) getBuildConfigValue(cordova.getContext(), "KNOXMANAGE");
         zoomUIService.enableMinimizeMeeting(true);
-        zoomUIService.disablePIPMode(false);
+        if (Boolean.FALSE.equals(isKnoxManage)) {
+            zoomUIService.disablePIPMode(false);
+        }
+        zoomUIService.setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
         zoomUIService.setNewMeetingUI(NewZoomMeetingActivity.class);
     }
 
