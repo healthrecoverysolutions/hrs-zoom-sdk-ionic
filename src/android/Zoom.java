@@ -105,6 +105,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     private static final String EVENT_TYPE_NOTIFICATION_SERVICE_STATUS_CHANGED = "notificationServiceStatusChanged";
     private static final String EVENT_TYPE_SHARED_MEETING_CHAT_STATUS_CHANGED = "sharedMeetingChatStatusChanged";
+    private static final String EVENT_TYPE_START_CALL_ROLLOVER = "startCallRollOver";
     private static final String EVENT_TYPE_SDK_INITIALIZE_RESULT = "sdkInitializeResult";
     private static final String EVENT_TYPE_SDK_INITIALIZE_AUTH_IDENTITY_EXPIRED = "sdkInitializeAuthIdentityExpired";
     private static final String EVENT_TYPE_AUTH_IDENTITY_EXPIRED = "authIdentityExpired";
@@ -246,14 +247,17 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String ACTION_SET_SHARED_EVENT_LISTENER = "setSharedEventListener";
     private static final String ACTION_NOTIFY_CALL_STATUS = "notifyCallStatus";
     private static final String ACTION_GET_MEETING_STATUS = "getMeetingStatus";
+    private static final String ACTION_SET_SHOULD_ROLLOVER = "setShouldRollOver";
 
     private CallbackContext callbackContext;
     private CallbackContext sharedEventContext;
     private final Handler callIgnoredHandler = new Handler();
+    private final Handler callRollOverHandler = new Handler();
     private static Zoom mInstance = null;
 
     private AlertDialog messageDialog;
     private static final int CALL_IGNORED_DIALOG_SHOW_AFTER_MILLIS = 90000; // Duration in millis after which we show the call ignored/missed dialog
+    private static final int START_CALL_ROLLOVER_MILLIS = 45000; // Duration in millis after which we show the call ignored/missed dialog
     private static final int CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS = 8000; // Duration for which we show the call ignored/missed dialog
     private static final String CALL_STATUS_DECLINED = "call_declined";
     public final static int ACTION_CALL_IGNORED_BY_PARTICIPANT = 1;
@@ -261,6 +265,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     public final static int ACTION_PARTICIPANTS_LEFT_THE_CALL = 3;
     public final static int REORDER_WITHOUT_ACTION = 0;
     public static String declinedCallId;
+    private boolean shouldRollOver = false;
 
     public static Zoom getInstance() {
         return mInstance;
@@ -380,6 +385,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             case ACTION_SET_SHARED_EVENT_LISTENER:
                 setSharedEventListener(callbackContext);
                 break;
+            case ACTION_SET_SHOULD_ROLLOVER:
+                setShouldRollOver(callbackContext, args);
+                break;
             case ACTION_NOTIFY_CALL_STATUS:
                 String callStatus = args.getString(0);
                 if(callStatus.equals(CALL_STATUS_DECLINED)){
@@ -443,6 +451,17 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             sharedEventContext.error("event listener callback overwritten");
         }
         sharedEventContext = callbackContext;
+    }
+
+    private void setShouldRollOver(CallbackContext callbackContext, JSONArray args) {
+        try {
+            shouldRollOver = args.getBoolean(0);
+        } catch (JSONException e) {
+            Timber.e("Error setting shouldRollOver for zoom call: %s", e.getMessage());
+            callbackContext.error("Error setting shouldRollOver for zoom call");
+        }
+
+        callbackContext.success();
     }
 
     private void emitSharedJsEvent(String type, JSONObject data) {
@@ -1743,6 +1762,16 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                     }
                 });
             } else {
+                if (shouldRollOver) {
+                    final Runnable rolloverRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Timber.d("Triggering call rollover");
+                            intializeCallRollOver();
+                        }
+                    };
+                    callRollOverHandler.postDelayed(rolloverRunnable, START_CALL_ROLLOVER_MILLIS); // Show after 90 seconds as this is the ringing time at clinician/caregivers end
+                }
                 final Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
@@ -1756,8 +1785,14 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
         NewZoomMeetingActivity.enableWaitingMessage((inMeetingUserListSize <= 1));
         if(inMeetingUserListSize > 1) {
-            if(callIgnoredHandler!=null)
-                callIgnoredHandler.removeCallbacksAndMessages(null); // clear the scheduler as other participant has joined and now we wont need to cancel the call after 90 seconds
+            // clear the schedulers as other participant has joined and now we wont need to cancel
+            // the call after 90 seconds or start rollover after 45 seconds
+            if(callIgnoredHandler!=null) {
+                callIgnoredHandler.removeCallbacksAndMessages(null);
+            }
+            if (callRollOverHandler!=null) {
+                callRollOverHandler.removeCallbacksAndMessages(null);
+            }
         }
 
         JSONObject eventData = new JSONObject();
@@ -1767,6 +1802,12 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         } catch (JSONException ignored) {
         }
         emitSharedJsEvent(EVENT_TYPE_MEETING_USER_JOIN, eventData);
+    }
+
+    private void intializeCallRollOver() {
+        if (shouldRollOver) {
+            emitSharedJsEvent(EVENT_TYPE_START_CALL_ROLLOVER, null);
+        }
     }
 
     /**
@@ -1920,6 +1961,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             }
             if (callIgnoredHandler != null) {
                 callIgnoredHandler.removeCallbacksAndMessages(null);
+            }
+
+            if (callRollOverHandler != null) {
+                callRollOverHandler.removeCallbacksAndMessages(null);
             }
         } catch(Exception e) {
             Timber.e("Exception in leaving zoom meeting " + e);
@@ -2668,3 +2713,4 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         emitSharedJsEvent(EVENT_TYPE_NOTIFICATION_SERVICE_STATUS, eventData);
     }
 }
+
