@@ -166,6 +166,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     protected void onPause() {
         Timber.d("Zoom on pause " + this);
         super.onPause();
+        minimizeZoomCall();
     }
 
     @Override
@@ -264,6 +265,3 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     }
 
 }
-
-
-
