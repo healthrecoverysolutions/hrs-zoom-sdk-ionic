@@ -36,6 +36,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     private String appResourcesPackage;
 
     private Context cordovaContext;
+    private boolean activityPaused = false;
     private static LinearLayout userWaitingLayout;
     private static FrameLayout containerInConf;
 
@@ -45,37 +46,39 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
 
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-            Timber.i("onCreate(): " + activity.getClass().getSimpleName());
+            Timber.i("onActivityCreated(): " + activity.getClass().getSimpleName());
         }
 
         @Override
         public void onActivityStarted(Activity activity) {
-            Timber.i("onStart(): " + activity.getClass().getSimpleName());
+            Timber.i("onActivityStarted(): %s", activity.getClass().getSimpleName());
         }
 
         @Override
         public void onActivityResumed(Activity activity) {
-            Timber.i("onResume(): " + activity.getClass().getSimpleName());
+            Timber.i("onActivityResumed(): " + activity.getClass().getSimpleName());
+            activityPaused = false;
         }
 
         @Override
         public void onActivityPaused(Activity activity) {
-            Timber.i("onPause(): " + activity.getClass().getSimpleName());
+            Timber.i("onActivityPaused(): " + activity.getClass().getSimpleName());
+            activityPaused = true;
         }
 
         @Override
         public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-            Timber.i("onSaveInstanceState(): " + activity.getClass().getSimpleName());
+            Timber.i("onActivitySaveInstanceState(): " + activity.getClass().getSimpleName());
         }
 
         @Override
         public void onActivityStopped(Activity activity) {
-            Timber.i("onStop(): " + activity.getClass().getSimpleName());
+            Timber.i("onActivityStopped(): " + activity.getClass().getSimpleName());
         }
 
         @Override
         public void onActivityDestroyed(Activity activity) {
-            Timber.i("onDestroy(): " + activity.getClass().getSimpleName());
+            Timber.i("onActivityDestroyed(): " + activity.getClass().getSimpleName());
             // ZmConfPipActivity (PiP mode zoom SDK's activity
             // We dont have callbacks from Zoom SDK when PiP mode is exited/destroyed. Thus we listen to this event and show the maximised view of the zoom call
             if (activity.getClass().getSimpleName().contains("ZmConfPipActivity")) {
@@ -166,7 +169,9 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     protected void onPause() {
         Timber.d("Zoom on pause " + this);
         super.onPause();
-        minimizeZoomCall();
+        if (activityPaused) {
+            minimizeZoomCall();
+        }
     }
 
     @Override
@@ -230,10 +235,14 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     }
 
     private void minimizeZoomCall() {
-        startMainActivity();
-        ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
-        ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
-        zoomUIService.showMiniMeetingWindow();
+        try {
+            startMainActivity();
+            ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
+            zoomUIService.setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
+            zoomUIService.showMiniMeetingWindow();
+        } catch (Exception e) {
+            Timber.e("Error thrown minimizeZoomCall" + e.getMessage());
+        }
     }
 
     private void endMeetingAndMoveToActivity() {
