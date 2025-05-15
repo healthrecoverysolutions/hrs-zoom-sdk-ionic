@@ -241,7 +241,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
             zoomUIService.setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
             zoomUIService.showMiniMeetingWindow();
         } catch (Exception e) {
-            Timber.e("Error thrown minimizeZoomCall" + e.getMessage());
+            Timber.e("Error calling minimizeZoomCall" + e.getMessage());
         }
     }
 
