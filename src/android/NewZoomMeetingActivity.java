@@ -228,6 +228,12 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
         minimizeZoomCall();
     }
 
+    @Override
+    public void onHomePressed() {
+        super.onHomePressed();
+        minimizeZoomCall();
+    }
+
     private void minimizeZoomCall() {
         startMainActivity();
         ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
@@ -264,6 +270,3 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     }
 
 }
-
-
-
