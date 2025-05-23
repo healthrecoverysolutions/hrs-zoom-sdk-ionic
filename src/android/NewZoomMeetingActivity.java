@@ -235,6 +235,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
     }
 
     private void minimizeZoomCall() {
+        Timber.d("Minimize zoom call " + this);
         startMainActivity();
         ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
         ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
@@ -248,9 +249,13 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
         } else { // app was minimised and app instance is no more thus handling this within this instance and re-launching the main activity
             Timber.d("Started new activity instance as app instance was not found");
             ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
-            zoomUIService.hideMiniMeetingWindow();
+            if (zoomUIService!=null) {
+                zoomUIService.hideMiniMeetingWindow();
+            }
             MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
-            meetingService.leaveCurrentMeeting(true);
+            if (meetingService!=null) {
+                meetingService.leaveCurrentMeeting(true);
+            }
             startMainActivity();
         }
     }
