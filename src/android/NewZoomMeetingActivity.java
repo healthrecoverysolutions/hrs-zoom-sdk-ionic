@@ -250,10 +250,12 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
             Timber.d("Started new activity instance as app instance was not found");
             ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
             if (zoomUIService!=null) {
+                Timber.d("endMeetingAndMoveToActivity : hiding mini meeting window");
                 zoomUIService.hideMiniMeetingWindow();
             }
             MeetingService meetingService = ZoomSDK.getInstance().getMeetingService();
             if (meetingService!=null) {
+                Timber.d("endMeetingAndMoveToActivity : leaving current meeting");
                 meetingService.leaveCurrentMeeting(true);
             }
             startMainActivity();
