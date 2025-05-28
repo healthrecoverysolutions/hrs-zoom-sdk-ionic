@@ -236,10 +236,10 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
 
     private void minimizeZoomCall() {
         Timber.d("Minimize zoom call " + this);
-        startMainActivity();
         ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
         ZoomSDK.getInstance().getZoomUIService().setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
         zoomUIService.showMiniMeetingWindow();
+        startMainActivity();
     }
 
     private void endMeetingAndMoveToActivity() {
