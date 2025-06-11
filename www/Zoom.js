@@ -78,7 +78,7 @@ var zoom = {
     fireMeetingLeftEvent: function () {
         if (!this._meetingLeftlistener)
             return;
-    
+
         var fn    = this._meetingLeftlistener[0],
             scope = this._meetingLeftlistener[1];
 
@@ -101,8 +101,8 @@ var zoom = {
         return execAsPromise('getMeetingStatus', []);
     },
 
-    setShouldRollOver: function(shouldRollOver) {
-        return execAsPromise('setShouldRollOver', [shouldRollOver]);
+    setShouldRollOver: function(shouldRollOver, startTimeMillis) {
+        return execAsPromise('setShouldRollOver', [shouldRollOver, startTimeMillis]);
     },
 };
 
