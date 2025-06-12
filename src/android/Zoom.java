@@ -266,6 +266,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     public final static int REORDER_WITHOUT_ACTION = 0;
     public static String declinedCallId;
     private boolean shouldRollOver = false;
+    // the time the user started the call from the javascript call, used to calculate call rollover duration
+    private long callStart;
+
 
     public static Zoom getInstance() {
         return mInstance;
@@ -456,6 +459,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private void setShouldRollOver(CallbackContext callbackContext, JSONArray args) {
         try {
             shouldRollOver = args.getBoolean(0);
+            callStart = args.getLong(1);
         } catch (JSONException e) {
             Timber.e("Error setting shouldRollOver for zoom call: %s", e.getMessage());
             callbackContext.error("Error setting shouldRollOver for zoom call");
@@ -463,6 +467,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
         callbackContext.success();
     }
+
 
     private void emitSharedJsEvent(String type, JSONObject data) {
         Timber.d("emitSharedJsEvent -> %s", type);
@@ -1770,7 +1775,10 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                             intializeCallRollOver();
                         }
                     };
-                    callRollOverHandler.postDelayed(rolloverRunnable, START_CALL_ROLLOVER_MILLIS); // Show after 90 seconds as this is the ringing time at clinician/caregivers end
+
+                    // account for time the patient was waiting for the zoom call to initialize
+                    long rolloverMillis = START_CALL_ROLLOVER_MILLIS - (System.currentTimeMillis()- callStart);
+                    callRollOverHandler.postDelayed(rolloverRunnable, rolloverMillis);
                 }
                 final Runnable runnable = new Runnable() {
                     @Override
@@ -2713,4 +2721,3 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         emitSharedJsEvent(EVENT_TYPE_NOTIFICATION_SERVICE_STATUS, eventData);
     }
 }
-
