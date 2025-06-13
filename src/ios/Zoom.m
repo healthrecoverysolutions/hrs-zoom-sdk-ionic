@@ -427,7 +427,7 @@ CustomMessageComponent *customMessageComponent;
             /*An alert message will be shown to the user if no other participant joins in 90 seconds for ending the call*/
             endCallTimer = [NSTimer scheduledTimerWithTimeInterval:End_Call_Timer_Seconds
             target:self selector:@selector(startEndMeetingTimer:) userInfo:nil repeats:NO];
-            long long rolloverMillis = Call_Rollover_Timer_Seconds - ((long long)([[NSDate date] timeIntervalSince1970] * 1000) - callStart);
+            long long rolloverMillis = Call_Rollover_Timer_Seconds - ((long long)([[NSDate date] timeIntervalSince1970]) - (callStart / 1000));
             callRolloverTimer = [NSTimer scheduledTimerWithTimeInterval:rolloverMillis
             target:self selector:@selector(startCallRollover:) userInfo:nil repeats:NO];
 
@@ -1206,3 +1206,4 @@ CustomMessageComponent *customMessageComponent;
 }
 
 @end
+ 
