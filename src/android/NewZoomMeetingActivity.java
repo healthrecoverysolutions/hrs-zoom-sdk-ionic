@@ -148,6 +148,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
                 ViewParent parent = userWaitingLayout.getParent();
                 ((ViewGroup) parent).removeView(userWaitingLayout);
             }
+            containerInConf.addView(userWaitingLayout);
         } else {
             containerInConf.removeView(userWaitingLayout);
         }
