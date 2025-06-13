@@ -2,8 +2,8 @@
 //  MobileRTCMeetingService+Interpretation.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 2020/10/15.
-//  Copyright © 2020 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 2020/10/15.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 
@@ -346,14 +346,14 @@
 
 /**
  @brief Join some sign language channel if myself is not a sign interpreter.only for non-interpreter.
- @return If the function succeeds, it will return MobileRTCSDKError_succuss, otherwise not.
+ @return If the function succeeds, it will return MobileRTCSDKError_Succuss, otherwise not.
  @warning the inferface only for ZOOM UI
  */
 - (MobileRTCSDKError)joinSignLanguageChannel:(NSString *_Nullable)signLanID;
 
 /**
  @brief Leave current sign language channel if myself is not a sign interpreter.only for non-interpreter.
- @return If the function succeeds, it will return MobileRTCSDKError_succuss, otherwise not.
+ @return If the function succeeds, it will return MobileRTCSDKError_Succuss, otherwise not.
  @warning the inferface only for ZOOM UI
  */
 - (MobileRTCSDKError)leaveSignLanguageChannel;

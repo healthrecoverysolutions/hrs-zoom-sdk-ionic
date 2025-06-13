@@ -2,8 +2,8 @@
 //  MobileRTCMeetingService+User.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 2018/6/6.
-//  Copyright © 2019 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 2018/6/6.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <MobileRTC/MobileRTC.h>
@@ -81,7 +81,27 @@
  @brief Get the ID of user who is sharing in the meeting.
  @return The ID of user who is sharing in the meeting.
  */
-- (NSUInteger)activeShareUserID;
+- (NSUInteger)activeShareUserID DEPRECATED_MSG_ATTRIBUTE("Use getViewableSharingUserList instead");
+
+/**
+ * @brief Get the ID of users who are sharing.
+ * @return A NSArray of sourceID of all users who are sharing.
+ */
+- (NSArray<NSNumber *>* _Nullable)getViewableSharingUserList;
+
+/**
+@brief Get the user's child list.
+@param userId Specify the user ID for which to get the informatio
+@return  If the function succeeds, the return value is the sub-user list of user companion mode. Otherwise the function fails, and the return value is nil.
+*/
+- (NSArray *_Nullable)getCompanionChildList:(NSUInteger)userId;
+
+/**
+@brief Get the information about the user's parent user.
+@param userId Specify the user ID for which to get the information.
+@return If the function succeeds, the return value is a pointer to the IUserInfo. For more details, see \link MobileRTCMeetingUserInfo \endlink. Otherwise the function fails, and the return value is nullptr.
+*/
+- (MobileRTCMeetingUserInfo *_Nullable)getCompanionParentUser:(NSUInteger)userId;
 
 /*!
  @brief Judge if the two IDs from different sessions are of the same user.
@@ -188,5 +208,21 @@
 @return YES indicates that the specified user has raw live stream privilege, otherwise false NO.
  */
 - (BOOL)hasRawLiveStreamPrivilege:(NSUInteger)userID;
+
+#pragma mark - robot -
+
+/*!
+@brief Get the information about the bot's authorized user.
+@param botUserId Specify the user ID for which to get the information.
+@return If the function succeeds, the return the pointer of MobileRTCMeetingUserInfo. For more details, see see {@link MobileRTCMeetingUserInfo} object. Otherwise the function fails, and the return value is nil.
+*/
+- (nullable MobileRTCMeetingUserInfo*)getBotAuthorizedUserInfoByUserID:(NSUInteger)botUserId;
+
+/*!
+@brief Get the authorizer's bot list.
+@param userId Specify the user ID for which to get the information.
+@return If the function succeeds, the return value is the authorizer's robot list in the meeting. Otherwise the function fails, and the return value is nil.
+*/
+- (nullable NSArray <NSNumber *> *)getAuthorizedBotListByUserID:(NSUInteger)userId;
 
 @end
