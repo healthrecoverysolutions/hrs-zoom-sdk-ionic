@@ -3,7 +3,7 @@
 //  MobileRTC
 //
 //  Created by Zoom on 3/27/23.
-//  Copyright © 2023 Zoom Video Communications, Inc. All rights reserved.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -89,6 +89,13 @@
  * @return If the function succeeds, the return value is MobileRTCSDKError_Success. Otherwise the function fails. Fed, for more details, see {@link MobileRTCSDKError}.
  */
 - (MobileRTCSDKError)setHideFeatureDisclaimers;
+
+/**
+ * Is need explicit consent for AI custom Disclaimer. Only valid for {@link ReminderType#TYPE_CUSTOM_AI_COMPANION_DISCLAIMER}.
+ *
+ * @return True means explicit consent is required. Before agreeing to AIC disclaimer, the user's video and audio will be blocked. False means explicit consent is not required and video and audio will not be blocked.
+ */
+- (BOOL)isNeedExplicitConsent4AICustomDisclaimer;
 
 @end
 

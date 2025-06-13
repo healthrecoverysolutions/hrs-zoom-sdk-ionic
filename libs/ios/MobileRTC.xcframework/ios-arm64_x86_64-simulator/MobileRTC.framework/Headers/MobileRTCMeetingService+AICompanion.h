@@ -3,7 +3,7 @@
 //  MobileRTC
 //
 //  Created by Zoom on 2024/4/25.
-//  Copyright © 2024 Zoom Video Communications, Inc. All rights reserved.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <MobileRTC/MobileRTC.h>
@@ -58,10 +58,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * @brief Agree to the request to turn. the  AI Companion features on or off.
- * @param deleteAsserts true means delete the meeting asserts when turning off the  AI Companion features.
+ * @param deleteAssets true means delete the meeting asserts when turning off the  AI Companion features.
  * @return If the function succeeds, the return value is SDKErr_Success. Otherwise the function fails. For more details, see {@link MobileRTCSDKError}.
  */
-- (MobileRTCSDKError)agree:(BOOL)deleteAsserts;
+- (MobileRTCSDKError)agree:(BOOL)deleteAssets;
 
 /**
  * @brief  Decline the request to turn the  AI Companion features on or off.
@@ -141,7 +141,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * @brief Get the smart summary helper
- * @return If the function succeeds, the return value is a pointer to ZoomSDKAICompanionSmartSummaryHelper {@link MobileRTCAICompanionSmartSummaryHelper}. Otherwise the function returns nil.
+ * @return If the function succeeds, the return value is a pointer to MobileRTCAICompanionSmartSummaryHelper {@link MobileRTCAICompanionSmartSummaryHelper}. Otherwise the function returns nil.
  */
 - (MobileRTCAICompanionSmartSummaryHelper *)getSmartSummaryHelper;
 

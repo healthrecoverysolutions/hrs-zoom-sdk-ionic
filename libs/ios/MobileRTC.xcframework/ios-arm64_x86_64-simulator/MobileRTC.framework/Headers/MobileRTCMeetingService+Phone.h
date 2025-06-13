@@ -3,7 +3,7 @@
 //  MobileRTC
 //
 //  Created by ZOOM on 2023/4/24.
-//  Copyright © 2023 Zoom Video Communications, Inc. All rights reserved.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <MobileRTC/MobileRTC.h>
@@ -26,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * @brief Get the list of the countries which support to call out.
- * @return An NSArray contains ZoomSDKPhoneSupportCountryInfoList objects of all countries supporting to call out.  Otherwise nil.
+ * @return An NSArray contains MobileRTCCallCountryCode objects of all countries supporting to call out.  Otherwise nil.
  */
 -(NSArray <MobileRTCCallCountryCode*>* _Nullable)getSupportCountryInfo;
 

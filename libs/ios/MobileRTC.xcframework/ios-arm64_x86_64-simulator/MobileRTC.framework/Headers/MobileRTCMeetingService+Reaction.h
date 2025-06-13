@@ -2,8 +2,8 @@
 //  MobileRTCMeetingService+Reaction.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 2020/12/3.
-//  Copyright © 2020 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 2020/12/3.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <MobileRTC/MobileRTC.h>
@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * @brief Send emoji reaction.
  * @param type - The type of the emoji reaction.
- * @return If the function succeeds, it will return ZoomSDKError_succuss, otherwise not.
+ * @return If the function succeeds, it will return MobileRTCSDKError_Succuss, otherwise not.
  * @warning MobileRTCEmojiReactionSkinTone doesn't work for MobileRTCEmojiReactionType_Heart type. To set MobileRTCEmojiReactionSkinTone, use -[MobileRTCMeetingSettings setReactionSkinTone] in MobileRTCMeetingSettings.h file
  */
 - (MobileRTCSDKError)sendEmojiReaction:(MobileRTCEmojiReactionType)type;

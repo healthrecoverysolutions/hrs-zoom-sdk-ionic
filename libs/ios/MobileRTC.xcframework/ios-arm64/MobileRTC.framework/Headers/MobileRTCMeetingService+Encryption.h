@@ -2,8 +2,8 @@
 //  MobileRTCMeetingService+AppShare.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 2017/2/27.
-//  Copyright © 2019年 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 2017/2/27.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <MobileRTC/MobileRTC.h>
@@ -33,7 +33,7 @@
 
 /*!
  @brief Determine whether unencrypted exception data is valid,
- @note This method can only be called when the encryption type is ZoomSDKEncryptionType_Enhanced.
+ @note This method can only be called when the encryption type is MobileRTCMeetingEncryptionType_Enhanced.
  @return YES means unencrypted exception data is valid.
  */
 - (BOOL)isUnencryptedExceptionDataValid;

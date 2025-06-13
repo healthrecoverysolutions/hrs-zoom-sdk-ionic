@@ -2,8 +2,8 @@
 //  MobileRTCRenderer.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 2019/8/6.
-//  Copyright © 2019 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 2019/8/6.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -45,8 +45,7 @@
  @note If you are already in the meeting, subscribe to your own video data using the real userId or userId = 0.
  @return If the function succeeds, the return value is MobileRTCRawData_Success. Otherwise, the function fails and returns null. To get extended error information, see {@link MobileRTCRawDataError}.
  */
-- (MobileRTCRawDataError)subscribe:(NSUInteger)userId
-                    videoType:(MobileRTCVideoType)type;
+- (MobileRTCRawDataError)subscribe:(NSUInteger)userId videoType:(MobileRTCVideoType)type;
 
 /*!
  @brief Call the function to unsubscribe from raw video data.

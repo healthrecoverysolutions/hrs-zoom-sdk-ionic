@@ -2,8 +2,8 @@
 //  MobileRTCAuthService.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 8/8/14.
-//  Copyright (c) 2019 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 8/8/14.
+//  Copyright (c) Zoom Communications, Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -62,7 +62,7 @@
 /**
  * @brief Login ZOOM with SSO Uri Protocol.
  * @param uriProtocol For the parameter to be used for sso account login.
- * @return If the function succeeds, it will return ZoomSDKError_success. Otherwise failed.
+ * @return If the function succeeds, it will return MobileRTCLoginFailReason_Success. Otherwise failed.
  */
 - (MobileRTCLoginFailReason)ssoLoginWithWebUriProtocol:(nonnull NSString*)uriProtocol;
 
@@ -101,7 +101,7 @@
 
 /*!
  @brief Get notification service controller interface.
- @return If the function succeeds, it will return a ZoomSDKZpnsServiceController object.
+ @return If the function succeeds, it will return a MobileRTCNotificationServiceHelper object.
  */
 - (MobileRTCNotificationServiceHelper*_Nullable)getNotificationServiceHelper;
 
@@ -140,8 +140,8 @@
 
 /*!
  @brief Notification service status changed callback.
- @param status The value of transfer meeting service. For more details, see {@link ZoomSDKNotificationServiceStatus}.
- @param error Connection Notification service fail error code. For more details, see {@link ZoomSDKNotificationServiceError}.
+ @param status The value of transfer meeting service. For more details, see {@link MobileRTCNotificationServiceStatus}.
+ @param error Connection Notification service fail error code. For more details, see {@link MobileRTCNotificationServiceError}.
  */
 - (void)onNotificationServiceStatus:(MobileRTCNotificationServiceStatus)status error:(MobileRTCNotificationServiceError)error;
 

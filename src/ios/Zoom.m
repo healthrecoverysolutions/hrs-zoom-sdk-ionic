@@ -2,7 +2,7 @@
  *  Zoom.m
  *
  *  @author Zoom Video Communications, Inc.
- *  @version v5.17.11.14222
+ *  @version v6.4.10
  */
 #import "Zoom.h"
 #import <CocoaLumberjack/CocoaLumberjack.h>
@@ -886,7 +886,7 @@ CustomMessageComponent *customMessageComponent;
         case MobileRTCMeetError_Success:
             message = @"Successfully start/join meeting.";
             break;
-        case MobileRTCMeetError_NetworkError:
+        case MobileRTCMeetError_ConnectionError:
             message = @"Network issue, please check your network connection.";
             break;
         case MobileRTCMeetError_ReconnectError:
