@@ -886,7 +886,7 @@ CustomMessageComponent *customMessageComponent;
         case MobileRTCMeetError_Success:
             message = @"Successfully start/join meeting.";
             break;
-        case MobileRTCMeetError_NetworkError:
+        case MobileRTCMeetError_ConnectionError:
             message = @"Network issue, please check your network connection.";
             break;
         case MobileRTCMeetError_ReconnectError:
