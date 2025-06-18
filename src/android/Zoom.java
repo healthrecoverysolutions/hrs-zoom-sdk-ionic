@@ -257,7 +257,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     private AlertDialog messageDialog;
     private static final int CALL_IGNORED_DIALOG_SHOW_AFTER_MILLIS = 90000; // Duration in millis after which we show the call ignored/missed dialog
-    private static final int START_CALL_ROLLOVER_MILLIS = 45000; // Duration in millis after which we show the call ignored/missed dialog
+    private static final int START_CALL_ROLLOVER_MILLIS = 40000; // Duration in millis after which we show the call ignored/missed dialog
     private static final int CALL_IGNORED_DIALOG_SHOW_DURATION_MILLIS = 8000; // Duration for which we show the call ignored/missed dialog
     private static final String CALL_STATUS_DECLINED = "call_declined";
     public final static int ACTION_CALL_IGNORED_BY_PARTICIPANT = 1;
