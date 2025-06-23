@@ -2,7 +2,7 @@
  *  Zoom.m
  *
  *  @author Zoom Video Communications, Inc.
- *  @version v5.17.11.14222
+ *  @version v6.4.5
  */
 #import "Zoom.h"
 #import <CocoaLumberjack/CocoaLumberjack.h>
@@ -14,8 +14,13 @@
 
 @implementation Zoom
 
+NSString *sharedEventCallbackId;
 const CGFloat End_Call_Timer_Seconds = 90.0f;
+const CGFloat Call_Rollover_Timer_Seconds = 40.0f;
+BOOL shouldRollOver = NO;
+long long callStart = 0;
 NSTimer *endCallTimer;
+NSTimer *callRolloverTimer;
 NSTimer *alertMessageTimer;
 NSString *meetingNumber;
 NSString *previousMeetingNumber;
@@ -69,6 +74,69 @@ CustomMessageComponent *customMessageComponent;
     });
 }
 
+- (void)setShouldRollOver:(CDVInvokedUrlCommand *)command {
+    @try {
+        NSArray *args = command.arguments;
+        NSNumber *shouldRollOverArg = [args objectAtIndex:0];
+        NSNumber *callStartArg = [args objectAtIndex:1];
+
+        shouldRollOver = [shouldRollOverArg boolValue];
+        callStart = [callStartArg longLongValue];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"Error setting shouldRollOver for zoom call: %@", exception.reason);
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error setting shouldRollOver for zoom call"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)initializeCallRollOver {
+    if (shouldRollOver) {
+        [self emitSharedJsEvent:@"startCallRollOver" data:nil];
+    }
+}
+
+- (void)emitSharedJsEvent:(NSString *)type data:(NSDictionary *)data {
+    NSLog(@"emitSharedJsEvent -> %@", type);
+
+    if (sharedEventCallbackId == nil) {
+        return;
+    }
+
+    if (data == nil) {
+        data = @{};
+    }
+
+    NSDictionary *payload = @{
+        @"type": type,
+        @"data": data
+    };
+
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:payload];
+    [pluginResult setKeepCallbackAsBool:YES];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:sharedEventCallbackId];
+}
+
+- (void)setSharedEventListener:(CDVInvokedUrlCommand *)command {
+    if (sharedEventCallbackId != nil) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"event listener callback overwritten"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+
+    sharedEventCallbackId = command.callbackId;
+
+    // Send immediate OK result if you want:
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [pluginResult setKeepCallbackAsBool:YES]; // important to keep callback alive for future events
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:sharedEventCallbackId];
+}
+
+
 //Added new method to set jwtToken in MobileRTCAuthService
 - (void)initializeWithJWT:(CDVInvokedUrlCommand*)command{
     DDLogDebug(@"initializeWithJWT");
@@ -105,6 +173,12 @@ CustomMessageComponent *customMessageComponent;
             [authService sdkAuth];
         }
     });
+
+    if (shouldRollOver) {
+        long long rolloverMillis = Call_Rollover_Timer_Seconds - ((long long)([[NSDate date] timeIntervalSince1970]) - (callStart / 1000));
+                  callRolloverTimer = [NSTimer scheduledTimerWithTimeInterval:rolloverMillis
+                  target:self selector:@selector(startCallRollover:) userInfo:nil repeats:NO];
+    }
 }
 
 - (void)login:(CDVInvokedUrlCommand*)command
@@ -117,7 +191,7 @@ CustomMessageComponent *customMessageComponent;
     // Run login method on main thread.
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         if (username != nil && [username isKindOfClass:[NSString class]] && [username length] > 0 && password != nil && [password isKindOfClass:[NSString class]]  && [password length]) {
-            
+
             // loginWithEmail has been deprecated in the lastest SDK 5.11 and not being used anywhere in the code so commented it for now.
             // Try to log user in
 //            [[[MobileRTC sharedRTC] getAuthService] loginWithEmail:username password:password rememberMe:YES];
@@ -169,7 +243,7 @@ CustomMessageComponent *customMessageComponent;
     DDLogDebug(@"Zoom call is declined by other participant");
     NSString *callStatus = [command.arguments objectAtIndex:0];
     NSString *meetingNumber = [command.arguments objectAtIndex:1];
-    
+
     if(callStatus != nil && ([callStatus isEqualToString: kCallDeclined])) {
         /* Ending meeting if meeting has not been ended previously by comparing current meeting number with previous meeting number */
         if(previousMeetingNumber == nil || ![previousMeetingNumber isEqualToString:meetingNumber]){
@@ -246,7 +320,7 @@ CustomMessageComponent *customMessageComponent;
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings ].disconnectAudioHidden = NO;
             }
-            
+
             // no_driving_mode
             if ([options objectForKey:@"no_driving_mode"] != [NSNull null]) {
                 [[[MobileRTC sharedRTC] getMeetingSettings] disableDriveMode: [options[@"no_driving_mode"] boolValue]];
@@ -259,21 +333,21 @@ CustomMessageComponent *customMessageComponent;
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings].meetingInviteHidden = NO;
             }
-            
+
             // no_titlebar
             if ([options objectForKey:@"no_titlebar"] != [NSNull null]) {
                 [[MobileRTC sharedRTC] getMeetingSettings].topBarHidden = [options[@"no_titlebar"] boolValue];
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings].topBarHidden = NO;
             }
-            
+
             // no_video
             if ([options objectForKey:@"no_video"] != [NSNull null]) {
                 [[[MobileRTC sharedRTC] getMeetingSettings] setMuteVideoWhenJoinMeeting:[options[@"no_video"] boolValue]];
             } else {
                 [[[MobileRTC sharedRTC] getMeetingSettings] setMuteVideoWhenJoinMeeting:NO];
             }
-            
+
             // no_button_video
             if ([options objectForKey:@"no_button_video"] != [NSNull null]) {
                 [[MobileRTC sharedRTC] getMeetingSettings].meetingVideoHidden = [options[@"no_button_video"] boolValue];
@@ -359,7 +433,6 @@ CustomMessageComponent *customMessageComponent;
             /*An alert message will be shown to the user if no other participant joins in 90 seconds for ending the call*/
             endCallTimer = [NSTimer scheduledTimerWithTimeInterval:End_Call_Timer_Seconds
             target:self selector:@selector(startEndMeetingTimer:) userInfo:nil repeats:NO];
-
         }
     }
 }
@@ -373,6 +446,18 @@ CustomMessageComponent *customMessageComponent;
     if(meetingUserCount == 1) {
         DDLogDebug(@"Call missed: show ending call popup");
         [self showEndingCallPopup:NSLocalizedString(@"zoom_call_missed_message", @"")];
+    }
+}
+
+// This method will start call rollover if other participants doesn't join in 90 seconds
+- (void) startCallRollover:(NSTimer *)timer
+{
+    [timer invalidate];
+    NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
+
+    if(meetingUserCount == 1) {
+        DDLogDebug(@"Call missed: starting call rollover");
+        [self initializeCallRollOver];
     }
 }
 
@@ -634,7 +719,7 @@ CustomMessageComponent *customMessageComponent;
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings ].disconnectAudioHidden = NO;
             }
-            
+
             // no_driving_mode
             if ([options objectForKey:@"no_driving_mode"] != [NSNull null]) {
                 [[[MobileRTC sharedRTC] getMeetingSettings] disableDriveMode: [options[@"no_driving_mode"] boolValue]];
@@ -647,21 +732,21 @@ CustomMessageComponent *customMessageComponent;
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings].meetingInviteHidden = NO;
             }
-            
+
             // no_titlebar
             if ([options objectForKey:@"no_titlebar"] != [NSNull null]) {
                 [[MobileRTC sharedRTC] getMeetingSettings].topBarHidden = [options[@"no_titlebar"] boolValue];
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings].topBarHidden = NO;
             }
-            
+
             // no_video
             if ([options objectForKey:@"no_video"] != [NSNull null]) {
                 [[[MobileRTC sharedRTC] getMeetingSettings] setMuteVideoWhenJoinMeeting:[options[@"no_video"] boolValue]];
             } else {
                 [[[MobileRTC sharedRTC] getMeetingSettings] setMuteVideoWhenJoinMeeting:NO];
             }
-            
+
             // no_button_video
             if ([options objectForKey:@"no_button_video"] != [NSNull null]) {
                 [[MobileRTC sharedRTC] getMeetingSettings].meetingVideoHidden = [options[@"no_button_video"] boolValue];
@@ -998,6 +1083,7 @@ CustomMessageComponent *customMessageComponent;
     }
     // Cancelling if endCallTimer is running
     if(endCallTimer)[endCallTimer invalidate];
+    if(callRolloverTimer)[callRolloverTimer invalidate];
 }
 
 // Delegate method of MobileRTCUserServiceDelegate to observe when new user joins the meeting
@@ -1122,3 +1208,4 @@ CustomMessageComponent *customMessageComponent;
 }
 
 @end
+

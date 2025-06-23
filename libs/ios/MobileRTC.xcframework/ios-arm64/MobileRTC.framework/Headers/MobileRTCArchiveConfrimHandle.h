@@ -2,8 +2,8 @@
 //  MobileRTCArchiveConfrimHandle.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 5/6/24.
-//  Copyright © 2024 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 5/6/24.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -27,3 +27,20 @@
 - (NSString * _Nullable)getArchiveConfirmContent;
 @end
 
+/**
+ * @brief The interface for host user to handle recover meeting or not when start a deleted or expired meeting
+ */
+@interface MobileRTCRecoverMeetingHandle : NSObject
+/*!
+ @brief Join the meeting.
+ @param toRecover YES means to recover the meeting and start the meeting. NO means not recover the meeting and leave the start meeting process.
+ @return If the function succeeds, the return value is MobileRTCSDKError_Success. Otherwise fails. For more details, see {@link MobileRTCSDKError}.
+ */
+- (MobileRTCSDKError)recoverMeeting:(BOOL)toRecover;
+
+/*!
+ @brief The content that notify the host user to recover the meeting.
+ @return The content that notify the host user to recover the meeting.
+ */
+- (NSString * _Nullable)getRecoverMeetingContent;
+@end

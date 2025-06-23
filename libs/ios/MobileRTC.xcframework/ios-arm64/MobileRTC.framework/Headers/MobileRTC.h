@@ -2,8 +2,8 @@
 //  MobileRTC.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 8/7/14.
-//  Copyright (c) 2019 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 8/7/14.
+//  Copyright (c) Zoom Communications, Inc. All rights reserved.
 //
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
@@ -28,6 +28,7 @@
 #import <MobileRTC/MobileRTCMeetingService+BO.h>
 #import <MobileRTC/MobileRTCMeetingService+Reaction.h>
 #import <MobileRTC/MobileRTCMeetingService+LiveTranscription.h>
+#import <MobileRTC/MobileRTCMeetingService+Docs.h>
 #import <MobileRTC/MobileRTCMeetingService+RawArchiving.h>
 #import <MobileRTC/MobileRTCMeetingService+Phone.h>
 #import <MobileRTC/MobileRTCMeetingService+SmartSummary.h>
@@ -114,17 +115,17 @@
 /*!
  @brief MobileRTC domain, read-only.  
  */
-@property (retain, nonatomic, readonly) NSString * _Nullable mobileRTCDomain;
+@property (copy, nonatomic, readonly) NSString * _Nullable mobileRTCDomain;
 
 /*!
  @brief The path of MobileRTC Resources Bundle, read-only. 
  */
-@property (retain, nonatomic, readonly) NSString * _Nullable mobileRTCResPath;
+@property (copy, nonatomic, readonly) NSString * _Nullable mobileRTCResPath;
 
 /*!
  @brief The name of APP Localizable file for MobileRTC, read-only.
  */
-@property (retain, nonatomic, readonly) NSString * _Nullable mobileRTCCustomLocalizableName;
+@property (copy, nonatomic, readonly) NSString * _Nullable mobileRTCCustomLocalizableName;
 
 /*!
  @brief Call the function to get the MobileRTC client.
@@ -300,10 +301,10 @@
 - (void)appDidBecomeActive;
 
 /*!
- @brief Notify common layer that application did enter background. Call the appDidEnterBackgroud via applicationDidEnterBackground.
+ @brief Notify common layer that application did enter background. Call the appDidEnterBackground via applicationDidEnterBackground.
  @warning It is necessary to call the method in AppDelegate "- (void)applicationDidEnterBackground:(UIApplication *)application".
  */
-- (void)appDidEnterBackgroud;
+- (void)appDidEnterBackground;
 
 /*!
  @brief Notify common layer that application will terminate. Call the appWillTerminate via applicationWillTerminate.

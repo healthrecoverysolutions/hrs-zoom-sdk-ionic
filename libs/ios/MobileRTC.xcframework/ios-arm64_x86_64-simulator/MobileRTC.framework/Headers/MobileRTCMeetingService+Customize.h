@@ -2,8 +2,8 @@
 //  MobileRTCMeetingService+Customize.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 2017/2/27.
-//  Copyright © 2019年 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 2017/2/27.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <MobileRTC/MobileRTC.h>
@@ -23,12 +23,25 @@
 - (void)customizeMeetingTitle:(NSString * _Nullable)title;
 
 /*!
+ @brief Determine if host/cohose can change the meeting topic.
+ @return If it can change the meeting topic, the return value is YES.otherwise not.
+ */
+- (BOOL)canSetMeetingTopic;
+
+/*!
 @brief Set to customize the meeting topic which will be displayed in the meeting info view.
  @param meetingTopic The topic of the meeting.
 @warning only meeting original host can call the function.
 @warning only in-meeting can call the function.
 */
-- (BOOL)setMeetingTopic:(NSString *_Nonnull)meetingTopic;
+- (MobileRTCSDKError)setMeetingTopics:(NSString *_Nonnull)meetingTopic;
+/*!
+@brief Set to customize the meeting topic which will be displayed in the meeting info view.
+ @param meetingTopic The topic of the meeting.
+@warning only meeting original host can call the function.
+@warning only in-meeting can call the function.
+*/
+- (BOOL)setMeetingTopic:(NSString *_Nonnull)meetingTopic DEPRECATED_MSG_ATTRIBUTE("Use setMeetingTopics  instead");
 
 /*!
  @brief Query if it is able to Call Room device(H.323).
