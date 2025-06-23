@@ -13,7 +13,7 @@
 /*!
  @brief Data pointer of audio buffer data.
  */
-@property (nonatomic, assign, nullable) char      *buffer;
+@property (nonatomic, assign) char      *buffer;
 
 /*!
  @brief Audio buffer data lenth.
