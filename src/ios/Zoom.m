@@ -2,17 +2,30 @@
  *  Zoom.m
  *
  *  @author Zoom Video Communications, Inc.
- *  @version v5.17.11.14222
+ *  @version v6.4.5
  */
 #import "Zoom.h"
 #import <CocoaLumberjack/CocoaLumberjack.h>
-
+#import "CustomMessageComponent.h"
 #define ddLogLevel DDLogLevelAll
 #define kSDKDomain  @"https://zoom.us"
 #define DEBUG   YES
+#define kCallDeclined @"call_declined"
 
 @implementation Zoom
 
+NSString *sharedEventCallbackId;
+const CGFloat End_Call_Timer_Seconds = 90.0f;
+const CGFloat Call_Rollover_Timer_Seconds = 40.0f;
+BOOL shouldRollOver = NO;
+long long callStart = 0;
+NSTimer *endCallTimer;
+NSTimer *callRolloverTimer;
+NSTimer *alertMessageTimer;
+NSString *meetingNumber;
+NSString *previousMeetingNumber;
+MessageAlertViewController *messageAlertViewController;
+CustomMessageComponent *customMessageComponent;
 
 // This method has been deprecated. Now the authservice takes jwtToken at the place of appKey and appSecret.
 - (void)initialize:(CDVInvokedUrlCommand*)command
@@ -61,6 +74,69 @@
     });
 }
 
+- (void)setShouldRollOver:(CDVInvokedUrlCommand *)command {
+    @try {
+        NSArray *args = command.arguments;
+        NSNumber *shouldRollOverArg = [args objectAtIndex:0];
+        NSNumber *callStartArg = [args objectAtIndex:1];
+
+        shouldRollOver = [shouldRollOverArg boolValue];
+        callStart = [callStartArg longLongValue];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"Error setting shouldRollOver for zoom call: %@", exception.reason);
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error setting shouldRollOver for zoom call"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)initializeCallRollOver {
+    if (shouldRollOver) {
+        [self emitSharedJsEvent:@"startCallRollOver" data:nil];
+    }
+}
+
+- (void)emitSharedJsEvent:(NSString *)type data:(NSDictionary *)data {
+    NSLog(@"emitSharedJsEvent -> %@", type);
+
+    if (sharedEventCallbackId == nil) {
+        return;
+    }
+
+    if (data == nil) {
+        data = @{};
+    }
+
+    NSDictionary *payload = @{
+        @"type": type,
+        @"data": data
+    };
+
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:payload];
+    [pluginResult setKeepCallbackAsBool:YES];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:sharedEventCallbackId];
+}
+
+- (void)setSharedEventListener:(CDVInvokedUrlCommand *)command {
+    if (sharedEventCallbackId != nil) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"event listener callback overwritten"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+
+    sharedEventCallbackId = command.callbackId;
+
+    // Send immediate OK result if you want:
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [pluginResult setKeepCallbackAsBool:YES]; // important to keep callback alive for future events
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:sharedEventCallbackId];
+}
+
+
 //Added new method to set jwtToken in MobileRTCAuthService
 - (void)initializeWithJWT:(CDVInvokedUrlCommand*)command{
     DDLogDebug(@"initializeWithJWT");
@@ -97,6 +173,12 @@
             [authService sdkAuth];
         }
     });
+
+    if (shouldRollOver) {
+        long long rolloverMillis = Call_Rollover_Timer_Seconds - ((long long)([[NSDate date] timeIntervalSince1970]) - (callStart / 1000));
+                  callRolloverTimer = [NSTimer scheduledTimerWithTimeInterval:rolloverMillis
+                  target:self selector:@selector(startCallRollover:) userInfo:nil repeats:NO];
+    }
 }
 
 - (void)login:(CDVInvokedUrlCommand*)command
@@ -109,7 +191,7 @@
     // Run login method on main thread.
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         if (username != nil && [username isKindOfClass:[NSString class]] && [username length] > 0 && password != nil && [password isKindOfClass:[NSString class]]  && [password length]) {
-            
+
             // loginWithEmail has been deprecated in the lastest SDK 5.11 and not being used anywhere in the code so commented it for now.
             // Try to log user in
 //            [[[MobileRTC sharedRTC] getAuthService] loginWithEmail:username password:password rememberMe:YES];
@@ -156,6 +238,21 @@
     });
 }
 
+// This method will be called with zoom call is declined by other participants
+-(void) notifyCallStatus :(CDVInvokedUrlCommand*)command {
+    DDLogDebug(@"Zoom call is declined by other participant");
+    NSString *callStatus = [command.arguments objectAtIndex:0];
+    NSString *meetingNumber = [command.arguments objectAtIndex:1];
+
+    if(callStatus != nil && ([callStatus isEqualToString: kCallDeclined])) {
+        /* Ending meeting if meeting has not been ended previously by comparing current meeting number with previous meeting number */
+        if(previousMeetingNumber == nil || ![previousMeetingNumber isEqualToString:meetingNumber]){
+            DDLogDebug(@"Call declined: proceed to end the call");
+            [self continueEndingMeeting];
+        }
+    }
+}
+
 - (void)joinMeeting:(CDVInvokedUrlCommand*)command
 {
     pluginResult = nil;
@@ -165,7 +262,7 @@
     NSString* meetingPassword = [command.arguments objectAtIndex:1];
     NSString* displayName = [command.arguments objectAtIndex:2];
     NSDictionary* options = [command.arguments objectAtIndex:3];
-
+    meetingNumber = meetingNo;
     if (DEBUG) {
         DDLogDebug(@"========meeting number======= %@", meetingNo);
         DDLogDebug(@"========display name======= %@", displayName);
@@ -223,7 +320,7 @@
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings ].disconnectAudioHidden = NO;
             }
-            
+
             // no_driving_mode
             if ([options objectForKey:@"no_driving_mode"] != [NSNull null]) {
                 [[[MobileRTC sharedRTC] getMeetingSettings] disableDriveMode: [options[@"no_driving_mode"] boolValue]];
@@ -236,21 +333,21 @@
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings].meetingInviteHidden = NO;
             }
-            
+
             // no_titlebar
             if ([options objectForKey:@"no_titlebar"] != [NSNull null]) {
                 [[MobileRTC sharedRTC] getMeetingSettings].topBarHidden = [options[@"no_titlebar"] boolValue];
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings].topBarHidden = NO;
             }
-            
+
             // no_video
             if ([options objectForKey:@"no_video"] != [NSNull null]) {
                 [[[MobileRTC sharedRTC] getMeetingSettings] setMuteVideoWhenJoinMeeting:[options[@"no_video"] boolValue]];
             } else {
                 [[[MobileRTC sharedRTC] getMeetingSettings] setMuteVideoWhenJoinMeeting:NO];
             }
-            
+
             // no_button_video
             if ([options objectForKey:@"no_button_video"] != [NSNull null]) {
                 [[MobileRTC sharedRTC] getMeetingSettings].meetingVideoHidden = [options[@"no_button_video"] boolValue];
@@ -317,8 +414,6 @@
             params.userName = displayName;
             params.customerKey = participantID;
             [ms joinMeetingWithJoinParam:params];
-            
-
         }
     });
 }
@@ -332,7 +427,52 @@
         //Return type of muteMyVideo has been replaced with MobileRTCSDKError from MobileRTCVideoError in latest SDK 5.14
         MobileRTCSDKError unmuteResult = [ms muteMyVideo:NO];
         DDLogDebug(@"onMeetingReady unmuteResult: %d", unmuteResult);
+        NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
+        if(meetingUserCount == 1) {
+            [self addWaitingForParticipantsMessage];
+            /*An alert message will be shown to the user if no other participant joins in 90 seconds for ending the call*/
+            endCallTimer = [NSTimer scheduledTimerWithTimeInterval:End_Call_Timer_Seconds
+            target:self selector:@selector(startEndMeetingTimer:) userInfo:nil repeats:NO];
+        }
     }
+}
+
+// This method will end meeting if other participants doesn't join in 90 seconds
+- (void) startEndMeetingTimer:(NSTimer *)timer
+{
+    [timer invalidate];
+    NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
+
+    if(meetingUserCount == 1) {
+        DDLogDebug(@"Call missed: show ending call popup");
+        [self showEndingCallPopup:NSLocalizedString(@"zoom_call_missed_message", @"")];
+    }
+}
+
+// This method will start call rollover if other participants doesn't join in 90 seconds
+- (void) startCallRollover:(NSTimer *)timer
+{
+    [timer invalidate];
+    NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
+
+    if(meetingUserCount == 1) {
+        DDLogDebug(@"Call missed: starting call rollover");
+        [self initializeCallRollOver];
+    }
+}
+
+// ZoomCallHandlerDelegate method for ending current zoom call
+- (void)endMeeting {
+    [self leaveExistingMeeting];
+}
+
+// Method for leaving from exising zoom meeting
+-(void) leaveExistingMeeting {
+    DDLogDebug(@"Ending zoom call");
+    MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
+    [ms leaveMeetingWithCmd:LeaveMeetingCmd_Leave];
+    previousMeetingNumber = meetingNumber;
+    meetingNumber = nil;
 }
 
 - (void)startMeeting:(CDVInvokedUrlCommand*)command
@@ -579,7 +719,7 @@
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings ].disconnectAudioHidden = NO;
             }
-            
+
             // no_driving_mode
             if ([options objectForKey:@"no_driving_mode"] != [NSNull null]) {
                 [[[MobileRTC sharedRTC] getMeetingSettings] disableDriveMode: [options[@"no_driving_mode"] boolValue]];
@@ -592,21 +732,21 @@
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings].meetingInviteHidden = NO;
             }
-            
+
             // no_titlebar
             if ([options objectForKey:@"no_titlebar"] != [NSNull null]) {
                 [[MobileRTC sharedRTC] getMeetingSettings].topBarHidden = [options[@"no_titlebar"] boolValue];
             } else {
                 [[MobileRTC sharedRTC] getMeetingSettings].topBarHidden = NO;
             }
-            
+
             // no_video
             if ([options objectForKey:@"no_video"] != [NSNull null]) {
                 [[[MobileRTC sharedRTC] getMeetingSettings] setMuteVideoWhenJoinMeeting:[options[@"no_video"] boolValue]];
             } else {
                 [[[MobileRTC sharedRTC] getMeetingSettings] setMuteVideoWhenJoinMeeting:NO];
             }
-            
+
             // no_button_video
             if ([options objectForKey:@"no_button_video"] != [NSNull null]) {
                 [[MobileRTC sharedRTC] getMeetingSettings].meetingVideoHidden = [options[@"no_button_video"] boolValue];
@@ -941,31 +1081,55 @@
     if (reason == 0) {
         [self.commandDelegate evalJs:@"cordova.plugins.Zoom.fireMeetingLeftEvent()"];
     }
+    // Cancelling if endCallTimer is running
+    if(endCallTimer)[endCallTimer invalidate];
+    if(callRolloverTimer)[callRolloverTimer invalidate];
 }
 
 // Delegate method of MobileRTCUserServiceDelegate to observe when new user joins the meeting
 - (void)onSinkMeetingUserJoin:(NSUInteger)userID{
-    if ([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 2){
+    NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
+    if (meetingUserCount > 2){
         // Added one second delay in view switching to get the UI opearations done when new user joins the call
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        [[[MobileRTC sharedRTC] getMeetingService] switchToVideoWall];
+            [[[MobileRTC sharedRTC] getMeetingService] switchToVideoWall];
+            [self hideWaitingForParticipateMessage];
         });
     }else{
         // Added one second delay in view switching to get the UI opearations done when new user joins the call
+        if([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 1) {
+            if(alertMessageTimer) {
+                [alertMessageTimer invalidate];
+                if(messageAlertViewController && messageAlertViewController.view.superview) {
+                    [messageAlertViewController.view removeFromSuperview];
+                }
+                [[[MobileRTC sharedRTC] getMeetingSettings] setTopBarHidden:NO];
+                [[[MobileRTC sharedRTC] getMeetingSettings] setBottomBarHidden:NO];
+            }
+        }
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             [[[MobileRTC sharedRTC] getMeetingService] switchToActiveSpeaker];
+            if(meetingUserCount > 1){
+                [self hideWaitingForParticipateMessage];
+            }
         });
     }
 }
 
 // Delegate method of MobileRTCUserServiceDelegate to observe whe user leaves the meeting
 - (void)onSinkMeetingUserLeft:(NSUInteger)userID{
-    if ([[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count > 2){
+    NSUInteger meetingUserCount = [[MobileRTC sharedRTC] getMeetingService].getInMeetingUserList.count;
+    if (meetingUserCount > 2){
         // Added one second delay in view switching to get the UI opearations done when user leaves the call
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         [[[MobileRTC sharedRTC] getMeetingService] switchToVideoWall];
         });
     }else{
+        if(meetingUserCount <= 1){
+            DDLogDebug(@"Other participant left: proceed to end the call");
+            [self leaveExistingMeeting];
+            return;
+        }
         // Added one second delay in view switching to get the UI opearations done when user leaves the call
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             [[[MobileRTC sharedRTC] getMeetingService] switchToActiveSpeaker];
@@ -973,4 +1137,75 @@
     }
 }
 
+// Method for adding "Waiting for others to join.." message if there is only one user in meeting.
+-(void) addWaitingForParticipantsMessage{
+    UIView *meetingView = [[MobileRTC sharedRTC] getMeetingService].meetingView;
+    customMessageComponent = [[CustomMessageComponent alloc] initWithFrame:CGRectMake(meetingView.frame.origin.x, meetingView.frame.origin.y, meetingView.frame.size.width, meetingView.frame.size.height)];
+    [meetingView addSubview:customMessageComponent];
+    [customMessageComponent setMessageLabelText: NSLocalizedString(@"zoom_waiting_message", @"")];
+    [customMessageComponent setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [[customMessageComponent.widthAnchor constraintEqualToConstant:meetingView.frame.size.width] setActive:YES];
+    [[customMessageComponent.heightAnchor constraintEqualToConstant:meetingView.frame.size.height] setActive:YES];
+    [[customMessageComponent.leadingAnchor constraintEqualToAnchor:meetingView.leadingAnchor] setActive:YES];
+    [[customMessageComponent.trailingAnchor constraintEqualToAnchor:meetingView.trailingAnchor constant:0] setActive:YES];
+}
+
+// Method for hiding "Waiting for others to join.." message when others have joined the meeting.
+-(void) hideWaitingForParticipateMessage{
+    if(customMessageComponent){
+        [customMessageComponent setHidden:YES];
+    }
+}
+
+// Method for ending existing zoom meeting when declined by other participants
+-(void) continueEndingMeeting {
+    DDLogDebug(@"Call declined: show ending call popup");
+    MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
+    [self showEndingCallPopup:NSLocalizedString(@"zoom_call_declined_message", @"")];
+    if(ms.meetingView == nil) {
+        [self leaveExistingMeeting];
+    }
+}
+
+
+
+// Show ending zoom meeting popup if call is not answered or declined by other participants
+- (void) showEndingCallPopup: (NSString*) endingCallMessage {
+    if(![alertMessageTimer isValid]){
+        DDLogDebug(@"Showing ending call popup with timer");
+        MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
+        messageAlertViewController = [[MessageAlertViewController alloc] initWithNibName:@"MessageAlertViewController" bundle:nil];
+        messageAlertViewController.delegate = self;
+        __block int secondsLeft= 8;
+        alertMessageTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+            secondsLeft = secondsLeft - 1;
+            NSString *alertMessage = [NSString stringWithFormat:endingCallMessage, secondsLeft];
+            [messageAlertViewController setAlertMessage:alertMessage];
+            if(secondsLeft == 0) {
+                [self leaveExistingMeeting];
+                [messageAlertViewController.view removeFromSuperview];
+                [timer invalidate];
+            }
+        }];
+        [[[MobileRTC sharedRTC] getMeetingSettings] setTopBarHidden:YES];
+        [[[MobileRTC sharedRTC] getMeetingSettings] setBottomBarHidden:YES];
+        /*If meeting view is available or zoom call is not minimized, adding message alert view to zoom meeting view else adding it to UIApplication window*/
+        if(ms.meetingView) {
+            [ms.meetingView addSubview:messageAlertViewController.view];
+            [messageAlertViewController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
+            [[messageAlertViewController.view.leadingAnchor constraintEqualToAnchor:ms.meetingView.leadingAnchor] setActive:YES];
+            [[messageAlertViewController.view.trailingAnchor constraintEqualToAnchor:ms.meetingView.trailingAnchor] setActive:YES];
+            [[messageAlertViewController.view.topAnchor constraintEqualToAnchor:ms.meetingView.topAnchor] setActive:YES];
+            [[messageAlertViewController.view.bottomAnchor constraintEqualToAnchor:ms.meetingView.bottomAnchor] setActive:YES];
+        } else {
+            UIWindow *window = [[UIApplication sharedApplication] delegate].window;
+            messageAlertViewController.view.frame = window.bounds;
+            [window addSubview:messageAlertViewController.view];
+        }
+        NSString *alertMessage = [NSString stringWithFormat:endingCallMessage, secondsLeft];
+        [messageAlertViewController setAlertMessage:alertMessage];
+    }
+}
+
 @end
+
