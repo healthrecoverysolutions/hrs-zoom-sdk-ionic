@@ -130,8 +130,8 @@ typedef NS_ENUM(NSUInteger, MobileRTCLoginFailReason) {
 typedef NS_ENUM(NSUInteger, MobileRTCMeetError) {
     ///Start/Join meeting successfully.
     MobileRTCMeetError_Success                          = 0,
-    ///The connection with the backend service has errors.
-    MobileRTCMeetError_ConnectionError                  = 1,
+    ///Network issue, please check the network connection.
+    MobileRTCMeetError_NetworkError                     = 1,
     ///Failed to reconnect the meeting.
     MobileRTCMeetError_ReconnectError                   = 2,
     ///MMR issue, please check MMR configuration.
@@ -580,7 +580,7 @@ typedef NS_ENUM(NSUInteger, MobileRTCMicrophoneError) {
  */
 typedef NS_ENUM(NSUInteger, MobileRTCMeetingEndReason) {
     ///User leaves meeting.
-    MobileRTCMeetingEndReason_None                      = 0,
+    MobileRTCMeetingEndReason_SelfLeave                 = 0,
     ///The user is removed from meeting by the host.
     MobileRTCMeetingEndReason_RemovedByHost             = 1,
     ///Host ends the meeting.
@@ -593,8 +593,10 @@ typedef NS_ENUM(NSUInteger, MobileRTCMeetingEndReason) {
     MobileRTCMeetingEndReason_NoAteendee                = 5,
     ///Meeting ends by the host for he will start another meeting.
     MobileRTCMeetingEndReason_HostEndForAnotherMeeting  = 6,
-    ///Represents an undefined end meeting reason, typically used for new error codes introduced by the backend after client release
-    MobileRTCMeetingEndReason_Undefined                 = 7,
+    ///Meeting ends for SDK disconnects, such as network issue.
+    MobileRTCMeetingEndReason_ConnectBroken             = 7,
+    ///Meeting ends by unknown reasons.
+    MobileRTCMeetingEndReason_Unknown,
 };
 
 /*!
@@ -1148,7 +1150,6 @@ typedef NS_ENUM(NSInteger, MobileRTCSubscribeFailReason)
     MobileRTCSubscribe_Fail_NotSupport1080P,
     MobileRTCSubscribe_Fail_HasSubscribe720P,
     MobileRTCSubscribe_Fail_HasSubscribeExceededLimit,
-    MobileRTCSubscribe_Fail_TooFrequentCall,
 };
 
 /*!

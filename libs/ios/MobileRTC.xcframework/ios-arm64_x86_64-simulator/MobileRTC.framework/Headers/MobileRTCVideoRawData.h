@@ -18,12 +18,12 @@
 /*!
  @brief The u-data data pointer to a video's YUV data.
  */
-@property (nonatomic, assign, nullable) char *uBuffer;
+@property (nonatomic, assign) char *uBuffer;
 
 /*!
  @brief The v-data data pointer to a video's YUV data.
  */
-@property (nonatomic, assign, nullable) char *vBuffer;
+@property (nonatomic, assign) char *vBuffer;
 
 /*!
  @brief The video data's size.
@@ -33,7 +33,7 @@
 /*!
  @brief The data pointer to a video's alpha data.
  */
-@property (nonatomic, assign, nullable) char *alphaBuffer;
+@property (nonatomic, assign) char *alphaBuffer;
 
 /*!
  @brief the alpha buffer data length

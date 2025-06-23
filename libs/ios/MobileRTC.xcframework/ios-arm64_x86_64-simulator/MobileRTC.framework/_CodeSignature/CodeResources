@@ -26,7 +26,7 @@
 		</data>
 		<key>Headers/MobileRTCAudioRawData.h</key>
 		<data>
-		2DGl5kQY3G5btaT7OrBleuSm7VE=
+		uPf+YcIxiQF2haBAov2m2idqryQ=
 		</data>
 		<key>Headers/MobileRTCAudioRawDataHelper.h</key>
 		<data>
@@ -62,7 +62,7 @@
 		</data>
 		<key>Headers/MobileRTCConstants.h</key>
 		<data>
-		KNg6sb68N4W8ivmEKVTT4P0vEL0=
+		i6KvHxrp/b9iW6Enhu0R8UFNxUQ=
 		</data>
 		<key>Headers/MobileRTCDirectShareService.h</key>
 		<data>
@@ -262,7 +262,7 @@
 		</data>
 		<key>Headers/MobileRTCVideoRawData.h</key>
 		<data>
-		a3HhPptPnptcNwmWCJEegDmkngg=
+		b1e7cBtETwTcpy2Eu/9x+wJCscY=
 		</data>
 		<key>Headers/MobileRTCVideoSender.h</key>
 		<data>
@@ -286,7 +286,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		Ppa4fW8XWRR9Wdd9YM0Y6ZAq+OQ=
+		ZAoUz7SL7WmLESVK7DtcZYS2X6s=
 		</data>
 		<key>Modules/MobileRTC.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -306,7 +306,7 @@
 		</data>
 		<key>Modules/MobileRTC.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		LH/9HtFR4BO3W93de8Oc7Ii+/Us=
+		2iAEqIVmWY5VaxtKa1aCUhFt5Gg=
 		</data>
 		<key>Modules/MobileRTC.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -326,7 +326,7 @@
 		</data>
 		<key>Modules/MobileRTC.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		4E5EvM+fpqqWrvkku4GnT7H6gOU=
+		v+AQJhKpCTvIWUb13Ie07E99Ir4=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -382,7 +382,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			3/gxEHKQD7uC5d+YfZfnWcn2X0X7uj1KeMrO3vs/nLs=
+			U56XpVhIe0NmW5GYu7mHbCyn8VesYICU4UCs+3fHWIk=
 			</data>
 		</dict>
 		<key>Headers/MobileRTCAudioRawDataHelper.h</key>
@@ -445,7 +445,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			hXg1EPUU9aV7zAjm48SMAoTTQqrmR1wmYti0tjFGRD8=
+			m27GpsP74CP50U3m5fX+3WDKW+zN41mjdIZ76uItfno=
 			</data>
 		</dict>
 		<key>Headers/MobileRTCDirectShareService.h</key>
@@ -795,7 +795,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			BHb4qyvnvcVN12pqbaMNFCpC7ryNa4Q3JxEQKxtqiCA=
+			Qp+rjeBC2ZSyJDe3vO6tbegcdM3ptLgp6vN+IKDgu4o=
 			</data>
 		</dict>
 		<key>Headers/MobileRTCVideoSender.h</key>
@@ -865,7 +865,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			BWQJCsPURJ0ifI/vUF36azfk60IESCDexvf7ew+8LGA=
+			SZpkbkSqlFMGs9lsx2ZcBYxnCqpSA51rD7rvt40J0oY=
 			</data>
 		</dict>
 		<key>Modules/MobileRTC.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -900,7 +900,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			zuy2Dt9VKyPRerLj2yzS9pJcMIUHc+A2I+H95u02NVw=
+			bhvL1/9avmKNvSpNk9uDeloaL6ETVYWSuxX13OoZk04=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
