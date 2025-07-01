@@ -1614,7 +1614,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     public void onMeetingLeaveComplete(long l) {
         try {
             if (webView != null) {
-                String event = "javascript:cordova.plugin.Zoom.fireMeetingLeftEvent()";
+                String event = "javascript:cordova.plugins.Zoom.fireMeetingLeftEvent()";
                 webView.loadUrl(event);
             }
             InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
