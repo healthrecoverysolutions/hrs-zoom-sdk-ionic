@@ -1,27 +1,38 @@
 package cordova.plugin.zoom;
 
-import java.util.Locale;
-import java.util.Locale.Builder;
-import java.util.IllformedLocaleException;
-import java.util.List;
+import android.app.AlertDialog;
 
-import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import java.util.IllformedLocaleException;
+import java.util.List;
+import java.util.Locale;
+import java.util.Locale.Builder;
 
+import timber.log.Timber;
+import us.zoom.sdk.CameraControlRequestResult;
+import us.zoom.sdk.CameraControlRequestType;
 import us.zoom.sdk.ChatMessageDeleteType;
 import us.zoom.sdk.FreeMeetingNeedUpgradeType;
+import us.zoom.sdk.ICameraControlRequestHandler;
+import us.zoom.sdk.IMeetingArchiveConfirmHandler;
+import us.zoom.sdk.IMeetingInputUserInfoHandler;
+import us.zoom.sdk.IRecoverMeetingHandle;
 import us.zoom.sdk.IRequestLocalRecordingPrivilegeHandler;
 import us.zoom.sdk.InMeetingAudioController;
 import us.zoom.sdk.InMeetingChatController;
-import us.zoom.sdk.InMeetingUserList;
+import us.zoom.sdk.InMeetingChatMessage;
+import us.zoom.sdk.InMeetingEventHandler;
+import us.zoom.sdk.InMeetingService;
+import us.zoom.sdk.InMeetingServiceListener;
+import us.zoom.sdk.InstantMeetingOptions;
+import us.zoom.sdk.JoinMeetingOptions;
+import us.zoom.sdk.JoinMeetingParams;
 import us.zoom.sdk.LocalRecordingRequestPrivilegeStatus;
 import us.zoom.sdk.MeetingError;
 import us.zoom.sdk.MeetingParameter;
@@ -41,43 +52,12 @@ import us.zoom.sdk.ZoomAuthenticationError;
 import us.zoom.sdk.ZoomError;
 import us.zoom.sdk.ZoomSDK;
 import us.zoom.sdk.ZoomSDKAuthenticationListener;
-import us.zoom.sdk.ZoomSDKInitParams;
-import us.zoom.sdk.ZoomSDKInitializeListener;
-import us.zoom.sdk.ZoomApiError;
-import us.zoom.sdk.ZoomAuthenticationError;
-import us.zoom.sdk.ZoomError;
-
-import us.zoom.sdk.InMeetingAudioController;
-import us.zoom.sdk.InMeetingChatMessage;
-import us.zoom.sdk.InMeetingEventHandler;
-import us.zoom.sdk.InMeetingService;
-import us.zoom.sdk.InMeetingServiceListener;
-import us.zoom.sdk.MeetingStatus;
-import us.zoom.sdk.MeetingError;
-import us.zoom.sdk.MeetingService;
-import us.zoom.sdk.MeetingServiceListener;
-import us.zoom.sdk.MeetingSettingsHelper;
-import us.zoom.sdk.MeetingViewsOptions;
-import us.zoom.sdk.InstantMeetingOptions;
-import us.zoom.sdk.StartMeetingOptions;
-import us.zoom.sdk.StartMeetingParams4NormalUser;
-import us.zoom.sdk.StartMeetingParamsWithoutLogin;
-import us.zoom.sdk.JoinMeetingParams;
-import us.zoom.sdk.JoinMeetingOptions;
-
-import cordova.plugin.zoom.AuthThread;
-import us.zoom.sdk.ZoomUIService;
-
-import timber.log.Timber;
-
-import us.zoom.sdk.CameraControlRequestResult;
-import us.zoom.sdk.CameraControlRequestType;
-import us.zoom.sdk.ICameraControlRequestHandler;
-import us.zoom.sdk.IMeetingArchiveConfirmHandler;
-import us.zoom.sdk.IMeetingInputUserInfoHandler;
 import us.zoom.sdk.ZoomSDKFileReceiver;
 import us.zoom.sdk.ZoomSDKFileSender;
 import us.zoom.sdk.ZoomSDKFileTransferInfo;
+import us.zoom.sdk.ZoomSDKInitParams;
+import us.zoom.sdk.ZoomSDKInitializeListener;
+import us.zoom.sdk.ZoomUIService;
 
 /**
  * Zoom
@@ -175,15 +155,15 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String EVENT_TYPE_FOCUS_MODE_STATE_CHANGED = "focusModeStateChanged";
     private static final String EVENT_TYPE_FOCUS_MODE_SHARE_TYPE_CHANGED = "focusModeShareTypeChanged";
     private static final String EVENT_TYPE_VIDEO_ALPHA_CHANNEL_STATUS_CHANGED = "videoAlphaChannelStatusChanged";
-    private static final String EVENT_TYPE_ALLOW_PARTICIPANT_REQUEST_CLOUD_RECORDING= "allowParticipantRequestCloudRecording";
+    private static final String EVENT_TYPE_ALLOW_PARTICIPANT_REQUEST_CLOUD_RECORDING = "allowParticipantRequestCloudRecording";
     private static final String EVENT_TYPE_NOTIFICATION_SERVICE_STATUS = "notificationServiceStatus";
     private static final String EVENT_TYPE_USER_INFO_ON_JOIN_MEETING = "userInfoOnJoinMeeting";
     private static final String EVENT_TYPE_ON_SINK_JOIN_THIRD_PARTY_TELEPHONY_AUDIO = "onSinkJoinThirdPartyAudio";
-    private  static final String EVENT_TYPE_CAMERA_CONTROL_REQUEST_RECEIVED = "onCameraControlRequestReceived";
+    private static final String EVENT_TYPE_CAMERA_CONTROL_REQUEST_RECEIVED = "onCameraControlRequestReceived";
     private static final String EVENT_TYPE_CAMERA_CONTROL_REQUEST_RESULT = "onCameraControlRequestResult";
-    private  static  final String EVENT_TYPE_FILE_SEND_START = "onFileSendStart";
-    private  static  final String EVENT_TYPE_FILE_RECEIVED= "onFileReceived";
-    private  static  final String EVENT_TYPE_FILE_TRANSFER_IN_PROGRESS = "fileTransferInProgress";
+    private static final String EVENT_TYPE_FILE_SEND_START = "onFileSendStart";
+    private static final String EVENT_TYPE_FILE_RECEIVED = "onFileReceived";
+    private static final String EVENT_TYPE_FILE_TRANSFER_IN_PROGRESS = "fileTransferInProgress";
 
     private static final String DATA_KEY_VALUE = "value";
     private static final String DATA_KEY_STATUS = "status";
@@ -825,7 +805,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 @Override
                 public void run() {
                     int response = meetingService.joinMeetingWithParams(
-                            cordova.getActivity().getApplicationContext(),params, opts);
+                        cordova.getActivity().getApplicationContext(), params, opts);
                     Zoom.this.onJoinMeetingResult(callbackContext, response);
                 }
             });
@@ -835,7 +815,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 public void run() {
                     // If meeting option is not provided, simply join meeting.
                     int response = meetingService.joinMeetingWithParams(
-                            cordova.getActivity().getApplicationContext(), params, null);
+                        cordova.getActivity().getApplicationContext(), params, null);
                     Zoom.this.onJoinMeetingResult(callbackContext, response);
                 }
             });
@@ -1539,7 +1519,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     }
 
     //@Override
-    public void onWebinarNeedRegister() {}
+    public void onWebinarNeedRegister() {
+    }
 
     @Override
     public void onJoinWebinarNeedUserNameAndEmail(InMeetingEventHandler inMeetingEventHandler) {
@@ -1565,7 +1546,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     @Override
     public void onMeetingUserJoin(List<Long> list) {
-        ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
+        ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
         InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
         List<Long> currentUserList = meetingService.getInMeetingUserList();
 
@@ -1587,11 +1568,11 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     @Override
     public void onMeetingUserLeave(List<Long> list) {
-        ZoomUIService zoomUIService =  ZoomSDK.getInstance().getZoomUIService();
+        ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
         InMeetingService meetingService = ZoomSDK.getInstance().getInMeetingService();
         List<Long> currentUserList = meetingService.getInMeetingUserList();
 
-        if (currentUserList !=null && currentUserList.size() < ZOOM_UI_AUTO_CHANGE_FROM_USER_COUNT) {
+        if (currentUserList != null && currentUserList.size() < ZOOM_UI_AUTO_CHANGE_FROM_USER_COUNT) {
             zoomUIService.switchToActiveSpeaker();
         } else {
             zoomUIService.switchToVideoWall();
@@ -2295,5 +2276,50 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         } catch (JSONException ignored) {
         }
         emitSharedJsEvent(EVENT_TYPE_FILE_TRANSFER_IN_PROGRESS, eventData);
+    }
+
+    @Override
+    public void onMuteOnEntryStatusChange(boolean b) {
+        
+    }
+
+    @Override
+    public void onMeetingTopicChanged(String s) {
+
+    }
+
+    @Override
+    public void onMeetingFullToWatchLiveStream(String s) {
+
+    }
+
+    @Override
+    public void onBotAuthorizerRelationChanged(long l) {
+
+    }
+
+    @Override
+    public void onVirtualNameTagStatusChanged(boolean b, long l) {
+
+    }
+
+    @Override
+    public void onVirtualNameTagRosterInfoUpdated(long l) {
+
+    }
+
+    @Override
+    public void onCreateCompanionRelation(long l, long l1) {
+
+    }
+
+    @Override
+    public void onRemoveCompanionRelation(long l) {
+
+    }
+
+    @Override
+    public void onUserConfirmRecoverMeeting(IRecoverMeetingHandle iRecoverMeetingHandle) {
+
     }
 }
