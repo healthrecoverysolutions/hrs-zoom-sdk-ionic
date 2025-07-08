@@ -3,7 +3,7 @@
 //  MobileRTC
 //
 //  Created by Zoom on 2022/11/17.
-//  Copyright © 2022 Zoom Video Communications, Inc. All rights reserved.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -15,7 +15,7 @@
 /*!
  @brief index
  */
-@property(nonatomic, assign, readonly) NSInteger index;
+@property(nonatomic, assign, readonly) NSInteger index DEPRECATED_MSG_ATTRIBUTE("Please use meetingId instead");
 /*!
  @brief device name
  */
@@ -32,5 +32,9 @@
  @brief meeting id
  */
 @property(nonatomic, copy, readonly) NSString * _Nullable meetingId;
+/*!
+ @brief this meeting support joining in companion mode
+ */
+@property(nonatomic, assign) BOOL isSupportCompanionMode;
 
 @end

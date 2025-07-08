@@ -3,7 +3,7 @@
 //  MobileRTC
 //
 //  Created by Zoom on 2023/11/29.
-//  Copyright © 2023 Zoom Video Communications, Inc. All rights reserved.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <MobileRTC/MobileRTC.h>
@@ -26,7 +26,8 @@
 - (NSString *_Nullable)getPollingAnswerID;
 - (NSString *_Nullable)getPollingAnswerName;
 - (NSString *_Nullable)getPollingAnsweredContent;
-- (BOOL)isChecked; //This property has no meaning for the correct answer.
+//This property has no meaning for the correct answer.
+- (BOOL)isChecked;
 @end
 
 @interface MobileRTCPollingQuestionItem : NSObject

@@ -2,8 +2,8 @@
 //  MobileRTCMeetingService+AppShare.h
 //  MobileRTC
 //
-//  Created by Zoom Video Communications on 2017/2/27.
-//  Copyright © 2019年 Zoom Video Communications, Inc. All rights reserved.
+//  Created by Zoom Communications on 2017/2/27.
+//  Copyright © Zoom Communications, Inc. All rights reserved.
 //
 
 #import <MobileRTC/MobileRTC.h>
@@ -60,6 +60,38 @@
 */
 - (MobileRTCSDKError)unsubscribe;
 
+@end
+
+/*!
+ @brief ZOOM share information class.
+ */
+@interface MobileRTCSSharingSourceInfo: NSObject
+
+/**
+ * @brief Get the User ID of the sharing Source Info.
+ * @return If the function succeeds, the return value is the User ID. Otherwise the function fails, and the return value is ZERO (0).
+ */
+- (NSUInteger)getUserID;
+/**
+ * @brief Get the ID of the sharing Source Source Info.
+ * @return If the function succeeds, the return value is the sharing Source ID. Otherwise the function fails, and the return value is ZERO (0).
+ */
+- (NSUInteger)getShareSourceID;
+/**
+ * @brief Get the Content Type of the sharing Source Info.
+ * @return If the function succeeds, the return value is the sharing Source Info Content Type . Otherwise the function fails, and the return value is ZERO (0).
+ */
+- (MobileRTCShareContentType)getContentType;
+/**
+ * @brief Get the Status of the sharing Source Info.
+ * @return If the function succeeds, the return value is the sharing Source Info Status. Otherwise the function fails, and the return value is ZERO (0).
+ */
+- (MobileRTCSharingStatus)getStatus;
+/**
+ * @brief Get the Status of the sharing optimzie status.
+ * @return If the function succeeds, the return value is the sharing Source Info Status. Otherwise the function fails, and the return value is ZERO (0).
+ */
+- (BOOL)isEnableOptimizingVideoSharing;
 @end
 
 /*!
@@ -123,7 +155,12 @@
  @warning When the customer goes to share content, consider the effects on device performance, and use this method to pause sharing when UI changes, and resume sharing when UI changes stop, see WebViewController.m in sample project.
  */
 - (BOOL)suspendSharing:(BOOL)suspend;
+/*!
+ @brief Support  sharing  device  auido.
+ @return YES means supported.
+ */
 
+- (BOOL)isSupportShareAudio;
 /*!
  @brief Enable the sending of device audio.
  @param enableAudio - YES if device audio sharing should be enabled, otherwise disable.
@@ -143,6 +180,23 @@
  */
 - (BOOL)isDeviceSharing;
 
+/*!
+ @brief support optimiza share video
+ @return YES means supported.
+ */
+
+- (BOOL)isSupportOptimizeForSharedVideo;
+/*!
+ @brief enable optimize share video.
+ @return YES means enable suceess
+ */
+- (BOOL)enableOptimizeForSharedVideo:(BOOL)enableVideo;
+/*!
+ @brief Get state of optimize share video.
+ @return YES if that optimized share video.
+ */
+- (BOOL)isEnableOptimizeForSharedVideo;
+
 /**
 * Allow participant to share white board
 * @param allow YES: allow, NO: disallow
@@ -155,4 +209,25 @@
 * @return YES: allow, NO: disallow
 */
 - (BOOL)isParticipantsShareWhiteBoardAllowed;
+
+/**
+ * @brief Get the list of sharing source info.
+ * @param userID The user who is sharing.
+ * @return If the function succeeds, the return value is a pointer to the NSArray<MobileRTCSSharingSourceInfo*>, Otherwise, the return value is nil.
+ */
+- (NSArray <MobileRTCSSharingSourceInfo*> *_Nullable)getSharingSourceInfoList:(NSInteger)userID;
+
+/**
+ * @brief Set sharing types for the host or co-host in meeting.
+ * @param shareType Custom setting types of ZOOM SDK sharing.
+ * @return If the function succeeds, it will return MobileRTCSDKError_Success, otherwise not.
+ */
+-(MobileRTCSDKError)setShareSettingType:(MobileRTCShareSettingType)shareType;
+
+/**
+ * @brief Get the sharing types for the host or co-host in meeting.
+ * @return If the function succeeds, it will return MobileRTCShareSettingType, otherwise not.
+ */
+- (MobileRTCShareSettingType)getShareSettingType;
+
 @end

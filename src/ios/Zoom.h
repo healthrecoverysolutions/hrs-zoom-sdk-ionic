@@ -7,14 +7,12 @@
 
 #import <Cordova/CDV.h>
 #import <MobileRTC/MobileRTC.h>
-#import "MessageAlertViewController.h"
-
 /**
  *  Zoom
  *
  *  A Cordova Plugin to use Zoom Video Conferencing services on Cordova applications.
  */
-@interface Zoom :  CDVPlugin<MobileRTCAuthDelegate, MobileRTCMeetingServiceDelegate, MobileRTCSMSServiceDelegate, ZoomCallHandlerDelegate> {
+@interface Zoom :  CDVPlugin<MobileRTCAuthDelegate, MobileRTCMeetingServiceDelegate, MobileRTCSMSServiceDelegate> {
     NSString *callbackId;
     CDVPluginResult* pluginResult;
 }
