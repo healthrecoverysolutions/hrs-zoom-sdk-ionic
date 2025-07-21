@@ -1888,10 +1888,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     public void leaveMeeting() {
         try {
-            ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
-            if (zoomUIService != null) {
-                zoomUIService.hideMiniMeetingWindow();
-            }
+            hidePiPWindow();
+
             if (messageDialog != null && messageDialog.isShowing()) {
                 messageDialog.dismiss();
                 messageDialog = null;
@@ -1942,6 +1940,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                             Bundle bundleAnim = ActivityOptions.makeCustomAnimation(cordova.getActivity(), android.R.anim.slide_in_left, android.R.anim.slide_out_right).toBundle();
                             ActivityCompat.startActivity(cordova.getContext(), intent, bundleAnim);
 
+                            hidePiPWindow(); // In case call was minimised, before ending remove the pip view as well.
+
                         } catch (ClassNotFoundException e) {
                             Timber.e(e, "Unable to start");
                         }
@@ -1961,6 +1961,23 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 Timber.e(e, "Exception while re-ordering NewZoomActivity");
             }
         });
+    }
+
+    /**
+     * Method to hide the mini meeting PiP window
+     */
+    private void hidePiPWindow() {
+        try {
+            Timber.d("hidePiPWindow : Will hide mini meeting as we are now showing the maximised view");
+            ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
+            if (zoomUIService != null) {
+                Timber.d("hiding mini meeting window");
+                zoomUIService.hideMiniMeetingWindow();
+            }
+        } catch (Exception e) { // Currently there is no exposed method in zoom SDK to determine whether PiP window
+            // was opened or not, thus as a safe check putting this hide call in try/catch.
+            Timber.e(e, "Exception in hiding mini window");
+        }
     }
 
     @Override
