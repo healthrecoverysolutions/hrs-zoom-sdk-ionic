@@ -48,6 +48,7 @@ import us.zoom.sdk.InMeetingChatMessage;
 import us.zoom.sdk.InMeetingEventHandler;
 import us.zoom.sdk.InMeetingService;
 import us.zoom.sdk.InMeetingServiceListener;
+import us.zoom.sdk.InMeetingVideoController;
 import us.zoom.sdk.InstantMeetingOptions;
 import us.zoom.sdk.JoinMeetingOptions;
 import us.zoom.sdk.JoinMeetingParams;
@@ -239,6 +240,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private static final String ACTION_NOTIFY_CALL_STATUS = "notifyCallStatus";
     private static final String ACTION_GET_MEETING_STATUS = "getMeetingStatus";
     private static final String ACTION_SET_SHOULD_ROLLOVER = "setShouldRollOver";
+    private static final String ACTION_MUTE_MY_VIDEO = "muteMyVideo";
+    private static final String ACTION_IS_MY_VIDEO_MUTED = "isMyVideoMuted";
 
     private CallbackContext callbackContext;
     private CallbackContext sharedEventContext;
@@ -381,10 +384,40 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             case ACTION_GET_MEETING_STATUS:
                 cordova.getActivity().runOnUiThread(() -> getMeetingStatus(callbackContext));
                 break;
+            case ACTION_MUTE_MY_VIDEO:
+                String muteMyVideo = args.getString(0);
+                muteMyVideo(muteMyVideo.equals("On"));
+                break;
+            case ACTION_IS_MY_VIDEO_MUTED:
+                isMyVideoMuted(callbackContext);
+                break;
             default:
                 return false;
         }
         return true;
+    }
+
+    /**
+     * Turn off/on video of participant
+     * @param mute
+     */
+    private void muteMyVideo(boolean mute) {
+        cordova.getActivity().runOnUiThread(() -> {
+            //trying to turn off camera
+            InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
+            InMeetingVideoController videoController = inMeetingService.getInMeetingVideoController();
+            videoController.muteMyVideo(mute);
+        });
+    }
+
+    private void isMyVideoMuted(CallbackContext callbackContext) {
+        cordova.getActivity().runOnUiThread(() -> {
+            InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
+            InMeetingVideoController videoController = inMeetingService.getInMeetingVideoController();
+            // To know whether camera is on or off
+            boolean videoStatus = videoController.isMyVideoMuted();
+            callbackContext.success(String.valueOf(videoStatus));
+        });
     }
 
     private void getMeetingStatus(CallbackContext callbackContext) {
