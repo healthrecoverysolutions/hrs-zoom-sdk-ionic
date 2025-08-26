@@ -104,6 +104,14 @@ var zoom = {
     setShouldRollOver: function(shouldRollOver, startTimeMillis) {
         return execAsPromise('setShouldRollOver', [shouldRollOver, startTimeMillis]);
     },
+
+    isMyVideoMuted: function() {
+        return execAsPromise('isMyVideoMuted', []);
+    },
+
+    muteMyVideo: function(mute) {
+        return execAsPromise('muteMyVideo', [mute]);
+    },
 };
 
 module.exports = zoom;
