@@ -603,6 +603,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
      * @param callbackContext Cordova callback context.
      * @deprecated Initialize Zoom SDK. <Dev Note : this method should not be used now and is deprecated. Use initializeWithJWT instead for initialization
      */
+    @Deprecated
     private void initialize(String appKey, String appSecret, CallbackContext callbackContext) {
         if (DEBUG) {
             Timber.d("********** Zoom's initialize called **********");
