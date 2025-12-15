@@ -89,6 +89,8 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
                     } catch (ClassNotFoundException e) {
                         Timber.e(e, "Unable to start");
                     }
+                } else {
+                    Timber.d("onActivityDestroyed inMeetingService meeting not connected, not starting activity");
                 }
             }
         }
@@ -122,7 +124,7 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
         LayoutInflater li = LayoutInflater.from(this);
         userWaitingLayout = (LinearLayout) li.inflate(getResources().getIdentifier("zoom_user_waiting_layout", "layout", appResourcesPackage), null, false);
         containerInConf = findViewById(getResources().getIdentifier("container_in_conf", "id", appResourcesPackage));
-
+        Timber.d("onCreate end");
     }
 
     public static void enableWaitingMessage(boolean show) {
