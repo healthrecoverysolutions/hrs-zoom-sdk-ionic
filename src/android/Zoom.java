@@ -589,6 +589,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
             @Override
             public void onZoomAuthIdentityExpired() {
+                Timber.d("onZoomAuthIdentityExpired()");
                 Zoom.this.onSDKInitializeAuthIdentityExpired();
             }
         };
@@ -799,7 +800,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         PluginResult.Status status = success ? PluginResult.Status.OK : PluginResult.Status.ERROR;
 
         if (DEBUG) {
-            Timber.i("handleMeetingJoinOrStart(), response = %s (eventType = %s)", message, eventType);
+            Timber.d("handleMeetingJoinOrStart(), response = %s (eventType = %s)", message, eventType);
         }
 
         PluginResult pluginResult = new PluginResult(status, message);
@@ -869,6 +870,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
         // If the Zoom SDK instance is not initialized, throw error.
         if (!zoomSDK.isInitialized()) {
+            Timber.d("ZoomSDK has not been initialized successfully");
             pluginResult = new PluginResult(PluginResult.Status.ERROR, "ZoomSDK has not been initialized successfully");
             pluginResult.setKeepCallback(true);
             callbackContext.sendPluginResult(pluginResult);
@@ -878,6 +880,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         // Get meeting service instance.
         MeetingService meetingService = zoomSDK.getMeetingService();
         if (meetingService == null) {
+            Timber.d("Meeting service is null");
             callbackContext.error("Meeting service cannot be empty");
         }
 
@@ -971,11 +974,15 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 }
             } catch (JSONException ex) {
                 if (DEBUG) {
-                    Timber.i(ex);
+                    Timber.d(ex);
                 }
             }
 
             cordova.getActivity().runOnUiThread(() -> {
+                Timber.d(
+                    "JoinMeeting AppContext: %s", (cordova != null && cordova.getActivity() != null) ?
+                        cordova.getActivity().getApplicationContext() : "NULL");
+
                 int response = meetingService.joinMeetingWithParams(
                     cordova.getActivity().getApplicationContext(), params, opts);
                 setZoomCustomMeetingUIAndPiP();
@@ -984,6 +991,9 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
         } else {
             cordova.getThreadPool().execute(() -> {
                 // If meeting option is not provided, simply join meeting.
+                Timber.d(
+                    "JoinMeeting AppContext opts null: %s", (cordova != null && cordova.getActivity() != null) ?
+                        cordova.getActivity().getApplicationContext() : "NULL");
                 int response = meetingService.joinMeetingWithParams(
                     cordova.getActivity().getApplicationContext(), params, null);
                 setZoomCustomMeetingUIAndPiP();
@@ -1461,6 +1471,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
      */
     @Override
     public void onZoomIdentityExpired() {
+        Timber.d("onZoomIdentityExpired triggered");
         emitSharedJsEvent(EVENT_TYPE_IDENTITY_EXPIRED, null);
         ZoomSDK mZoomSDK = ZoomSDK.getInstance();
         if (mZoomSDK.isLoggedIn()) {
@@ -1481,7 +1492,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     public void onMeetingStatusChanged(MeetingStatus meetingStatus, int errorCode,
                                        int internalErrorCode) {
         if (DEBUG) {
-            Timber.i("onMeetingStatusChanged,"
+            Timber.d("onMeetingStatusChanged,"
                 + " meetingStatus=" + meetingStatus
                 + ", errorCode=" + errorCode
                 + ", internalErrorCode=" + internalErrorCode);
@@ -1720,6 +1731,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     @Override
     public void onMeetingFail(int i, int i1) {
+        Timber.d("onMeetingFail errorcode " + i + " internalErrorCode " + i1);
         JSONObject eventData = new JSONObject();
         try {
             eventData.put(DATA_KEY_ERROR_CODE, i);
@@ -1809,6 +1821,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     @Override
     public void onMeetingUserLeave(List<Long> list) {
+        Timber.d("onMeetingUserLeave");
         ZoomUIService zoomUIService = ZoomSDK.getInstance().getZoomUIService();
         InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
         List<Long> currentUserList = inMeetingService.getInMeetingUserList();
@@ -1922,6 +1935,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     public void leaveMeeting() {
         try {
+            Timber.d("leaveMeeting");
             hidePiPWindow();
 
             if (messageDialog != null && messageDialog.isShowing()) {
@@ -1955,13 +1969,16 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     }
 
     private void reorderNewZoomActivity(int action) {
+        Timber.d("reorderNewZoomActivity action " + action);
         Handler mainHandler = new Handler(Looper.getMainLooper());
         // Send a task to the MessageQueue of the main thread
         mainHandler.post(() -> {
             try {
                 if (ZoomSDK.getInstance() != null) {
+                    Timber.d("reorderNewZoomActivity zoom instance present");
                     InMeetingService inMeetingService = ZoomSDK.getInstance().getInMeetingService();
                     if (inMeetingService != null && inMeetingService.isMeetingConnected()) {
+                        Timber.d("reorderNewZoomActivity inMeetingService not null, will reorder");
                         String activityToStart = "cordova.plugin.zoom.NewZoomMeetingActivity";
                         try {
                             Class<?> c = Class.forName(activityToStart);
