@@ -2,6 +2,7 @@ package cordova.plugin.zoom;
 
 import static org.apache.cordova.BuildHelper.getBuildConfigValue;
 
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -978,7 +979,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 }
             }
 
-            cordova.getActivity().runOnUiThread(() -> {
+            runOnUiThreadLogged(() -> {
                 Timber.d(
                     "JoinMeeting AppContext: %s", (cordova != null && cordova.getActivity() != null) ?
                         cordova.getActivity().getApplicationContext() : "NULL");
@@ -1001,6 +1002,44 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             });
         }
 
+    }
+
+    private void runOnUiThreadLogged(Runnable action) {
+        Timber.d("[%s] runOnUiThread requested. Thread=%s",
+            "JoinMeeting", Thread.currentThread().getName());
+
+        if (cordova == null) {
+            Timber.e("[%s] Cordova is NULL", "JoinMeeting");
+            return;
+        }
+
+        Activity activity = cordova.getActivity();
+        if (activity == null) {
+            Timber.e("[%s] Activity is NULL", "JoinMeeting");
+            return;
+        }
+
+        Timber.d("[%s] Activity=%s finishing=%s destroyed=%s",
+            "JoinMeeting",
+            activity.getClass().getSimpleName(),
+            activity.isFinishing(),
+            activity.isDestroyed());
+
+        try {
+            activity.runOnUiThread(() -> {
+                Timber.d("[%s] ENTERED UI thread. Looper=%s",
+                    "JoinMeeting", Looper.myLooper());
+
+                try {
+                    action.run();
+                    Timber.d("[%s] UI thread action COMPLETED", "JoinMeeting");
+                } catch (Throwable t) {
+                    Timber.e(t, "[%s] Exception inside UI thread", "JoinMeeting");
+                }
+            });
+        } catch (Throwable t) {
+            Timber.e(t, "[%s] Failed to schedule runOnUiThread", "JoinMeeting");
+        }
     }
 
     /**
