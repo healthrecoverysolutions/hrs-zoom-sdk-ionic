@@ -454,6 +454,7 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             zoomUIService.disablePIPMode(false);
         }
         zoomUIService.setMiniMeetingViewSize(new CustomizedMiniMeetingViewSize(50, 50, 90, 120));
+        Timber.d("Set new meeting UI to NewZoomMeetingActivity");
         zoomUIService.setNewMeetingUI(NewZoomMeetingActivity.class);
     }
 
@@ -983,10 +984,11 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 Timber.d(
                     "JoinMeeting AppContext: %s", (cordova != null && cordova.getActivity() != null) ?
                         cordova.getActivity().getApplicationContext() : "NULL");
-
+                Timber.d("Setting Zoom custom UI");
+                setZoomCustomMeetingUIAndPiP();
+                Timber.d("joinMeetingWithParams");
                 int response = meetingService.joinMeetingWithParams(
                     cordova.getActivity().getApplicationContext(), params, opts);
-                setZoomCustomMeetingUIAndPiP();
                 Zoom.this.onJoinMeetingResult(callbackContext, response);
             });
         } else {
@@ -995,9 +997,11 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 Timber.d(
                     "JoinMeeting AppContext opts null: %s", (cordova != null && cordova.getActivity() != null) ?
                         cordova.getActivity().getApplicationContext() : "NULL");
+                Timber.d("Setting Zoom custom UI");
+                setZoomCustomMeetingUIAndPiP();
+                Timber.d("joinMeetingWithParams");
                 int response = meetingService.joinMeetingWithParams(
                     cordova.getActivity().getApplicationContext(), params, null);
-                setZoomCustomMeetingUIAndPiP();
                 Zoom.this.onJoinMeetingResult(callbackContext, response);
             });
         }
