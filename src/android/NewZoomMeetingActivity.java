@@ -43,7 +43,11 @@ public class NewZoomMeetingActivity extends NewMeetingActivity {
 
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-            Timber.i("onCreate(): %s", activity.getClass().getSimpleName());
+            Timber.i("onActivityCreated(): %s", activity.getClass().getSimpleName());
+            if (activity.getClass().getSimpleName().contains("NewZoomMeetingActivity")) {
+                Timber.d("NewZoomMeetingActivity created");
+                Zoom.getInstance().cleanup();
+            }
         }
 
         @Override

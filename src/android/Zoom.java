@@ -4,14 +4,20 @@ import static org.apache.cordova.BuildHelper.getBuildConfigValue;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -101,6 +107,8 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
 
     private static final String EVENT_TYPE_SHARED_MEETING_CHAT_STATUS_CHANGED = "sharedMeetingChatStatusChanged";
     private static final String EVENT_TYPE_START_CALL_ROLLOVER = "startCallRollOver";
+
+    private static final String EVENT_TYPE_ZOOM_CONNECT_ERROR_AFTER_DEVICE_IDLE = "zoomConnectErrorAfterDeviceIdle";
     private static final String EVENT_TYPE_SDK_INITIALIZE_RESULT = "sdkInitializeResult";
     private static final String EVENT_TYPE_SDK_INITIALIZE_AUTH_IDENTITY_EXPIRED = "sdkInitializeAuthIdentityExpired";
     private static final String EVENT_TYPE_AUTH_IDENTITY_EXPIRED = "authIdentityExpired";
@@ -263,12 +271,11 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
     private boolean shouldRollOver = false;
     // the time the user started the call from the javascript call, used to calculate call rollover duration
     private long callStart;
-
+    private static final Handler newZoomActivityLaunchedTracker = new Handler(Looper.getMainLooper());
 
     public static Zoom getInstance() {
         return mInstance;
     }
-
 
     @Override
     protected void pluginInitialize() {
@@ -316,7 +323,6 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 String appKey = args.getString(0);
                 String appSecret = args.getString(1);
                 cordova.getActivity().runOnUiThread(() -> initialize(appKey, appSecret, callbackContext));
-
                 break;
 
             case ACTION_INITIALIZE_WITH_JWT:
@@ -984,6 +990,13 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
                 Timber.d(
                     "JoinMeeting AppContext: %s", (cordova != null && cordova.getActivity() != null) ?
                         cordova.getActivity().getApplicationContext() : "NULL");
+                if (isKMSamsungS5eAndroid11()) {
+                    // DEV-23167 : code specific to S5E OS 11
+                    // start a handler here which after 5 seconds will check whether new zoom activity was launched.
+                    // Zoom call typically takes 2-3 sec to connect and show UI
+                    Timber.d("Starting handler to track zoom meeting connected ");
+                    newZoomActivityLaunchedTracker.postDelayed(callConnecttimeoutRunnable, 5000);
+                }
                 Timber.d("Setting Zoom custom UI");
                 setZoomCustomMeetingUIAndPiP();
                 Timber.d("joinMeetingWithParams");
@@ -1006,6 +1019,41 @@ public class Zoom extends CordovaPlugin implements ZoomSDKAuthenticationListener
             });
         }
 
+    }
+
+    /**
+     * This method checks whether device is S5e. For our apps, for OS 11 PCMT, we support only S5e,thus this check covers S5e.
+     * Model specific checks are not needed.
+     */
+    private boolean isKMSamsungS5eAndroid11() {
+        Boolean isKnoxManage = (Boolean) getBuildConfigValue(cordova.getActivity().getApplicationContext(), "KNOXMANAGE");
+        return Boolean.TRUE.equals(isKnoxManage) // only PCMT
+            && Build.VERSION.SDK_INT == Build.VERSION_CODES.R ; // Android 11
+    }
+
+    public void cleanup() {
+        if (isKMSamsungS5eAndroid11()) {
+            Timber.d("Cleanup newZoomTracker ");
+            newZoomActivityLaunchedTracker.removeCallbacksAndMessages(null);
+        }
+    }
+
+    public final Runnable callConnecttimeoutRunnable = () -> {
+        if (isKMSamsungS5eAndroid11()) {
+            showRestartDialog();
+            cleanup();
+        }
+    };
+
+
+    /**
+     * Pass the event to typescript layer to show the restart prompt
+     */
+    private void showRestartDialog() {
+        if (isKMSamsungS5eAndroid11()) {
+            Timber.e("Zoom call connect error, show restart dialog ");
+            emitSharedJsEvent(EVENT_TYPE_ZOOM_CONNECT_ERROR_AFTER_DEVICE_IDLE, null);
+        }
     }
 
     private void runOnUiThreadLogged(Runnable action) {
